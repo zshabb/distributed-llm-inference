@@ -13,3 +13,8 @@ security advisories on this repository once it is published. Please do not open 
 - Secrets are never committed (gitleaks pre-commit hook and CI scan).
 - GPU development host: no credentials are stored there, SSH agent forwarding is disabled, and services bind to localhost
   only (`docs/operations.md`).
+
+## Disclosure log
+| Date | Item | Severity | Resolution |
+|---|---|---|---|
+| 2026-11-10 | Commit `207083c` published profiler output with absolute paths revealing the developer's local username and the repo's directory layout | Low: no credentials, keys, infrastructure addresses, or secrets (verified by pattern scan and gitleaks on the commit) | Redacted going forward; profile output is now path-redacted by the benchmark script; every push greps for personal paths. Published history intentionally left intact (no force-push) |
