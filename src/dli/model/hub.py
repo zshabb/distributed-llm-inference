@@ -1,0 +1,44 @@
+"""Download supported models at pinned revisions.
+
+Revisions are commit hashes, not branch names: ``main`` can change under us, which would silently
+invalidate parity results and benchmarks. Only open, ungated (Apache-2.0) models are listed, so no
+Hugging Face token is ever needed, on the laptop or on the GPU host.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from huggingface_hub import snapshot_download
+
+# repo id -> pinned commit (verified 2026-11-10 via the Hub API).
+PINNED_REVISIONS: dict[str, str] = {
+    "HuggingFaceTB/SmolLM2-135M-Instruct": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+    "Qwen/Qwen2.5-0.5B-Instruct": "7ae557604adf67be50417f59c2c2f167def9a775",
+}
+
+# Only what inference needs. Excluding *.bin guarantees no pickle checkpoint is ever downloaded.
+_ALLOW_PATTERNS = [
+    "config.json",
+    "generation_config.json",
+    "*.safetensors",
+    "*.safetensors.index.json",
+    "tokenizer.json",
+    "tokenizer_config.json",
+]
+
+
+def download(repo_id: str, cache_dir: str | Path | None = None) -> Path:
+    """Fetch ``repo_id`` at its pinned revision and return the local snapshot directory.
+
+    Raises:
+        KeyError: ``repo_id`` has no pinned revision (pin it deliberately before use).
+    """
+    revision = PINNED_REVISIONS[repo_id]
+    path = snapshot_download(
+        repo_id,
+        revision=revision,
+        allow_patterns=_ALLOW_PATTERNS,
+        cache_dir=str(cache_dir) if cache_dir else None,
+    )
+    return Path(path)

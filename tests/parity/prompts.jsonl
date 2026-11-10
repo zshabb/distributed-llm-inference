@@ -1,0 +1,100 @@
+{"kind": "completion", "text": "Explain photosynthesis to a curious twelve-year-old:", "id": 0}
+{"kind": "completion", "text": "Here are three surprising facts about photosynthesis:\n1.", "id": 1}
+{"kind": "completion", "text": "Write a short Python function related to photosynthesis, with a docstring.\n\n```python\n", "id": 2}
+{"kind": "completion", "text": "Explain binary search trees to a curious twelve-year-old:", "id": 3}
+{"kind": "completion", "text": "Here are three surprising facts about binary search trees:\n1.", "id": 4}
+{"kind": "completion", "text": "Q: What is the most common misconception about binary search trees?\nA:", "id": 5}
+{"kind": "completion", "text": "Explain the French Revolution to a curious twelve-year-old:", "id": 6}
+{"kind": "completion", "text": "Here are three surprising facts about the French Revolution:\n1.", "id": 7}
+{"kind": "completion", "text": "Write a short Python function related to the French Revolution, with a docstring.\n\n```python\n", "id": 8}
+{"kind": "completion", "text": "Explain TCP congestion control to a curious twelve-year-old:", "id": 9}
+{"kind": "completion", "text": "Here are three surprising facts about TCP congestion control:\n1.", "id": 10}
+{"kind": "completion", "text": "Q: What is the most common misconception about TCP congestion control?\nA:", "id": 11}
+{"kind": "completion", "text": "Explain compound interest to a curious twelve-year-old:", "id": 12}
+{"kind": "completion", "text": "Here are three surprising facts about compound interest:\n1.", "id": 13}
+{"kind": "completion", "text": "Write a short Python function related to compound interest, with a docstring.\n\n```python\n", "id": 14}
+{"kind": "completion", "text": "Explain black holes to a curious twelve-year-old:", "id": 15}
+{"kind": "completion", "text": "Here are three surprising facts about black holes:\n1.", "id": 16}
+{"kind": "completion", "text": "Q: What is the most common misconception about black holes?\nA:", "id": 17}
+{"kind": "completion", "text": "Explain the water cycle to a curious twelve-year-old:", "id": 18}
+{"kind": "completion", "text": "Here are three surprising facts about the water cycle:\n1.", "id": 19}
+{"kind": "completion", "text": "Write a short Python function related to the water cycle, with a docstring.\n\n```python\n", "id": 20}
+{"kind": "completion", "text": "Explain garbage collection in the JVM to a curious twelve-year-old:", "id": 21}
+{"kind": "completion", "text": "Here are three surprising facts about garbage collection in the JVM:\n1.", "id": 22}
+{"kind": "completion", "text": "Q: What is the most common misconception about garbage collection in the JVM?\nA:", "id": 23}
+{"kind": "completion", "text": "Explain the Pythagorean theorem to a curious twelve-year-old:", "id": 24}
+{"kind": "completion", "text": "Here are three surprising facts about the Pythagorean theorem:\n1.", "id": 25}
+{"kind": "completion", "text": "Write a short Python function related to the Pythagorean theorem, with a docstring.\n\n```python\n", "id": 26}
+{"kind": "completion", "text": "Explain volcanoes to a curious twelve-year-old:", "id": 27}
+{"kind": "completion", "text": "Here are three surprising facts about volcanoes:\n1.", "id": 28}
+{"kind": "completion", "text": "Q: What is the most common misconception about volcanoes?\nA:", "id": 29}
+{"kind": "completion", "text": "Explain public-key cryptography to a curious twelve-year-old:", "id": 30}
+{"kind": "completion", "text": "Here are three surprising facts about public-key cryptography:\n1.", "id": 31}
+{"kind": "completion", "text": "Write a short Python function related to public-key cryptography, with a docstring.\n\n```python\n", "id": 32}
+{"kind": "completion", "text": "Explain the human immune system to a curious twelve-year-old:", "id": 33}
+{"kind": "completion", "text": "Here are three surprising facts about the human immune system:\n1.", "id": 34}
+{"kind": "completion", "text": "Q: What is the most common misconception about the human immune system?\nA:", "id": 35}
+{"kind": "completion", "text": "Explain supply and demand to a curious twelve-year-old:", "id": 36}
+{"kind": "completion", "text": "Here are three surprising facts about supply and demand:\n1.", "id": 37}
+{"kind": "completion", "text": "Write a short Python function related to supply and demand, with a docstring.\n\n```python\n", "id": 38}
+{"kind": "completion", "text": "Explain the Roman aqueducts to a curious twelve-year-old:", "id": 39}
+{"kind": "completion", "text": "Here are three surprising facts about the Roman aqueducts:\n1.", "id": 40}
+{"kind": "completion", "text": "Q: What is the most common misconception about the Roman aqueducts?\nA:", "id": 41}
+{"kind": "completion", "text": "Explain neural network backpropagation to a curious twelve-year-old:", "id": 42}
+{"kind": "completion", "text": "Here are three surprising facts about neural network backpropagation:\n1.", "id": 43}
+{"kind": "completion", "text": "Write a short Python function related to neural network backpropagation, with a docstring.\n\n```python\n", "id": 44}
+{"kind": "completion", "text": "Explain plate tectonics to a curious twelve-year-old:", "id": 45}
+{"kind": "completion", "text": "Here are three surprising facts about plate tectonics:\n1.", "id": 46}
+{"kind": "completion", "text": "Q: What is the most common misconception about plate tectonics?\nA:", "id": 47}
+{"kind": "completion", "text": "Explain database indexing to a curious twelve-year-old:", "id": 48}
+{"kind": "completion", "text": "Here are three surprising facts about database indexing:\n1.", "id": 49}
+{"kind": "completion", "text": "Write a short Python function related to database indexing, with a docstring.\n\n```python\n", "id": 50}
+{"kind": "completion", "text": "Explain the history of jazz to a curious twelve-year-old:", "id": 51}
+{"kind": "completion", "text": "Here are three surprising facts about the history of jazz:\n1.", "id": 52}
+{"kind": "completion", "text": "Q: What is the most common misconception about the history of jazz?\nA:", "id": 53}
+{"kind": "completion", "text": "Explain climate feedback loops to a curious twelve-year-old:", "id": 54}
+{"kind": "completion", "text": "Here are three surprising facts about climate feedback loops:\n1.", "id": 55}
+{"kind": "completion", "text": "Write a short Python function related to climate feedback loops, with a docstring.\n\n```python\n", "id": 56}
+{"kind": "completion", "text": "Explain consensus algorithms like Raft to a curious twelve-year-old:", "id": 57}
+{"kind": "completion", "text": "Here are three surprising facts about consensus algorithms like Raft:\n1.", "id": 58}
+{"kind": "completion", "text": "Q: What is the most common misconception about consensus algorithms like Raft?\nA:", "id": 59}
+{"kind": "completion", "text": "The quick brown fox", "id": 60}
+{"kind": "completion", "text": "1, 1, 2, 3, 5, 8, 13,", "id": 61}
+{"kind": "completion", "text": "def fibonacci(n):", "id": 62}
+{"kind": "completion", "text": "SELECT name, COUNT(*) FROM orders", "id": 63}
+{"kind": "completion", "text": "Bonjour, je m'appelle Marie et je", "id": 64}
+{"kind": "completion", "text": "Der schnellste Weg nach Berlin ist", "id": 65}
+{"kind": "completion", "text": "In 1969, the Apollo 11 mission", "id": 66}
+{"kind": "completion", "text": "Once upon a time, in a village by the sea,", "id": 67}
+{"kind": "completion", "text": "The capital of Australia is", "id": 68}
+{"kind": "completion", "text": "To be, or not to be,", "id": 69}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize photosynthesis in two sentences?"}], "id": 70}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in photosynthesis? Answer as a bulleted list."}], "id": 71}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on photosynthesis. Suggest an outline."}], "id": 72}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize binary search trees in two sentences?"}], "id": 73}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in binary search trees? Answer as a bulleted list."}], "id": 74}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on binary search trees. Suggest an outline."}], "id": 75}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize the French Revolution in two sentences?"}], "id": 76}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in the French Revolution? Answer as a bulleted list."}], "id": 77}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on the French Revolution. Suggest an outline."}], "id": 78}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize TCP congestion control in two sentences?"}], "id": 79}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in TCP congestion control? Answer as a bulleted list."}], "id": 80}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on TCP congestion control. Suggest an outline."}], "id": 81}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize compound interest in two sentences?"}], "id": 82}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in compound interest? Answer as a bulleted list."}], "id": 83}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on compound interest. Suggest an outline."}], "id": 84}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize black holes in two sentences?"}], "id": 85}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in black holes? Answer as a bulleted list."}], "id": 86}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on black holes. Suggest an outline."}], "id": 87}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize the water cycle in two sentences?"}], "id": 88}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in the water cycle? Answer as a bulleted list."}], "id": 89}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on the water cycle. Suggest an outline."}], "id": 90}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize garbage collection in the JVM in two sentences?"}], "id": 91}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in garbage collection in the JVM? Answer as a bulleted list."}], "id": 92}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on garbage collection in the JVM. Suggest an outline."}], "id": 93}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize the Pythagorean theorem in two sentences?"}], "id": 94}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in the Pythagorean theorem? Answer as a bulleted list."}], "id": 95}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on the Pythagorean theorem. Suggest an outline."}], "id": 96}
+{"kind": "chat", "messages": [{"role": "user", "content": "Can you summarize volcanoes in two sentences?"}], "id": 97}
+{"kind": "chat", "messages": [{"role": "user", "content": "What are the main trade-offs involved in volcanoes? Answer as a bulleted list."}], "id": 98}
+{"kind": "chat", "messages": [{"role": "user", "content": "I am preparing a lecture on volcanoes. Suggest an outline."}], "id": 99}
