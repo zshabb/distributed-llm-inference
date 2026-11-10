@@ -1,0 +1,59 @@
+{
+ "code_revision": "380a1fa0eb6c",
+ "evidence_label": "CPU-LAPTOP",
+ "null_runner_sweep": [
+  {
+   "concurrency": 8,
+   "decode_steps": 252,
+   "schedule_us_median": 67.7,
+   "postprocess_us_median": 178.1,
+   "overhead_us_per_seq_median": 31.37,
+   "overhead_us_per_seq_p95": 66.46
+  },
+  {
+   "concurrency": 32,
+   "decode_steps": 252,
+   "schedule_us_median": 203.8,
+   "postprocess_us_median": 714.9,
+   "overhead_us_per_seq_median": 28.08,
+   "overhead_us_per_seq_p95": 40.7
+  },
+  {
+   "concurrency": 128,
+   "decode_steps": 252,
+   "schedule_us_median": 1286.0,
+   "postprocess_us_median": 3542.1,
+   "overhead_us_per_seq_median": 36.69,
+   "overhead_us_per_seq_p95": 49.48
+  },
+  {
+   "concurrency": 256,
+   "decode_steps": 249,
+   "schedule_us_median": 1823.7,
+   "postprocess_us_median": 6588.8,
+   "overhead_us_per_seq_median": 33.46,
+   "overhead_us_per_seq_p95": 40.79
+  }
+ ],
+ "smollm2_observation": {
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "prompts": 24,
+  "new_tokens_each": 32,
+  "repetitions": 3,
+  "batched_output_tok_s": [
+   112.0,
+   93.8,
+   107.2
+  ],
+  "sequential_output_tok_s": [
+   21.2,
+   20.4,
+   20.8
+  ],
+  "batched_median": 107.2,
+  "sequential_median": 20.8,
+  "speedup_median": 5.17,
+  "engine_overhead_share_median": 0.0058,
+  "torch_threads": 6
+ }
+}
