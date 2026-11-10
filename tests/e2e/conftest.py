@@ -45,8 +45,9 @@ def _free_port() -> int:
 
 def start_server(bundle: ServerBundle) -> LiveServer:
     port = _free_port()
-    config = uvicorn.Config(bundle.app, host="127.0.0.1", port=port, log_level="warning",
-                            lifespan="off")  # fmt: skip
+    config = uvicorn.Config(
+        bundle.app, host="127.0.0.1", port=port, log_level="warning", lifespan="off"
+    )
     server = uvicorn.Server(config)
     bundle.engine.start()
     thread = threading.Thread(target=server.run, daemon=True)

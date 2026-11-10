@@ -19,11 +19,20 @@ BIG_POOL = 1024  # blocks x 4 = 4096 token slots, so a 3000-token holder fits
 
 def _hold_slot(live: LiveServer, started: threading.Event, stop: threading.Event) -> None:
     """Occupy the engine's only sequence slot with a long stream until told to stop."""
-    with live.client() as c, c.stream(
-        "POST", "/v1/completions",
-        json={"model": MODEL, "prompt": "hold", "max_tokens": 3000, "stream": True,
-              "ignore_eos": True},
-    ) as r:  # fmt: skip
+    with (
+        live.client() as c,
+        c.stream(
+            "POST",
+            "/v1/completions",
+            json={
+                "model": MODEL,
+                "prompt": "hold",
+                "max_tokens": 3000,
+                "stream": True,
+                "ignore_eos": True,
+            },
+        ) as r,
+    ):
         for line in r.iter_lines():
             if line.startswith("data: "):
                 started.set()
@@ -64,8 +73,11 @@ def test_queue_cap(make_server: ServerFactory) -> None:
     try:
         assert started.wait(10)
         engine = live.bundle.engine
-        waiter = threading.Thread(target=lambda: live.client().post(
-            "/v1/completions", json={"model": MODEL, "prompt": "w", "max_tokens": 5}))  # fmt: skip
+        waiter = threading.Thread(
+            target=lambda: live.client().post(
+                "/v1/completions", json={"model": MODEL, "prompt": "w", "max_tokens": 5}
+            )
+        )
         waiter.start()
         wait_for(lambda: engine.snapshot.num_waiting == 1)
         with live.client() as c:
@@ -82,11 +94,18 @@ def test_unattainable_deadline_is_rejected_up_front(make_server: ServerFactory) 
     live = make_server()
     with live.client() as c:
         # Warm-up gives the admission controller a measured prefill rate.
-        assert c.post("/v1/completions", json={"model": MODEL, "prompt": "warm up " * 4,
-                                               "max_tokens": 4}).status_code == 200  # fmt: skip
+        assert (
+            c.post(
+                "/v1/completions", json={"model": MODEL, "prompt": "warm up " * 4, "max_tokens": 4}
+            ).status_code
+            == 200
+        )
         t0 = time.perf_counter()
-        r = c.post("/v1/completions", headers={"X-Deadline-Ms": "1"},
-                   json={"model": MODEL, "prompt": "y" * 200, "max_tokens": 4})  # fmt: skip
+        r = c.post(
+            "/v1/completions",
+            headers={"X-Deadline-Ms": "1"},
+            json={"model": MODEL, "prompt": "y" * 200, "max_tokens": 4},
+        )
         dt = time.perf_counter() - t0
     assert r.status_code == 429, r.text
     assert r.json()["error"]["code"] == "deadline_unattainable"
@@ -121,10 +140,20 @@ def test_deadline_exceeded_while_queued_aborts_the_request(make_server: ServerFa
 
 def test_draining_rejects_new_work_but_finishes_inflight(make_server: ServerFactory) -> None:
     live = make_server()
-    with live.client() as c, c.stream(
-        "POST", "/v1/completions",
-        json={"model": MODEL, "prompt": "z", "max_tokens": 40, "stream": True, "temperature": 0},
-    ) as r:  # fmt: skip
+    with (
+        live.client() as c,
+        c.stream(
+            "POST",
+            "/v1/completions",
+            json={
+                "model": MODEL,
+                "prompt": "z",
+                "max_tokens": 40,
+                "stream": True,
+                "temperature": 0,
+            },
+        ) as r,
+    ):
         it = r.iter_lines()
         next(line for line in it if line.startswith("data: "))
         live.bundle.app.state.draining = True
@@ -140,7 +169,8 @@ def test_draining_rejects_new_work_but_finishes_inflight(make_server: ServerFact
 def test_invalid_deadline_header(make_server: ServerFactory) -> None:
     live = make_server()
     with live.client() as c:
-        r = c.post("/v1/completions", headers={"X-Deadline-Ms": "-5"},
-                   json={"model": MODEL, "prompt": "x"})  # fmt: skip
+        r = c.post(
+            "/v1/completions", headers={"X-Deadline-Ms": "-5"}, json={"model": MODEL, "prompt": "x"}
+        )
     assert r.status_code == 400
     assert r.json()["error"]["code"] == "invalid_header"

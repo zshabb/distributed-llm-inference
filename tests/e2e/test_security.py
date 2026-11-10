@@ -17,8 +17,9 @@ from .conftest import MODEL, LiveServer, ServerFactory, wait_for
 def secured(make_server: ServerFactory) -> tuple[LiveServer, str]:
     token, record = new_key("acme")
     one_slot = SchedulerConfig(max_num_seqs=1, max_num_batched_tokens=64)
-    live = make_server(auth=ApiKeyAuth([record]), max_body_bytes=4096, num_blocks=1024,
-                       scheduler=one_slot)  # fmt: skip
+    live = make_server(
+        auth=ApiKeyAuth([record]), max_body_bytes=4096, num_blocks=1024, scheduler=one_slot
+    )
     return live, token
 
 
@@ -52,12 +53,21 @@ def test_client_supplied_tenant_header_is_ignored(secured: tuple[LiveServer, str
     stop = threading.Event()
 
     def stream() -> None:
-        with live.client() as c, c.stream(
-            "POST", "/v1/completions",
-            headers={"Authorization": f"Bearer {token}", "X-Tenant-Id": "someone-else"},
-            json={"model": MODEL, "prompt": "t", "max_tokens": 3000, "stream": True,
-                  "ignore_eos": True},
-        ) as r:  # fmt: skip
+        with (
+            live.client() as c,
+            c.stream(
+                "POST",
+                "/v1/completions",
+                headers={"Authorization": f"Bearer {token}", "X-Tenant-Id": "someone-else"},
+                json={
+                    "model": MODEL,
+                    "prompt": "t",
+                    "max_tokens": 3000,
+                    "stream": True,
+                    "ignore_eos": True,
+                },
+            ) as r,
+        ):
             for _ in r.iter_lines():
                 if stop.is_set():
                     return
@@ -88,6 +98,9 @@ def test_oversized_bodies_rejected_with_413(secured: tuple[LiveServer, str]) -> 
                 yield b"y" * 1000
             yield b'"}'
 
-        r = c.post("/v1/completions", content=chunks(),
-                   headers={**auth, "content-type": "application/json"})  # fmt: skip
+        r = c.post(
+            "/v1/completions",
+            content=chunks(),
+            headers={**auth, "content-type": "application/json"},
+        )
         assert r.status_code == 413

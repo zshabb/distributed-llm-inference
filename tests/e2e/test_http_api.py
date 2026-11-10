@@ -45,8 +45,10 @@ def test_ops_endpoints(server: LiveServer) -> None:
 def test_completion_matches_engine_independent_reference(server: LiveServer) -> None:
     prompt = "The quick brown fox"
     with server.client() as c:
-        r = c.post("/v1/completions", json={"model": MODEL, "prompt": prompt, "max_tokens": 24,
-                                            "temperature": 0})  # fmt: skip
+        r = c.post(
+            "/v1/completions",
+            json={"model": MODEL, "prompt": prompt, "max_tokens": 24, "temperature": 0},
+        )
     assert r.status_code == 200, r.text
     body = r.json()
     ids = server.bundle.codec.encode(prompt)
@@ -141,10 +143,14 @@ def test_stop_string_spanning_tokens_truncates_and_never_leaks(server: LiveServe
 
 def test_client_disconnect_mid_stream_aborts_and_frees_kv(server: LiveServer) -> None:
     engine = server.bundle.engine
-    with server.client() as c, c.stream(
-        "POST", "/v1/completions",
-        json={"model": MODEL, "prompt": "go", "max_tokens": 900, "stream": True},
-    ) as r:  # fmt: skip
+    with (
+        server.client() as c,
+        c.stream(
+            "POST",
+            "/v1/completions",
+            json={"model": MODEL, "prompt": "go", "max_tokens": 900, "stream": True},
+        ) as r,
+    ):
         seen = 0
         for line in r.iter_lines():
             if line.startswith("data: "):
@@ -218,8 +224,11 @@ def test_malformed_json_and_bad_headers(server: LiveServer) -> None:
         )
         assert r.status_code == 400
         assert r.json()["error"]["type"] == "invalid_request_error"
-        r = c.post("/v1/completions", json={"model": MODEL, "prompt": "x"},
-                   headers={"X-Request-Priority": "urgent"})  # fmt: skip
+        r = c.post(
+            "/v1/completions",
+            json={"model": MODEL, "prompt": "x"},
+            headers={"X-Request-Priority": "urgent"},
+        )
         assert r.status_code == 400
         assert r.json()["error"]["code"] == "invalid_header"
         assert c.get("/v1/nope").status_code == 404

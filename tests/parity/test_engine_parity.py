@@ -55,12 +55,20 @@ def _unbatched_with_gaps(
     """The M1 contiguous path, also recording the top-2 logit gap at every step."""
     cfg = model.config
     cache = ContiguousKVCache(
-        cfg.num_layers, cfg.num_kv_heads, cfg.head_dim, len(ids) + steps,
-        model.model.embed_tokens.weight.dtype, model.inv_freq.device,
-    )  # fmt: skip
+        cfg.num_layers,
+        cfg.num_kv_heads,
+        cfg.head_dim,
+        len(ids) + steps,
+        model.model.embed_tokens.weight.dtype,
+        model.inv_freq.device,
+    )
     dev = model.inv_freq.device
-    logits = model(torch.tensor(ids, device=dev), torch.arange(len(ids), device=dev), cache,
-                   last_token_only=True)[-1].float()  # fmt: skip
+    logits = model(
+        torch.tensor(ids, device=dev),
+        torch.arange(len(ids), device=dev),
+        cache,
+        last_token_only=True,
+    )[-1].float()
     toks, gaps = [], []
     for _ in range(steps):
         top2 = torch.topk(logits, 2).values
@@ -97,9 +105,11 @@ def test_engine_matches_unbatched(repo_id: str) -> None:
     need = [-(-(len(p) + NEW_TOKENS) // BLOCK) for p in prompts]
     num_blocks = max(int(sum(need) * 0.25), max(need))
     eng = LLMEngine.for_model(
-        model, num_blocks=num_blocks, block_size=BLOCK,
+        model,
+        num_blocks=num_blocks,
+        block_size=BLOCK,
         config=SchedulerConfig(max_num_seqs=48, max_num_batched_tokens=256),
-    )  # fmt: skip
+    )
     params = SamplingParams(max_tokens=NEW_TOKENS, ignore_eos=True)
     reqs = [eng.add_request(f"p{i}", p, params) for i, p in enumerate(prompts)]
     t1 = time.perf_counter()

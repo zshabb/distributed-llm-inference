@@ -131,8 +131,11 @@ class AuthMiddleware:
                     else await asyncio.to_thread(self.auth.authenticate, header)
                 )
             except AuthError as exc:
-                err = {"message": str(exc), "type": "authentication_error",
-                       "code": "invalid_api_key"}  # fmt: skip
+                err = {
+                    "message": str(exc),
+                    "type": "authentication_error",
+                    "code": "invalid_api_key",
+                }
                 headers = [(b"content-type", b"application/json"), (b"www-authenticate", b"Bearer")]
                 await send({"type": "http.response.start", "status": 401, "headers": headers})
                 await send(
@@ -157,8 +160,11 @@ def _cli(argv: list[str]) -> int:
         return 2
     token, record = new_key(argv[1])
     print(f"API key (shown once, give it to the client): {token}", file=sys.stderr)
-    print(json.dumps({"key_id": record.key_id, "tenant": record.tenant,
-                      "secret_hash": record.secret_hash}))  # fmt: skip
+    print(
+        json.dumps(
+            {"key_id": record.key_id, "tenant": record.tenant, "secret_hash": record.secret_hash}
+        )
+    )
     return 0
 
 

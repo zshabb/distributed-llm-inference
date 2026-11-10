@@ -65,8 +65,15 @@ class _SamplingFields(BaseModel):
         extra = self.model_extra or {}
         if extra.get("best_of", 1) != 1:
             return "best_of"
-        for name in ("echo", "logit_bias", "suffix", "tools", "tool_choice", "functions",
-                     "response_format"):  # fmt: skip
+        for name in (
+            "echo",
+            "logit_bias",
+            "suffix",
+            "tools",
+            "tool_choice",
+            "functions",
+            "response_format",
+        ):
             if extra.get(name):  # falsy values (False, {}, None) request nothing
                 return name
         return None

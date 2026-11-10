@@ -50,10 +50,15 @@ def test_random_adversarial_workloads(sc: Scenario) -> None:
     bm = BlockManager(sc.num_blocks, sc.block_size, watermark=0.0)
     runner = FakeRunner(bm)
     eng = LLMEngine(
-        runner, bm, SchedulerConfig(max_num_seqs=sc.max_seqs, max_num_batched_tokens=sc.budget,
-                                    aging_steps=rng.choice([5, 50]),
-                                    tenant_weights={"t1": 2.0})
-    )  # fmt: skip
+        runner,
+        bm,
+        SchedulerConfig(
+            max_num_seqs=sc.max_seqs,
+            max_num_batched_tokens=sc.budget,
+            aging_steps=rng.choice([5, 50]),
+            tenant_weights={"t1": 2.0},
+        ),
+    )
     capacity_tokens = sc.num_blocks * sc.block_size
     pending = []
     for i in range(sc.n_requests):
@@ -72,9 +77,12 @@ def test_random_adversarial_workloads(sc: Scenario) -> None:
             pending.remove(item)
             _, rid, prompt, mt = item
             reqs[rid] = eng.add_request(
-                rid, prompt, SamplingParams(max_tokens=mt),
-                priority=rng.choice(list(Priority)), tenant=rng.choice(["t0", "t1", "t2"]),
-            )  # fmt: skip
+                rid,
+                prompt,
+                SamplingParams(max_tokens=mt),
+                priority=rng.choice(list(Priority)),
+                tenant=rng.choice(["t0", "t1", "t2"]),
+            )
             prompts[rid] = prompt
         for rid, r in reqs.items():
             if not r.is_finished and rng.random() < sc.cancel_rate:

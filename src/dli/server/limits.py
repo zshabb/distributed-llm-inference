@@ -64,8 +64,16 @@ class BodySizeLimit:
 
 
 async def _reject(send: Send, limit: int) -> None:
-    err = {"message": f"request body exceeds {limit} bytes", "type": "invalid_request_error",
-           "code": "body_too_large"}  # fmt: skip
-    await send({"type": "http.response.start", "status": 413,
-                "headers": [(b"content-type", b"application/json")]})  # fmt: skip
+    err = {
+        "message": f"request body exceeds {limit} bytes",
+        "type": "invalid_request_error",
+        "code": "body_too_large",
+    }
+    await send(
+        {
+            "type": "http.response.start",
+            "status": 413,
+            "headers": [(b"content-type", b"application/json")],
+        }
+    )
     await send({"type": "http.response.body", "body": json.dumps({"error": err}).encode()})

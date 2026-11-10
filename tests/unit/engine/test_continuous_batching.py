@@ -21,9 +21,11 @@ def make_engine(
     bm = BlockManager(num_blocks, block_size, watermark=0.0)
     runner = FakeRunner(bm)
     eng = LLMEngine(
-        runner, bm, SchedulerConfig(max_num_seqs=max_seqs, max_num_batched_tokens=budget),
+        runner,
+        bm,
+        SchedulerConfig(max_num_seqs=max_seqs, max_num_batched_tokens=budget),
         eos_token_ids=eos,
-    )  # fmt: skip
+    )
     return eng, runner, bm
 
 

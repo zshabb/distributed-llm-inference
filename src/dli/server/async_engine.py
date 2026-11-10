@@ -205,8 +205,9 @@ class AsyncEngine:
             self._dead = f"{type(exc).__name__}: {exc}"
             for rid in list(self._pending):
                 self._send(rid, EngineEvent(error=f"engine failure: {self._dead}", finished=True))
-            self._snapshot = EngineSnapshot(healthy=False, error=self._dead,
-                                            kv_total_blocks=eng.bm.num_blocks)  # fmt: skip
+            self._snapshot = EngineSnapshot(
+                healthy=False, error=self._dead, kv_total_blocks=eng.bm.num_blocks
+            )
 
     def _drain_commands(self, *, block: bool) -> bool:
         """Apply queued commands. Returns False when asked to stop."""
@@ -219,9 +220,12 @@ class AsyncEngine:
                 return False
             if isinstance(cmd, _Add):
                 req = self._engine.add_request(
-                    cmd.request_id, cmd.prompt_ids, cmd.params,
-                    priority=cmd.priority, tenant=cmd.tenant,
-                )  # fmt: skip
+                    cmd.request_id,
+                    cmd.prompt_ids,
+                    cmd.params,
+                    priority=cmd.priority,
+                    tenant=cmd.tenant,
+                )
                 if req.is_finished:  # rejected at admission (CAPACITY)
                     rejected = EngineEvent(finished=True, finish_reason=req.finish_reason)
                     self._send(cmd.request_id, rejected)

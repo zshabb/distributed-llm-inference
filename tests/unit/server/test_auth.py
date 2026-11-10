@@ -61,9 +61,16 @@ def test_key_file_round_trip(tmp_path: Path) -> None:
     t1, r1 = new_key("acme")
     t2, r2 = new_key("globex")
     path = tmp_path / "keys.json"
-    path.write_text(json.dumps([r.__dict__ if hasattr(r, "__dict__") else
-                                {"key_id": r.key_id, "tenant": r.tenant,
-                                 "secret_hash": r.secret_hash} for r in (r1, r2)]))  # fmt: skip
+    path.write_text(
+        json.dumps(
+            [
+                r.__dict__
+                if hasattr(r, "__dict__")
+                else {"key_id": r.key_id, "tenant": r.tenant, "secret_hash": r.secret_hash}
+                for r in (r1, r2)
+            ]
+        )
+    )
     auth = ApiKeyAuth.from_file(path)
     assert auth.authenticate(f"Bearer {t1}") == "acme"
     assert auth.authenticate(f"Bearer {t2}") == "globex"
