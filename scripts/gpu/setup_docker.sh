@@ -44,13 +44,42 @@ if ! dpkg -s nvidia-container-toolkit >/dev/null 2>&1; then
   apt-get install -y -qq nvidia-container-toolkit
 fi
 
-# Default bind address for published ports. Only written if no daemon.json exists (never overwrite).
-if [[ ! -f /etc/docker/daemon.json ]]; then
-  echo '{ "ip": "127.0.0.1" }' > /etc/docker/daemon.json
+# Docker's iptables rules bypass host firewalls (ufw), so a stray `-p 8000:8000` would be public.
+# Make 127.0.0.1 the default bind address for published ports by MERGING one key into the existing
+# daemon.json (all other settings preserved, timestamped backup kept). Only changed if absent.
+daemon_json=/etc/docker/daemon.json
+changed=0
+if ! grep -q '"nvidia"' "$daemon_json" 2>/dev/null; then
+  nvidia-ctk runtime configure --runtime=docker   # merges the nvidia runtime into daemon.json
+  changed=1
 fi
-nvidia-ctk runtime configure --runtime=docker   # merges the nvidia runtime into daemon.json
-systemctl enable --now docker >/dev/null
-systemctl restart docker
+proposed="$(mktemp)"
+python3 - "$daemon_json" "$proposed" <<'PY'
+import json, pathlib, sys
+src, dst = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+cfg = json.loads(src.read_text()) if src.exists() and src.read_text().strip() else {}
+cfg.setdefault("ip", "127.0.0.1")
+dst.write_text(json.dumps(cfg, indent=2) + "\n")
+PY
+if ! python3 -c 'import json,sys; a,b=(json.load(open(f)) if open(f).read().strip() else {} for f in sys.argv[1:]); sys.exit(a!=b)' "$daemon_json" "$proposed" 2>/dev/null; then
+  [[ -f "$daemon_json" ]] && cp -p "$daemon_json" "$daemon_json.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+  install -m 0644 "$proposed" "$daemon_json"
+  changed=1
+fi
+rm -f "$proposed"
+
+if [[ "$changed" -eq 1 ]]; then
+  running="$(docker ps -q | wc -l)"
+  if [[ "$running" -gt 0 ]]; then
+    echo "daemon.json changed but $running container(s) are running; NOT restarting docker." >&2
+    exit 5
+  fi
+  echo "daemon.json changed; restarting docker (no running containers)"
+  systemctl restart docker
+else
+  echo "daemon.json already compliant; docker not restarted"
+fi
+systemctl enable docker >/dev/null
 
 echo "--- post-state"
 docker --version
