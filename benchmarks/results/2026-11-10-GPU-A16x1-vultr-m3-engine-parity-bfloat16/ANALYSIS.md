@@ -27,3 +27,13 @@ the same shapes. Applying it to batched-vs-unbatched bf16 was an error in my acc
 
 **Decisive check:** the same engine in **fp32** on the same GPU (`*-m3-engine-parity-float32` on the A16) and on CPU.
 If scheduling, batching, or preemption were wrong, fp32 would also diverge, at large gaps.
+
+## Result of the decisive check (added after the fp32 run)
+Same engine, same configuration, same GPU, **fp32** (code `5b4254c`, results in
+`2026-11-10-GPU-A16x1-vultr-m3-engine-parity-float32/`): **100/100 prompts token-identical over all 128 tokens for both
+models**, with the same 47 preemptions per model. Scheduling, batching, chunked prefill, and preemption-recompute are
+therefore exact. The bf16 divergence is a property of bf16 arithmetic under different batch shapes, not an engine defect.
+
+**Consequence for acceptance:** batched-vs-unbatched token identity is a valid criterion only in fp32. For bf16 the meaningful
+checks are (a) no divergence at a gap beyond bf16 rounding (met: max 0.375 ≤ 1.0) and (b) model-level quality, which
+belongs to evaluation (M5), not to exact-match parity. The failed 98% rule stays recorded as failed.
