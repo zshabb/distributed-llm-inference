@@ -1,0 +1,4 @@
+revision: 9e53ae0ab6b5
+smoke ok: True
+container GPU access: OK
+overall exit status: 0
