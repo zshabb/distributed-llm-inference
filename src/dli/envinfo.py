@@ -137,7 +137,13 @@ def current_revision() -> str | None:
     rev_file = Path(__file__).resolve().parents[2] / "REVISION"
     if rev_file.is_file():
         return rev_file.read_text().strip()
-    return _run(["git", "describe", "--always", "--dirty", "--abbrev=12"])
+    rev = _run(["git", "describe", "--always", "--dirty", "--abbrev=12"])
+    if rev is None or rev.endswith("-dirty"):
+        return rev
+    # `git describe --dirty` ignores untracked files, so a run of a brand-new, uncommitted test
+    # file would be reported as clean (happened during M2). Untracked, non-ignored files => dirty.
+    untracked = _run(["git", "status", "--porcelain", "--untracked-files=normal"])
+    return f"{rev}-dirty" if untracked else rev
 
 
 def collect(revision: str | None = None) -> dict[str, Any]:
