@@ -17,6 +17,9 @@ dependencies = [
     "uvicorn>=0.32",
 ]
 
+[project.scripts]
+dli-serve = "dli.server.__main__:main"
+
 # PyTorch is selected per machine through mutually exclusive extras, so ONE lockfile
 # pins both the CPU build (laptop/CI) and the CUDA build (GPU host). See ADR-0002.
 [project.optional-dependencies]
