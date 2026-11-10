@@ -62,10 +62,11 @@ packages = ["src/dli"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers -m 'not parity and not gpu'"
+addopts = "-ra --strict-markers -m 'not parity and not gpu and not stress'"
 markers = [
     "parity: slow numerical parity suite against Hugging Face transformers (downloads model weights)",
     "gpu: requires a CUDA device",
+    "stress: long randomized soak tests (focused/broad tier, minutes)",
 ]
 
 [tool.ruff]
