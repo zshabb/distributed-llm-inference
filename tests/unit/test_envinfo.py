@@ -38,3 +38,18 @@ def test_explicit_start_revision_is_recorded_not_the_current_one(
     envinfo.main([str(out)], revision="start-rev")
     assert json.loads(out.read_text())["revision"] == "start-rev"
     assert envinfo.collect()["revision"] == "moved-on-head"
+
+
+def test_untracked_files_mark_the_revision_dirty(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Regression (M2): git describe --dirty ignores untracked files, so a run of an uncommitted
+    # new test file was labeled with a clean revision.
+    outputs = {"describe": "abc123", "status": "?? tests/new_test.py"}
+    monkeypatch.setattr(
+        envinfo,
+        "_run",
+        lambda cmd, timeout=20.0: outputs["describe" if cmd[1] == "describe" else "status"],
+    )
+    monkeypatch.setattr(envinfo.Path, "is_file", lambda self: False)
+    assert envinfo.current_revision() == "abc123-dirty"
+    outputs["status"] = ""
+    assert envinfo.current_revision() == "abc123"

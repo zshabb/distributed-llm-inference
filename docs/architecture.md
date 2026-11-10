@@ -17,9 +17,9 @@
 |---|---|---|---|
 | API | `dli.api` | OpenAI routes, SSE streaming, cancellation, health | planned M4 |
 | Admission / scheduling | `dli.scheduler` | Queues, token-budget step planning, chunked prefill, preemption, deadlines | planned M3 |
-| KV memory | `dli.kv` | Paged block pool, block tables, ref counts, prefix cache, eviction | planned M2 |
+| KV memory | `dli.kv` | Paged block pool, block tables, ref counts, copy-on-write, prefix cache (SHA-256 chains), LRU/cost-aware eviction, paged KV store | implemented M2 |
 | Runner | `dli.runner` | Batch metadata, forward, sampling, CUDA graphs | planned M3 |
-| Generation (M1 bridge) | `dli.generate` | Greedy decoding over a contiguous per-sequence KV cache, used for parity and later replaced by runner + paged KV | implemented M1 |
+| Generation (bridge) | `dli.generate` | Greedy decoding of ONE sequence over contiguous (M1) or paged (M2) KV; replaced by the batched runner in M3 | implemented M1–M2 |
 | Model | `dli.model` | Llama-family decoder (Llama, Qwen2), weight loading, RoPE | implemented M1 |
 | Kernels / parallel | `dli.kernels`, `dli.parallel` | Triton paged attention; tensor-parallel linear layers | planned M6 / M7 |
 | Environment evidence | `dli.envinfo` | Hardware/software manifest for every result | implemented M0 |

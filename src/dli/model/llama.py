@@ -17,7 +17,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from dli.model.config import ModelConfig
-from dli.model.kv_cache import ContiguousKVCache
+from dli.model.kv_cache import KVCacheView
 from dli.model.rope import apply_rope, inverse_frequencies, rope_cos_sin
 
 
@@ -60,7 +60,7 @@ class Attention(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        kv_cache: ContiguousKVCache | None,
+        kv_cache: KVCacheView | None,
     ) -> torch.Tensor:
         n = x.shape[0]
         # [n, heads*dim] -> [heads, n, dim]: heads lead so SDPA treats them as the batch dimension.
@@ -130,7 +130,7 @@ class DecoderLayer(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        kv_cache: ContiguousKVCache | None,
+        kv_cache: KVCacheView | None,
     ) -> torch.Tensor:
         x = x + self.self_attn(self.input_layernorm(x), cos, sin, kv_cache)
         out: torch.Tensor = x + self.mlp(self.post_attention_layernorm(x))
@@ -174,7 +174,7 @@ class LlamaForCausalLM(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
-        kv_cache: ContiguousKVCache | None = None,
+        kv_cache: KVCacheView | None = None,
         *,
         last_token_only: bool = False,
     ) -> torch.Tensor:

@@ -1,8 +1,8 @@
 # QnA: implementation-specific technical questions
 
-> **Scope: milestones M0–M1.** The release target is ≥ 30 questions across architecture, implementation,
+> **Scope: milestones M0–M2 (30 questions).** The release target is ≥ 30 questions across architecture, implementation,
 > scalability, reliability, security, performance, debugging, and system design (master prompt §17).
-> Questions about components that do not exist yet (scheduler, paged KV cache, API, kernels, TP, router) are
+> Questions about components that do not exist yet (scheduler, API, kernels, TP, router) are
 > added when those components land, because answering them now would describe unbuilt software.
 > Every number carries an evidence label and a result directory.
 
@@ -158,6 +158,88 @@ Not on its own. "Dirty" means uncommitted files were present, so the exact code 
 validation, and it was rerun after `scripts/gpu/sync.sh` gained `SYNC_FROM=head`, which ships `git archive HEAD` and writes
 the exact commit to `REVISION`. Evidence runs use HEAD sync. Worktree sync is for iteration only (`docs/operations.md` §3).
 
+## Paged KV cache (M2)
+
+### 21. Why page the KV cache, and what exactly does the block manager own?
+A contiguous cache reserves `max_len` slots per sequence up front (`ContiguousKVCache`). For Qwen2.5-0.5B in bf16 that
+is 12 KiB per token, 48 MiB for a 4K context, whether used or not. Reserved-but-unused KV is what caps concurrency.
+Paging allocates 16-token blocks on demand, so waste is under one block per sequence. The `BlockManager`
+(`src/dli/kv/block_manager.py`) owns only **metadata**: block tables, reference counts, the prefix index, and eviction
+order. `PagedKVStore` (`paged_store.py`) owns the bytes. The model sees a `KVCacheView` (`length`/`write`/`advance`), so
+the attention math did not change between M1 and M2.
+
+### 22. What states can a block be in, and why is "cached-idle" a separate state?
+FREE (on the free list), USED (`ref > 0`), and CACHED-IDLE (`ref == 0` but registered in the prefix index). Cached-idle
+blocks hold valid KV that a later request can revive with a prefix hit, so freeing a finished request must *not* discard
+them. They still count as available memory, because they can be evicted on demand. `check_invariants()` asserts that every
+block is in exactly one state, and the stress soak checks conservation (`free + idle + used == pool`) after every operation.
+
+### 23. How is a block identified for prefix sharing, and why SHA-256?
+A block's KV depends on every earlier token, so identity is a hash chain:
+`h_i = SHA-256(len(ns) ‖ ns ‖ h_{i-1} ‖ int64 tokens_i)` (`hashing.py`). A collision would make one request attend to
+another's cached KV: wrong output *and* a data leak. Python's 64-bit tuple hash is not built to resist crafted
+collisions, and hash-keyed prefix caches are a known vulnerability class. SHA-256 costs about a microsecond per 16-token
+block. The namespace is length-prefixed so `("ab", …)` cannot alias `("a", …)` (tested).
+
+### 24. Why can a block only be shared after `mark_computed`, and why is the last prompt block always recomputed?
+Allocation reserves slots before the forward pass writes them. If blocks were registered at allocation, a request
+admitted in the same step could "hit" a block whose KV is still garbage. That is the first fault the mutation script
+injects, and the shadow-KV property test catches it. The last-block rule exists because a fully cached prompt would
+leave zero tokens to run through the model, and then there are no logits to sample from. `_lookup` only considers
+blocks covering positions `< len(prompt) - 1`. The fault-injection run showed my first property test did not check this
+(content was still correct), so the rule is now asserted explicitly.
+
+### 25. How does copy-on-write work, and how did you prove it?
+`fork(parent, child)` increments the reference count of every block. When either sequence appends into a *partial*
+last block with `ref > 1`, `append_slots` allocates a private block, returns `CopyOp(src, dst)`, and moves the sequence
+to the copy. The caller applies the copy across all layers (`PagedKVStore.copy_blocks`) before writing. Full shared
+blocks are never written, because appends only touch the last partial block or a new one. Evidence:
+`test_fork_with_copy_on_write_matches_independent_runs` teacher-forces different continuations into a parent and its fork
+and matches every step's logits against independent full recomputation, with exactly one COW copy. Removing COW is
+mutant #1, caught as "KV overwritten".
+
+### 26. How do you guarantee an allocation failure never leaks blocks?
+Every mutating operation computes its full requirement first: new blocks needed, minus prefix hits, with revived
+idle hits subtracted from what is evictable, plus one block for a pending COW. It raises `NoFreeBlocksError` before
+changing anything. The scheduler (M3) can then preempt and retry safely. Tests assert byte-for-byte unchanged state after
+failures (`test_allocation_failure_is_atomic`, `test_append_failure_is_atomic`). The million-operation soak hits about
+27,000 out-of-space events per policy and still ends with zero leaked blocks.
+
+### 27. Describe the liveness bug you found in your own design.
+With duplicate content (two identical prompts admitted before either was computed), my first `_register` linked a
+block under whichever block the index held for the parent *hash*, possibly another sequence's copy. That other parent
+could then be idle while owning an in-use child. It counted as "available" but could never be evicted (only leaves are
+candidates), so the allocation pre-check could pass and the subsequent eviction fail. Fix: register a block only if the
+cached parent is the exact block preceding it in *its own* table. `check_invariants()` now asserts that an in-use cached
+block's parent is in use, which makes the availability count exact. Found in self-review before the first test run;
+recorded in the commit message.
+
+### 28. Is the block manager thread-safe?
+No, deliberately. It is **thread-confined** to the scheduler loop, the single writer of KV metadata in this design
+(ADR-0001). Locking every append would add overhead without benefit. Accidental cross-thread use is detected, not
+tolerated: with `debug_checks=True` every public method checks the caller's thread id and raises
+(`test_cross_thread_use_is_rejected`). If the engine ever moves to multiple scheduler threads, this would need a lock
+or sharding per pool, and the stateful tests would need a concurrent variant.
+
+### 29. How do you know your tests would actually catch the bugs that matter?
+Three layers. (1) A Hypothesis state machine with a *shadow KV store* that records which token prefix each slot holds
+and asserts, after every step, that every live sequence still owns its computed KV and every prefix hit returns matching
+content. (2) Fault injection: `scripts/dev/mutation_check_block_manager.sh` plants four realistic bugs, and the suite must
+fail on each. All four are caught; the first run caught a gap in the tests themselves. (3) End-to-end equality: paged
+decoding must equal the contiguous path, which M1 tied to `transformers`, on tiny models across block sizes, sharing,
+forks and eviction, and on SmolLM2-135M (40/40 runs `[CPU-LAPTOP]`).
+
+### 30. Did the cost-aware eviction policy work?
+Partly, and the negative half is published. On synthetic traces replayed through the real `BlockManager`
+(`benchmarks/results/2026-11-10-SIM-m2-prefix-eviction/`, `[SIM]`, hit rate only), GDSF beat LRU on
+**shared-system-prompt** traffic in every seed (+2.5 to +4.1 hit-rate points under memory pressure). It **lost** on
+**multi-turn** sessions in every seed (down to −10.9 points with a 16K-token pool) and was slightly worse with scan
+pollution. That refutes the spec's hypothesis for multi-turn traffic. The likely mechanism, not yet isolated: early blocks
+of a session get hit every turn, accumulate frequency, and keep pinning memory after the session ends, while aging is
+slow when evictions are rare. Decision: LRU stays the default and cost-aware is opt-in. I deliberately did not tune
+the policy against the same synthetic traces used to evaluate it. Follow-ups (frequency decay, ARC-style adaptation)
+must be judged with the same paired method and, more importantly, with latency measurements once the engine exists (M5).
+
 ## Results (labeled evidence)
 
 | Claim | Label | Evidence |
@@ -166,3 +248,6 @@ the exact commit to `REVISION`. Evidence runs use HEAD sync. Worktree sync is fo
 | Same, bf16, both implementations on one GPU | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-m1-greedy-parity-bfloat16/` |
 | A16 host usable: fp32/SDPA numerics, Triton JIT, container GPU access | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-env-validation/` |
 | Tiny-model logit parity ≤ 1e-4 on 7 architecture variants | `[CPU-LAPTOP]` | `tests/unit/model/test_reference_parity.py` (44-test fast suite) |
+| Paged decoding == contiguous decoding, 40/40 runs (cold + shared-prefix), SmolLM2-135M, block 16 | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m2-paged-parity/` |
+| Block manager: 10^6 random ops per policy, 0 invariant violations, 0 leaks; 10k-request soak, 0 leaks | `[CPU-LAPTOP]` | `tests/stress/test_block_manager_soak.py` (run output in commit aeacae5) |
+| Eviction policy hit rates (cost-aware wins shared-system, loses multi-turn) | `[SIM]` | `benchmarks/results/2026-11-10-SIM-m2-prefix-eviction/` |

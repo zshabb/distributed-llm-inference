@@ -13,3 +13,7 @@
 | 9 | Parity covers prompts ≤ 53 tokens + 128 generated (≤ 181 positions) | Long-context behavior unverified on real weights | Extend in M3 when chunked prefill lands |
 | 10 | Complete GPU server recreation has never been performed | Recovery time and the full procedure are unverified; only the user-level bootstrap (25 s) and validation are measured | Open; perform and time on the next approved rebuild (operations.md §4) |
 | 11 | Process deviation: M0–M1 were committed directly to `main` instead of a feature branch with a `--no-ff` merge | Review record is the commit history itself rather than a merge commit | Branch workflow applies from M2 |
+| 12 | Paged KV read path gathers the whole prefix per layer per decode step | Paged decoding is slower than the contiguous cache on CPU (correctness reference only) | By design until the M6 Triton paged-attention kernel reads pages in place |
+| 13 | Prefix sharing is block-granular (16 tokens by default) | Prefixes shorter than a block, and the partial tail of longer ones, are not shared | Accepted (ADR-0003); radix/partial-block sharing is a possible extension |
+| 14 | Identical prompts admitted before either is computed keep private copies | Temporary duplicate memory (counted in `duplicate_registrations`) | Accepted; merge-on-register is a possible optimization |
+| 15 | Eviction-policy results are trace simulations of hit rate only | No latency/TTFT evidence for the policies yet | Measure with the engine in M3/M5 |
