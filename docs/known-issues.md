@@ -2,7 +2,7 @@
 
 | # | Issue | Impact | Status / plan |
 |---|---|---|---|
-| 1 | CI workflows exist but have never run: the repository is local-only until publication is approved | Lint/type/test gates are enforced by pre-commit and local runs only | Will run on first push (Gate P) |
+| 1 | CI workflows had never run before publication | — | **Resolved** 2026-11-10: first GitHub runs passed (ci: lint, mypy --strict, 95 tests, 54 s; security: full-history gitleaks + pip-audit of both torch builds, 16 s), runs 42907583097 / 42907583166 |
 | 2 | `make` is not installed in the WSL2 dev environment (needs `sudo apt install make`, owner action) | `Makefile` targets unusable locally; the underlying `uv run …` commands are used directly | Open |
 | 3 | No C compiler in WSL2. Triton's runtime needs one on any machine that JIT-compiles kernels | No impact on CPU paths. The GPU host has gcc and Triton JIT is verified there | Open (laptop only) |
 | 4 | M1 generation uses a contiguous per-sequence KV cache and greedy decoding only | Not the serving path; exists for numerical parity. Paged KV (M2) and sampling (M3/M4) replace it | By design |

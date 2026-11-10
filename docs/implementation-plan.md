@@ -24,7 +24,7 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 - [x] pre-commit: format, lint, gitleaks, large-file guard
 - [x] ADR-0001 (architecture), ADR-0002 (PyTorch pinning)
 - [x] OpenAPI contract `contracts/inference/v1` validated by a test
-- [x] CI workflows (lint, types, tests, security scan) written; **not yet executed** (repository unpublished)
+- [x] CI workflows (lint, types, tests, security scan): first GitHub runs passed 2026-11-10
 - [x] GPU host scripts (sync, remote run, bootstrap, Docker setup, inspection, validation) + runbook
 - [x] GPU host validated: CUDA torch tensor check + container GPU access, results committed (`0a8a023`)
 
