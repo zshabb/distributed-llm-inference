@@ -77,7 +77,8 @@ strict = true
 files = ["src"]
 
 [[tool.mypy.overrides]]
-module = ["safetensors.*", "tokenizers.*", "huggingface_hub.*"]
+# triton ships only with the CUDA torch build, so it is absent from the CPU environment.
+module = ["safetensors.*", "tokenizers.*", "huggingface_hub.*", "triton", "triton.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]
