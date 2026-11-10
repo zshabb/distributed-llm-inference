@@ -31,6 +31,8 @@ from dli.engine import FinishReason, Priority
 from dli.sampling import SamplingParams
 from dli.server.admission import AdmissionConfig, AdmissionController
 from dli.server.async_engine import AsyncEngine, EngineDeadError
+from dli.server.auth import ApiKeyAuth, AuthMiddleware
+from dli.server.limits import BodySizeLimit
 from dli.server.schemas import ChatCompletionRequest, CompletionRequest
 from dli.server.text import (
     ChatMessage,
@@ -61,6 +63,7 @@ class ServerConfig:
     default_max_tokens: int = 16
     max_tokens_limit: int = 4096
     request_timeout_s: float = 600.0
+    max_body_bytes: int = 2 * 1024 * 1024
 
 
 class APIError(Exception):
@@ -129,7 +132,10 @@ def create_app(
     codec: TextCodec,
     config: ServerConfig,
     admission: AdmissionConfig | None = None,
+    auth: ApiKeyAuth | None = None,
 ) -> FastAPI:
+    """Build the API app. ``auth=None`` disables authentication (local development only:
+    the server entry point refuses to start without keys on a non-loopback address)."""
     app = FastAPI(title="distributed-llm-inference", version="0.1.0", docs_url=None, redoc_url=None)
     app.state.engine = engine
     app.state.codec = codec
@@ -137,6 +143,14 @@ def create_app(
     app.state.draining = False
     gate = AdmissionController(admission or AdmissionConfig())
     app.state.admission = gate
+    app.add_middleware(BodySizeLimit, max_bytes=config.max_body_bytes)
+
+    # Pure-ASGI layers wrap the app; the LAST added runs FIRST: auth precedes the body-size check.
+    app.add_middleware(AuthMiddleware, auth=auth)
+
+    def _tenant(request: Request) -> str:
+        # Set by AuthMiddleware from the verified key; client X-Tenant-Id headers are ignored.
+        return str(getattr(request.state, "tenant", "default"))
 
     # ------------------------------------------------------------------ errors
 
@@ -200,6 +214,7 @@ def create_app(
         *,
         chat: bool,
     ) -> Response:
+        tenant = _tenant(request)
         _validate(body, prompt_ids)
         params = SamplingParams(
             max_tokens=body.max_tokens or config.default_max_tokens,
@@ -222,7 +237,7 @@ def create_app(
         gate.inflight += 1
         handed_off = False
         try:
-            raw = _text_stream(rid, prompt_ids, params, body.stop_list, priority, "default", timing)
+            raw = _text_stream(rid, prompt_ids, params, body.stop_list, priority, tenant, timing)
             # Wait for the first event BEFORE sending headers: errors and deadline misses up to the
             # first token are real HTTP statuses (429/4xx/5xx), not in-band events in a 200 stream.
             first = await _first_event(raw, deadline_ms)

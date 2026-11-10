@@ -13,6 +13,7 @@ from dli.model import LlamaForCausalLM, load_model
 from dli.server.admission import AdmissionConfig
 from dli.server.app import ServerConfig, create_app
 from dli.server.async_engine import AsyncEngine
+from dli.server.auth import ApiKeyAuth
 from dli.server.text import TextCodec
 
 
@@ -37,6 +38,8 @@ class BuildOptions:
     max_tokens_limit: int = 4096
     request_timeout_s: float = 600.0
     admission: AdmissionConfig = field(default_factory=AdmissionConfig)
+    auth: ApiKeyAuth | None = None
+    max_body_bytes: int = 2 * 1024 * 1024
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -62,6 +65,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
         default_max_tokens=opts.default_max_tokens,
         max_tokens_limit=opts.max_tokens_limit,
         request_timeout_s=opts.request_timeout_s,
+        max_body_bytes=opts.max_body_bytes,
     )
-    app = create_app(aengine, codec, config, opts.admission)
+    app = create_app(aengine, codec, config, opts.admission, opts.auth)
     return ServerBundle(app, aengine, codec, model, config)
