@@ -22,9 +22,12 @@ Portfolio-wide rules: `ENGINEERING_STANDARDS.md` in the local planning workspace
   improvement separately with a Conventional Commit message explaining what and why (e.g.
   `fix(memory): prevent block leaks during request cancellation`). No bundling unrelated work, no trivial splitting, no
   manufactured activity. Local commits need no approval.
-- Work on a `feat/*` branch per milestone; merge to `main` with `--no-ff` and a PR-template message. Not yet published:
-  creating the GitHub repo and the first push need explicit owner approval. After that, validated pushes, PRs, and
-  `--no-ff` merges are authorized. Never force-push or rewrite published history.
+- **Published** (public, approved 2026-11-10): https://github.com/zshabb/distributed-llm-inference. Push validated
+  progress regularly during development (feature branch pushes after validated commits), open PRs, and merge
+  passing milestone branches with `--no-ff`, all without asking. Run the pre-push checks every time (fast suite, lint,
+  types, `gitleaks git`). Never force-push, rewrite published history, delete remote branches, or change visibility.
+- Push from WSL with the Windows GitHub CLI as a one-off credential helper (gh is not logged in inside WSL):
+  `git -c credential.helper= -c 'credential.helper=!"/mnt/c/Program Files/GitHub CLI/gh.exe" auth git-credential' push`
 - Do not rerun the M1 parity suites unless `src/dli/model/`, `src/dli/generate.py`, `uv.lock`, or the parity harness change
   in a way that affects numerics. Record the decision in `docs/progress.md`.
 - Evidence directories: `benchmarks/results/<UTC date>-<label>-<name>/` with `env.json` whose revision is captured at
