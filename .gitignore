@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+coverage.xml
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Secrets and local machine config (never committed)
+.env
+*.pem
+*.key
+scripts/gpu/host.env
+
+# Model weights and large artifacts are downloaded, never committed
+models/
+*.safetensors
+*.bin
+*.gguf
+
+# Raw benchmark scratch output (summaries and small raw data under benchmarks/results/ ARE committed)
+benchmarks/results/**/scratch/

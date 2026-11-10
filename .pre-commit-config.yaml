@@ -1,0 +1,23 @@
+# Uses the locked tool versions from uv.lock (local hooks) so pre-commit and CI cannot drift apart.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff format
+        entry: uv run --frozen ruff format
+        language: system
+        types: [python]
+      - id: ruff-check
+        name: ruff check
+        entry: uv run --frozen ruff check --fix
+        language: system
+        types: [python]
+      - id: gitleaks
+        name: gitleaks (staged changes)
+        entry: gitleaks git --staged --redact --no-banner
+        language: system
+        pass_filenames: false
+      - id: no-large-files
+        name: block files larger than 1 MiB
+        entry: scripts/dev/check_file_size.sh
+        language: script

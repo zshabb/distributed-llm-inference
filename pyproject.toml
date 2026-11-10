@@ -1,0 +1,85 @@
+[project]
+name = "distributed-llm-inference"
+version = "0.1.0.dev0"
+description = "Distributed LLM inference engine: paged KV cache, continuous batching, custom kernels, and a workload-aware router."
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Zeav" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "huggingface-hub>=0.26",
+    "safetensors>=0.4.5",
+    "tokenizers>=0.20",
+]
+
+# PyTorch is selected per machine through mutually exclusive extras, so ONE lockfile
+# pins both the CPU build (laptop/CI) and the CUDA build (GPU host). See ADR-0002.
+[project.optional-dependencies]
+cpu = ["torch==2.14.1"]
+cu130 = ["torch==2.14.1"]
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.100",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    # Reference implementation for numerical parity tests only; never imported by src/.
+    "transformers>=4.46",
+]
+
+[tool.uv]
+conflicts = [[{ extra = "cpu" }, { extra = "cu130" }]]
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", extra = "cpu" },
+    { index = "pytorch-cu130", extra = "cu130" },
+]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers -m 'not parity and not gpu'"
+markers = [
+    "parity: slow numerical parity suite against Hugging Face transformers (downloads model weights)",
+    "gpu: requires a CUDA device",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF", "PT", "C4"]
+ignore = ["N812"]  # `import torch.nn.functional as F` is the PyTorch convention
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = ["safetensors.*", "tokenizers.*", "huggingface_hub.*"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["src/dli"]
+branch = true
