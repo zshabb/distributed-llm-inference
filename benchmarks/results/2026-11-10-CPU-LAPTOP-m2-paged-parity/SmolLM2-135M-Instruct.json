@@ -1,0 +1,296 @@
+{
+ "summary": {
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "code_revision": "c2e6800177cd",
+  "evidence_label": "CPU-LAPTOP",
+  "block_size": 16,
+  "new_tokens": 32,
+  "runs": 40,
+  "identical_runs": 40,
+  "shared_prefix_runs_with_cache_hits": 20,
+  "prefix_hit_rate_tokens": 0.3478
+ },
+ "records": [
+  {
+   "prompt": 0,
+   "pass": "cold",
+   "prompt_tokens": 11,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 0,
+   "pass": "shared-prefix",
+   "prompt_tokens": 28,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 1,
+   "pass": "cold",
+   "prompt_tokens": 11,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 1,
+   "pass": "shared-prefix",
+   "prompt_tokens": 28,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 2,
+   "pass": "cold",
+   "prompt_tokens": 19,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 2,
+   "pass": "shared-prefix",
+   "prompt_tokens": 36,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 3,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 3,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 4,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 4,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 5,
+   "pass": "cold",
+   "prompt_tokens": 16,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 5,
+   "pass": "shared-prefix",
+   "prompt_tokens": 33,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 6,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 6,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 7,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 7,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 8,
+   "pass": "cold",
+   "prompt_tokens": 21,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 8,
+   "pass": "shared-prefix",
+   "prompt_tokens": 38,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 9,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 9,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 10,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 10,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 11,
+   "pass": "cold",
+   "prompt_tokens": 16,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 11,
+   "pass": "shared-prefix",
+   "prompt_tokens": 33,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 12,
+   "pass": "cold",
+   "prompt_tokens": 12,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 12,
+   "pass": "shared-prefix",
+   "prompt_tokens": 29,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 13,
+   "pass": "cold",
+   "prompt_tokens": 12,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 13,
+   "pass": "shared-prefix",
+   "prompt_tokens": 29,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 14,
+   "pass": "cold",
+   "prompt_tokens": 20,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 14,
+   "pass": "shared-prefix",
+   "prompt_tokens": 37,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 15,
+   "pass": "cold",
+   "prompt_tokens": 12,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 15,
+   "pass": "shared-prefix",
+   "prompt_tokens": 29,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 16,
+   "pass": "cold",
+   "prompt_tokens": 12,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 16,
+   "pass": "shared-prefix",
+   "prompt_tokens": 29,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 17,
+   "pass": "cold",
+   "prompt_tokens": 15,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 17,
+   "pass": "shared-prefix",
+   "prompt_tokens": 32,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 18,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 18,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  },
+  {
+   "prompt": 19,
+   "pass": "cold",
+   "prompt_tokens": 13,
+   "cached_prompt_tokens": 0,
+   "identical": true
+  },
+  {
+   "prompt": 19,
+   "pass": "shared-prefix",
+   "prompt_tokens": 30,
+   "cached_prompt_tokens": 16,
+   "identical": true
+  }
+ ]
+}
