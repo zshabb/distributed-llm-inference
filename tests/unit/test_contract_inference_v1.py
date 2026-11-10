@@ -37,7 +37,7 @@ def test_generation_endpoints_declare_contract(spec: dict[str, Any], path: str) 
         for p in op["parameters"]
     }
     assert headers == {"X-Request-Priority", "X-Deadline-Ms", "X-Session-Id", "X-Tenant-Id"}
-    assert {"200", "400", "429", "503"} <= op["responses"].keys()
+    assert {"200", "400", "401", "404", "413", "429", "503", "504"} <= op["responses"].keys()
 
 
 def test_extension_headers_are_optional(spec: dict[str, Any]) -> None:
