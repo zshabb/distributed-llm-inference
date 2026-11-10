@@ -75,9 +75,11 @@ implementations, no EOS stopping, pinned checkpoints.
 Evidence: [`2026-11-10-CPU-LAPTOP-m1-greedy-parity-float32/`](benchmarks/results/2026-11-10-CPU-LAPTOP-m1-greedy-parity-float32/)
 (see its `PROVENANCE.md`) and [`2026-11-10-GPU-A16x1-vultr-m1-greedy-parity-bfloat16/`](benchmarks/results/2026-11-10-GPU-A16x1-vultr-m1-greedy-parity-bfloat16/).
 
-What this shows: the native model, RoPE, GQA, tied heads, loader, and KV-cached decoding reproduce the reference
-exactly in fp32 and in bf16 on a real GPU. What it does **not** show: anything about speed, batching, or serving
-(not built yet). The wall-clock fields in the records are incidental, from sequential and unbatched runs.
+What this shows: for **these two checkpoints, these 100 prompts, greedy decoding of 128 tokens, fp32 on CPU and bf16
+on one A16 GPU**, the native model, RoPE, GQA, tied heads, loader, and KV-cached decoding produced exactly the reference's
+tokens. It is evidence for the tested configurations, **not a proof of universal numerical equivalence**: other
+models, longer contexts (> ~181 positions here), sampling, batching, or other hardware are not covered by it. It says
+nothing about speed. The wall-clock fields in the records are incidental, from sequential and unbatched runs.
 
 ### GPU host environment `[GPU:A16x1@vultr]`
 

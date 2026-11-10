@@ -11,3 +11,5 @@
 | 7 | `sync.sh` prints "cannot delete non-empty directory: benchmarks" in HEAD mode | Cosmetic: rsync declines to delete the remote `benchmarks/` because its excluded `results/` subtree is protected | Accepted |
 | 8 | `setup_docker.sh` install path (Docker absent) has never run: the Vultr image shipped Docker + toolkit | Rebuild on a different image could hit an unexercised path | Open; exercise on next rebuild |
 | 9 | Parity covers prompts ≤ 53 tokens + 128 generated (≤ 181 positions) | Long-context behavior unverified on real weights | Extend in M3 when chunked prefill lands |
+| 10 | Complete GPU server recreation has never been performed | Recovery time and the full procedure are unverified; only the user-level bootstrap (25 s) and validation are measured | Open; perform and time on the next approved rebuild (operations.md §4) |
+| 11 | Process deviation: M0–M1 were committed directly to `main` instead of a feature branch with a `--no-ff` merge | Review record is the commit history itself rather than a merge commit | Branch workflow applies from M2 |

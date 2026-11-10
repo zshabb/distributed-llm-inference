@@ -23,6 +23,9 @@ runbooks are added as those components land (milestones M4, M8, M9).
 - The host receives source files only (`git ls-files`), plus a `REVISION` file naming the exact commit and dirty state.
 - Services started on the host bind to `127.0.0.1`. Use `ssh -L <port>:127.0.0.1:<port>` for access. Docker publishes
   ports on `127.0.0.1` by default (`/etc/docker/daemon.json` `"ip"`), and the Docker API is unix-socket only.
+  These are **defense-in-depth layers, not the network security boundary**: a container started with an explicit
+  `-p 0.0.0.0:…` still binds publicly, and `--network host` bypasses the default entirely. The primary controls remain the
+  owner-managed Vultr cloud firewall and explicit, authenticated service configuration.
 - SSH daemon settings, host firewall, and the Vultr cloud firewall are owner-managed and never changed by these scripts.
   `inspect_host.sh` reads them for the record.
 
@@ -61,11 +64,19 @@ The host is disposable: everything needed to recreate it is in this repository.
 4. If container workloads are needed: `scripts/gpu/remote.sh bash scripts/gpu/setup_docker.sh`
 5. `scripts/gpu/remote.sh bash scripts/gpu/validate_host.sh`, then compare `env.json` with the previous validation.
 
-Measured on this host (2026-11-10): `bootstrap_host.sh` from nothing to a working cu130 environment took **25 s**
-(fast provider network); validation takes 11–15 s. A full rebuild is therefore dominated by the owner's provisioning
-steps and model downloads, not by our setup. Note: the Docker/NVIDIA stack came preinstalled with this Vultr image. On an
-image without it, `setup_docker.sh` installs it from the official repositories (that install path has not been
-exercised yet).
+**Verified vs untested (as of 2026-11-10):**
+
+| Step | Status | Measured |
+|---|---|---|
+| `bootstrap_host.sh` on the *existing* host (no uv/venv yet, warm provider network) | **Verified** | 25 s |
+| `validate_host.sh` | **Verified** | 11–15 s |
+| `setup_docker.sh` merge path (Docker + toolkit preinstalled) | **Verified**, idempotent rerun | 3 s |
+| `setup_docker.sh` fresh-install path (no Docker on the image) | **Untested** | — |
+| Full recreation (owner provisions a new instance → validated environment) | **Untested** | — |
+| Parity model re-download on the host (~1.3 GB) | Observed during the bf16 run, not timed separately | — |
+
+No end-to-end rebuild time is claimed until a complete recreation has been performed and timed. The 25 s figure covers
+only our user-level bootstrap on a host whose image already had the NVIDIA driver, Docker, and the container toolkit.
 
 **Data-loss risk on destroy:** only uncollected results and caches (uv cache, HF model cache, Docker images).
 `remote.sh` pulls `benchmarks/results/` after every command, so measurements are not lost. Host-security inspection
