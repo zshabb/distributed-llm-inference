@@ -8,8 +8,8 @@ runbooks are added as those components land (milestones M4, M8, M9).
 | Property | Value |
 |---|---|
 | Role | Single-GPU (tier T2) execution and measurement over SSH. Never holds source of truth, Git credentials, or secrets |
-| Hardware | Vultr cloud GPU, 1× NVIDIA A16 (one GA107 die, ~15 GiB), 6 vCPU, 60 GB RAM, 350 GB NVMe |
-| Software baseline | Ubuntu 22.04.5, NVIDIA driver 580.95.05 (CUDA 13.0 capability). Measured details: `benchmarks/results/*-env-validation/` |
+| Hardware (verified 2026-11-10) | Vultr cloud GPU: 1× NVIDIA A16 (GA107, compute capability 8.6, 10 SMs, 15,356 MiB / 14.61 GiB usable, ECC on, **PCI pass-through**, not vGPU, so no license throttling), 6 vCPU Xeon (Cascade Lake, Hyper-V guest), 58 GiB RAM, 328 GB disk |
+| Software baseline (verified) | Ubuntu 22.04.5, kernel 5.15.0-191, driver 580.95.05 (CUDA 13.0), gcc present (Triton JIT works), CUDA toolkit 13.4 under `/usr/local/cuda` (unused: wheels bundle their runtime). Preinstalled by the image: Docker 29.8.1, NVIDIA Container Toolkit 1.20.0 with the `nvidia` runtime, DCGM host engine on 127.0.0.1:5555. Evidence: `benchmarks/results/2026-11-10-GPU-A16x1-vultr-env-validation/` |
 | Python env | `uv` 0.13.5 (checksum-verified) → Python 3.12 → `uv sync --frozen --extra cu130` (torch 2.14.1+cu130 from `uv.lock`) |
 | Evidence label | `[GPU:A16x1@vultr]`. Single-GPU only: never multi-GPU or multi-node evidence (ENGINEERING_STANDARDS §3) |
 
@@ -39,9 +39,10 @@ SSH_AUTH_SOCK=/run/user/$(id -u)/openssh_agent ssh-add -t 8h ~/.ssh/vultr_gpu
 | Task | Command (from the repo root in WSL2) | Notes |
 |---|---|---|
 | Push code | `scripts/gpu/sync.sh` | Mirrors the working tree; keeps the remote `.venv` and results |
+| Push code for evidence runs | `SYNC_FROM=head scripts/gpu/sync.sh` | Exactly the committed HEAD, so results map to a commit (no `-dirty`) |
 | Read-only inspection | `scripts/gpu/remote.sh bash scripts/gpu/inspect_host.sh` | No changes on the host |
 | User-level bootstrap | `scripts/gpu/remote.sh bash scripts/gpu/bootstrap_host.sh` | Idempotent; uv + Python + locked cu130 env |
-| Docker + NVIDIA toolkit | `scripts/gpu/remote.sh bash scripts/gpu/setup_docker.sh` | **System-level**, owner-approved 2026-11-10. Idempotent, never replaces existing installs |
+| Docker + NVIDIA toolkit | `scripts/gpu/remote.sh bash scripts/gpu/setup_docker.sh` | **System-level**, owner-approved 2026-11-10. Idempotent, never replaces existing installs. On this host it only merged `"ip": "127.0.0.1"` into the existing `daemon.json` (backup `daemon.json.bak.<UTC>`) and restarted Docker once; reruns report "already compliant" |
 | Validate environment | `scripts/gpu/remote.sh bash scripts/gpu/validate_host.sh` | Bounded. Writes and pulls back `benchmarks/results/<date>-GPU-A16x1-vultr-env-validation/` |
 | Any bounded command | `GPU_TIMEOUT=600 scripts/gpu/remote.sh uv run --frozen pytest -m gpu` | Prints start/end/duration/estimated cost |
 
@@ -60,11 +61,15 @@ The host is disposable: everything needed to recreate it is in this repository.
 4. If container workloads are needed: `scripts/gpu/remote.sh bash scripts/gpu/setup_docker.sh`
 5. `scripts/gpu/remote.sh bash scripts/gpu/validate_host.sh`, then compare `env.json` with the previous validation.
 
-Expected effort: dominated by downloads (PyTorch CUDA wheels ≈ several GB; model weights per milestone). It will be
-measured on the first real rebuild instead of estimated here.
+Measured on this host (2026-11-10): `bootstrap_host.sh` from nothing to a working cu130 environment took **25 s**
+(fast provider network); validation takes 11–15 s. A full rebuild is therefore dominated by the owner's provisioning
+steps and model downloads, not by our setup. Note: the Docker/NVIDIA stack came preinstalled with this Vultr image. On an
+image without it, `setup_docker.sh` installs it from the official repositories (that install path has not been
+exercised yet).
 
 **Data-loss risk on destroy:** only uncollected results and caches (uv cache, HF model cache, Docker images).
-`remote.sh` pulls `benchmarks/results/` after every command, so measurements are not lost.
+`remote.sh` pulls `benchmarks/results/` after every command, so measurements are not lost. Host-security inspection
+output (`inspect.txt`) is kept locally but ignored by Git, so it never appears in a public repository.
 
 ### Snapshots (optional, not used)
 Vultr charges $0.05/GB-month of compressed snapshot size. A snapshot would mainly save re-downloading wheels, weights, and
