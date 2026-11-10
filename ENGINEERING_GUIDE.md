@@ -1,7 +1,8 @@
 # Engineering Guide
 
 How the system works, for an engineer who needs to maintain or extend it.
-**Scope of this revision: milestones M0–M1** (model, loader, single-sequence generation, tooling).
+**Scope of this revision: milestones M0–M2** (model, loader, single-sequence generation, paged KV memory with
+prefix caching, tooling).
 Sections for the scheduler, paged KV cache, API, kernels, tensor parallelism, and router are added as those land.
 Nothing described as *planned* exists yet (see `docs/implementation-plan.md`).
 
@@ -25,6 +26,25 @@ token ids ──► greedy_generate (dli/generate.py)
   to the top-left corner. This path is not used by greedy decoding today, but is tested
   (`test_chunked_prefill_into_nonempty_cache_matches_single_pass`) because chunked prefill (M3) will depend on it.
 
+## 1a. Paged KV flow (M2)
+
+```
+paged_greedy_generate(model, BlockManager, PagedKVStore, seq_id, prompt)
+  BlockManager.allocate(seq, prompt)        → block table; leading full blocks reused from the prefix cache
+  PagedSequence.prefill(prompt)             → forward only prompt[num_cached_tokens:]
+     model(..., PagedSequenceView)           write: K/V rows → store slots (slot_mapping)
+                                             read:  gather the sequence's pages in position order
+     view.advance(n) → mark_computed         completed full blocks become shareable
+  loop: BlockManager.append_slots(seq,[t])  → CopyOps (copy-on-write if the last block is shared)
+        PagedKVStore.copy_blocks(ops); forward 1 token through the view
+  BlockManager.free(seq)                    → cached blocks stay CACHED-IDLE (revivable), others FREE
+```
+
+The block manager owns *metadata* (where KV lives, who shares it, what is cached). The store owns *bytes*. The model sees
+only the `KVCacheView` protocol (`length`, `write`, `advance`), so contiguous and paged caches are interchangeable and
+the attention math did not change. Design and invariants: `docs/algorithms/paged-kv-cache.md`. Eviction policies:
+`docs/algorithms/prefix-cache-eviction.md`. Decisions: ADR-0003.
+
 ## 2. Components
 
 | Component | File | Responsibility | Key invariants |
@@ -36,7 +56,12 @@ token ids ──► greedy_generate (dli/generate.py)
 | Loader | `src/dli/model/loader.py` | safetensors → meta-built model via `assign=True` | No pickle; exact name/shape match; tied-head consistency |
 | Hub | `src/dli/model/hub.py` | Download at pinned commit hashes | Only ungated Apache-2.0 models; `*.bin` never downloaded |
 | Generation | `src/dli/generate.py` | Greedy loop, cached or recompute | Lowest-index argmax tie-break, same as the reference |
-| Env manifest | `src/dli/envinfo.py` | Hardware/software manifest per result | Never raises on missing tools |
+| Env manifest | `src/dli/envinfo.py` | Hardware/software manifest per result | Never raises on missing tools; revision captured at run start; untracked files count as dirty |
+| Block hashing | `src/dli/kv/hashing.py` | SHA-256 chain identity of full blocks | Equal hash ⇒ equal prefix (same namespace) |
+| Block manager | `src/dli/kv/block_manager.py` | Allocation, ref counts, COW, prefix index, eviction driving | `check_invariants()`; failures raise before mutating; thread-confined |
+| Eviction policies | `src/dli/kv/eviction.py` | LRU and cost-aware GDSF over leaf candidates | Only unused leaves are candidates |
+| Paged store | `src/dli/kv/paged_store.py` | KV pool tensors, slot scatter, page gather, COW copies | Layout `[layers, blocks, B, kv_heads, head_dim]` |
+| Paged generation | `src/dli/generate.py` (`PagedSequence`, `paged_greedy_generate`) | One sequence over paged KV | Equal to the contiguous path |
 
 ## 3. Data structures and memory
 
@@ -89,6 +114,9 @@ for CPU and CUDA 13.0 builds in one lockfile, matching the A16 host driver).
 | Cached output ≠ recompute | Cache `length` advanced early, or wrong mask branch | `test_kv_cache_path_equals_recompute_path`; check `past` in `Attention.forward` |
 | `CheckpointError: missing tensors` | Architecture flag not mapped (e.g. biases) | Compare `model.state_dict().keys()` with `safetensors` keys |
 | GPU numbers look throttled | Unlicensed vGPU or another tenant's load | `env.json` → `gpu.details["License Status"]`; `nvidia-smi -q` |
+| Paged output ≠ contiguous | Shared block written (missing COW), hit on uncomputed block, slot mapping off-by-one | `check_invariants()`; run the stateful test with `HYPOTHESIS_PROFILE=focused`; `scripts/dev/mutation_check_block_manager.sh` confirms the tests still catch these faults |
+| `NoFreeBlocksError` with apparently free memory | Watermark reserve at admission, or idle blocks pinned by in-use children | `stats()`; `check_invariants()` asserts idle blocks are evictable (liveness) |
+| Blocks leak over time | A sequence never freed (scheduler bug) | `stats().used_blocks` vs live sequences; stress soak pattern in `tests/stress/` |
 
 ## 8. Scaling, failure handling, limitations
 

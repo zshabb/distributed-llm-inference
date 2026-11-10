@@ -15,8 +15,15 @@ All notable changes are documented here, following [Keep a Changelog](https://ke
 - Parity suites: 100/100 token-identical vs `transformers` for two models in fp32 `[CPU-LAPTOP]` and bf16 `[GPU:A16x1@vultr]`.
 - GPU host validation evidence and `SYNC_FROM=head` evidence-sync mode.
 
+- Paged KV cache (M2): `BlockManager` (ref counting, copy-on-write, watermark, atomic failure, thread confinement),
+  SHA-256 hash-chained prefix cache with leaf-first eviction, LRU and cost-aware (GDSF) policies, `PagedKVStore`,
+  `PagedSequence` / `paged_greedy_generate`, the `KVCacheView` protocol.
+- Property-based (stateful, shadow-KV) tests, fault-injection script, stress tier (`-m stress`), paged parity spot check,
+  prefix-cache eviction trace simulation `[SIM]`.
+
 ### Fixed
 - `envinfo` recorded the revision at write time instead of run start (provenance).
+- `envinfo` reported a clean revision when untracked files were present.
 - `setup_docker.sh` now merges the localhost bind into an existing `daemon.json` instead of skipping it.
 
 ### Security

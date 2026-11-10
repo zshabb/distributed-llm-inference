@@ -3,9 +3,10 @@
 **An LLM inference engine built from first principles (paged KV cache, continuous batching, custom kernels, tensor
 parallelism) plus a workload-aware router, measured against established baselines.**
 
-> **Status: early development (milestones M0–M1).** What exists today is a verified model core: a native
-> Llama-family implementation that reproduces Hugging Face `transformers` token-for-token. The serving features listed
-> under *Planned capabilities* do **not** exist yet. This README only claims what the tests and labeled result files show.
+> **Status: early development (milestones M0–M2).** What exists today is a verified model core (a native
+> Llama-family implementation that reproduces Hugging Face `transformers` token-for-token on the tested configurations)
+> and a paged KV-cache memory manager with prefix caching. There is no batching scheduler or server yet: the serving
+> features listed under *Planned capabilities* do **not** exist. This README only claims what the tests and labeled result files show.
 
 ## The engineering problem
 
@@ -21,11 +22,13 @@ that address those problems itself, so each one can be studied, modified, and me
 | Strict, pickle-free checkpoint loading at pinned revisions | `src/dli/model/loader.py`, `hub.py` | Rejection-path tests |
 | Greedy generation with KV cache | `src/dli/generate.py` | Cached == recompute; 100/100 token-identical on two real models, fp32 CPU and bf16 GPU (see *Verified results*) |
 | Inference API contract (OpenAPI 3.1) | `contracts/inference/v1/` | Schema-validated in tests; **not served yet** (M4) |
+| Paged KV cache: block tables, ref counting, copy-on-write, watermark, atomic failure | `src/dli/kv/block_manager.py` | Model-based property tests + 4/4 injected faults caught; 10⁶-op and 10k-request soaks with 0 violations / 0 leaks `[CPU-LAPTOP]` |
+| Prefix caching: SHA-256 hash-chained blocks, leaf-first eviction, LRU / cost-aware (GDSF) policies | `src/dli/kv/` | Paged decoding == contiguous decoding (tiny models; SmolLM2 40/40 runs); policy study `[SIM]` (see *Verified results*) |
 | Reproducible GPU host tooling | `scripts/gpu/`, `docs/operations.md` | Environment validation results in `benchmarks/results/` |
 
 ## Planned capabilities (not implemented)
 
-Paged KV cache with prefix sharing and cost-aware eviction (M2) · continuous batching, chunked prefill, preemption (M3)
+Continuous batching over the paged KV cache, chunked prefill, preemption (M3)
 · OpenAI-compatible server with SSE, admission control, backpressure (M4) · benchmark harness vs HF and vLLM (M5) ·
 Triton paged-attention kernel (M6) · tensor parallelism (M7) · Go prefix/KV-aware router (M8) · Kubernetes deployment
 (M9). See `docs/implementation-plan.md`.
@@ -34,7 +37,7 @@ Triton paged-attention kernel (M6) · tensor parallelism (M7) · Go prefix/KV-aw
 
 ```
  clients ──► Router (Go, M8) ──► Engine workers (Python/PyTorch)
-                                   api (M4) → scheduler (M3) → kv (M2) → runner (M3) → model (M1 ✔) → kernels (M6)
+                                   api (M4) → scheduler (M3) → kv (M2 ✔) → runner (M3) → model (M1 ✔) → kernels (M6)
 ```
 Details: `docs/architecture.md`, decisions: `docs/design-decisions/`, internals: `ENGINEERING_GUIDE.md`.
 
@@ -80,6 +83,17 @@ on one A16 GPU**, the native model, RoPE, GQA, tied heads, loader, and KV-cached
 tokens. It is evidence for the tested configurations, **not a proof of universal numerical equivalence**: other
 models, longer contexts (> ~181 positions here), sampling, batching, or other hardware are not covered by it. It says
 nothing about speed. The wall-clock fields in the records are incidental, from sequential and unbatched runs.
+
+### M2: paged KV cache (correctness and policy study)
+
+| Claim | Label | Evidence |
+|---|---|---|
+| Paged decoding produced the same tokens as the contiguous path in 40/40 runs (SmolLM2-135M, 20 prompts × {cold, shared-prefix} × 32 tokens, block 16). Every shared-prefix run served its prefix from cache | `[CPU-LAPTOP]` | [`2026-11-10-CPU-LAPTOP-m2-paged-parity/`](benchmarks/results/2026-11-10-CPU-LAPTOP-m2-paged-parity/) |
+| 10⁶ random block-manager operations per policy: 0 invariant violations, 0 leaked blocks; 10,000-request lifecycle soak: 0 leaks | `[CPU-LAPTOP]` | `tests/stress/` (`-m stress`) |
+| Cost-aware (GDSF) eviction beats LRU on shared-system-prompt traces (+2.5 to +4.1 hit-rate points under pressure, 5/5 seeds) but **loses on multi-turn traces** (down to −10.9 points). LRU remains the default | `[SIM]` (hit rate only, no latency) | [`2026-11-10-SIM-m2-prefix-eviction/`](benchmarks/results/2026-11-10-SIM-m2-prefix-eviction/), [`docs/algorithms/prefix-cache-eviction.md`](docs/algorithms/prefix-cache-eviction.md) |
+
+Not yet measured: throughput, TTFT, or memory capacity gains from paging. They need the batched scheduler (M3) and the
+benchmark harness (M5). The M2 paged read path gathers pages and is slower than the contiguous cache until the M6 kernel.
 
 ### GPU host environment `[GPU:A16x1@vultr]`
 
