@@ -5,8 +5,8 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 
 | M | Milestone | Tiers | Status |
 |---|---|---|---|
-| M0 | Bootstrap: tooling, CI, ADRs, contract v1, GPU host scripts, environment validation | T0 · T2 smoke | in progress |
-| M1 | Native Llama-family model + HF weight loading; greedy parity with `transformers` | T0 (fp32 exact) · T2 (bf16 tolerance) | in progress |
+| M0 | Bootstrap: tooling, CI, ADRs, contract v1, GPU host scripts, environment validation | T0 · T2 smoke | **done** (CI not yet executed) |
+| M1 | Native Llama-family model + HF weight loading; greedy parity with `transformers` | T0 (fp32 exact) · T2 (bf16 tolerance) | **done** |
 | M2 | Paged KV-cache block manager + prefix sharing | T0 | not started |
 | M3 | Continuous batching, chunked prefill, preemption, cancellation | T0 · T2 | not started |
 | M4 | OpenAI API server, SSE, admission control, backpressure, metrics | T0 · T2 | not started |
@@ -23,19 +23,19 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 - [x] `uv.lock` pins CPU and CUDA builds; `ruff`, `mypy --strict`, `pytest` pass locally
 - [x] pre-commit: format, lint, gitleaks, large-file guard
 - [x] ADR-0001 (architecture), ADR-0002 (PyTorch pinning)
-- [ ] OpenAPI contract `contracts/inference/v1` validated by a test
-- [ ] CI workflows (lint, types, tests, security scan). They cannot run until the repository is published
+- [x] OpenAPI contract `contracts/inference/v1` validated by a test
+- [x] CI workflows (lint, types, tests, security scan) written; **not yet executed** (repository unpublished)
 - [x] GPU host scripts (sync, remote run, bootstrap, Docker setup, inspection, validation) + runbook
-- [ ] GPU host validated: CUDA torch tensor check + container GPU access, results committed
+- [x] GPU host validated: CUDA torch tensor check + container GPU access, results committed (`0a8a023`)
 
 ## M1 acceptance (spec AC1, M1 scope)
 
-- [ ] `ModelConfig` parses Llama and Qwen2 configs, rejects unsupported features
-- [ ] Logits match `transformers` on randomly initialized tiny Llama/Qwen2 models (fp32, atol ≤ 1e-4), incl. tied/untied
+- [x] `ModelConfig` parses Llama and Qwen2 configs, rejects unsupported features
+- [x] Logits match `transformers` on randomly initialized tiny Llama/Qwen2 models (fp32, atol ≤ 1e-4), incl. tied/untied
       embeddings and llama3 RoPE scaling. Fast, no downloads
-- [ ] Safetensors loader with strict name/shape checks; pinned model revisions
-- [ ] Greedy generation with a KV cache equals greedy generation without one (recompute) on the same model
-- [ ] **Parity suite:** 100 fixed prompts × 128 greedy tokens, token-identical to `transformers` fp32 on CPU for
-      SmolLM2-135M-Instruct and Qwen2.5-0.5B-Instruct `[CPU-LAPTOP]`
-- [ ] bf16 GPU check on the A16 with the spec's tolerance rule `[GPU:A16x1@vultr]`
-- [ ] ENGINEERING_GUIDE.md, QnA.md (M1 scope), README updated with labeled results
+- [x] Safetensors loader with strict name/shape checks; pinned model revisions
+- [x] Greedy generation with a KV cache equals greedy generation without one (recompute) on the same model
+- [x] **Parity suite:** 100 fixed prompts × 128 greedy tokens, token-identical to `transformers` fp32 on CPU for
+      SmolLM2-135M-Instruct and Qwen2.5-0.5B-Instruct `[CPU-LAPTOP]`: **100/100 and 100/100** (`cb05684`)
+- [x] bf16 GPU check on the A16 with the spec's tolerance rule `[GPU:A16x1@vultr]`: **100/100 and 100/100 identical** (`4848e8a`)
+- [x] ENGINEERING_GUIDE.md, QnA.md (M1 scope, 20 questions; ≥ 30 required by release), README updated with labeled results
