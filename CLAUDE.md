@@ -18,7 +18,13 @@ Portfolio-wide rules: `ENGINEERING_STANDARDS.md` in the local planning workspace
 | GPU host | `SYNC_FROM=head scripts/gpu/sync.sh && scripts/gpu/remote.sh <cmd>` | see `docs/operations.md` |
 
 ## Rules specific to this repo
-- Work on a `feat/*` branch per milestone; merge to `main` with `--no-ff` and a PR-template message.
+- Git history is the engineering journal reviewers will read: commit each validated, independently understandable
+  improvement separately with a Conventional Commit message explaining what and why (e.g.
+  `fix(memory): prevent block leaks during request cancellation`). No bundling unrelated work, no trivial splitting, no
+  manufactured activity. Local commits need no approval.
+- Work on a `feat/*` branch per milestone; merge to `main` with `--no-ff` and a PR-template message. Not yet published:
+  creating the GitHub repo and the first push need explicit owner approval. After that, validated pushes, PRs, and
+  `--no-ff` merges are authorized. Never force-push or rewrite published history.
 - Do not rerun the M1 parity suites unless `src/dli/model/`, `src/dli/generate.py`, `uv.lock`, or the parity harness change
   in a way that affects numerics. Record the decision in `docs/progress.md`.
 - Evidence directories: `benchmarks/results/<UTC date>-<label>-<name>/` with `env.json` whose revision is captured at
