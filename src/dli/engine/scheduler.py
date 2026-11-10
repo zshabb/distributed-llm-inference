@@ -22,9 +22,10 @@ Thread confinement: like the block manager, the scheduler belongs to the single 
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
-from dli.engine.request import FinishReason, Request, RequestStatus
+from dli.engine.request import FinishReason, Priority, Request, RequestStatus
 from dli.kv.block_manager import BlockManager, CopyOp, NoFreeBlocksError
 
 
@@ -36,15 +37,25 @@ class SchedulerConfig:
         max_num_seqs: Maximum requests holding KV and being scheduled concurrently.
         max_num_batched_tokens: Token budget per step (prefill chunks + decode tokens).
         namespace: Prefix-cache namespace (model/weights identity; see ADR-0003).
+        tenant_weights: Fair-share weight per tenant (default 1.0). A tenant with weight 2 receives
+            about twice the tokens of a weight-1 tenant while both have work queued.
+        aging_steps: A request that has waited this many steps is treated as INTERACTIVE, which
+            bounds how long BATCH work can starve behind a continuous interactive stream.
     """
 
     max_num_seqs: int = 64
     max_num_batched_tokens: int = 512
     namespace: bytes = b""
+    tenant_weights: Mapping[str, float] = field(default_factory=dict)
+    aging_steps: int = 200
 
     def __post_init__(self) -> None:
         if self.max_num_seqs < 1 or self.max_num_batched_tokens < 1:
             raise ValueError("max_num_seqs and max_num_batched_tokens must be >= 1")
+        if self.aging_steps < 1:
+            raise ValueError("aging_steps must be >= 1")
+        if any(w <= 0 for w in self.tenant_weights.values()):
+            raise ValueError("tenant weights must be positive")
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,6 +92,10 @@ class Scheduler:
         self.waiting: deque[Request] = deque()
         self.running: list[Request] = []
         self._by_id: dict[str, Request] = {}
+        self._step = 0
+        # Weighted fair queuing: virtual time per tenant = tokens served / weight. Admission picks
+        # the waiting request whose tenant is furthest behind.
+        self._vtime: dict[str, float] = {}
 
     # ------------------------------------------------------------------ lifecycle
 
@@ -99,6 +114,8 @@ class Scheduler:
             req.finish_reason = FinishReason.CAPACITY
             return False
         self._by_id[req.request_id] = req
+        req.arrival_step = self._step
+        self._activate_tenant(req.tenant)
         self.waiting.append(req)
         return True
 
@@ -136,6 +153,9 @@ class Scheduler:
         budget = self.config.max_num_batched_tokens
 
         scheduled: set[str] = set()
+        # Serve running requests in (effective priority, arrival) order. Preemption victims are
+        # taken from the END of this order, so the front request always progresses (liveness).
+        self.running.sort(key=lambda r: (self._effective_priority(r), r.arrival_seq))
 
         for req in list(self.running):
             if budget == 0:
@@ -164,6 +184,7 @@ class Scheduler:
             out.copy_ops.extend(ops)
             out.chunks.append(self._chunk(req, n))
             scheduled.add(req.request_id)
+            self._charge(req, n)
             budget -= n
 
         # Never admit in a step that had to preempt: readmitting what was just evicted (or
@@ -174,19 +195,51 @@ class Scheduler:
             and budget > 0
             and len(self.running) < self.config.max_num_seqs
         ):
-            req = self.waiting[0]
+            req = min(self.waiting, key=self._admission_key)
             tokens = req.all_token_ids
             if not self.bm.can_allocate(tokens, self.config.namespace):
-                break  # head of line waits for memory; admission order is preserved
+                # The most deserving request waits for memory. Admitting smaller requests past it
+                # would starve large prompts indefinitely.
+                break
             alloc = self.bm.allocate(req.request_id, tokens, namespace=self.config.namespace)
-            self.waiting.popleft()
+            self.waiting.remove(req)
             req.status = RequestStatus.RUNNING
             req.num_computed_tokens = alloc.num_cached_tokens
             self.running.append(req)
             n = min(len(tokens) - alloc.num_cached_tokens, budget)
             out.chunks.append(self._chunk(req, n))
+            self._charge(req, n)
             budget -= n
+        self._step += 1
         return out
+
+    # ------------------------------------------------------------------ fairness
+
+    def _effective_priority(self, req: Request) -> int:
+        """Priority class, promoted to INTERACTIVE after ``aging_steps`` (bounds starvation)."""
+        if self._step - req.arrival_step >= self.config.aging_steps:
+            return int(Priority.INTERACTIVE)
+        return int(req.priority)
+
+    def _admission_key(self, req: Request) -> tuple[int, int, float, int]:
+        # Within a priority class: preempted requests first (they already held a slot), then the
+        # tenant with the smallest virtual time, then arrival order.
+        resumed = 0 if req.num_preemptions else 1
+        return (self._effective_priority(req), resumed, self._vtime[req.tenant], req.arrival_seq)
+
+    def _charge(self, req: Request, tokens: int) -> None:
+        self._vtime[req.tenant] += tokens / self.config.tenant_weights.get(req.tenant, 1.0)
+
+    def _activate_tenant(self, tenant: str) -> None:
+        """Start a newly active tenant at the current virtual clock.
+
+        A tenant that was idle must not "bank" credit from its idle period and then monopolize the
+        engine. The clock is the smallest virtual time among tenants with work in the system.
+        """
+        active = {r.tenant for r in self.waiting} | {r.tenant for r in self.running}
+        active.discard(tenant)
+        clock = min((self._vtime[t] for t in active), default=0.0)
+        self._vtime[tenant] = max(self._vtime.get(tenant, 0.0), clock)
 
     def _pick_victim(self, exclude: set[str]) -> Request | None:
         """Newest-admitted running request outside ``exclude`` (LIFO preemption).
