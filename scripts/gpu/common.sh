@@ -17,7 +17,7 @@ if [[ -f "$GPU_SCRIPT_DIR/host.env" ]]; then
   source "$GPU_SCRIPT_DIR/host.env"
 fi
 : "${GPU_HOST:?set GPU_HOST (e.g. root@203.0.113.10) in scripts/gpu/host.env}"
-: "${GPU_SSH_PUBKEY:=$HOME/.ssh/vultr_gpu.pub}"
+: "${GPU_SSH_PUBKEY:?set GPU_SSH_PUBKEY (public key matching the agent identity) in scripts/gpu/host.env}"
 : "${GPU_REMOTE_DIR:=work/distributed-llm-inference}"   # relative to the remote $HOME
 : "${SSH_AUTH_SOCK:=/run/user/$(id -u)/openssh_agent}"
 export SSH_AUTH_SOCK
@@ -38,7 +38,7 @@ gpu_preflight() {
   if ! ssh-add -l >/dev/null 2>&1; then
     echo "error: no identities in ssh-agent at $SSH_AUTH_SOCK." >&2
     echo "Load the key yourself (the passphrase is never handled by these scripts):" >&2
-    echo "  SSH_AUTH_SOCK=$SSH_AUTH_SOCK ssh-add -t 8h ~/.ssh/vultr_gpu" >&2
+    echo "  SSH_AUTH_SOCK=$SSH_AUTH_SOCK ssh-add -t 8h ${GPU_SSH_PUBKEY%.pub}" >&2
     exit 2
   fi
 }

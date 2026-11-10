@@ -34,7 +34,7 @@ runbooks are added as those components land (milestones M4, M8, M9).
 ```bash
 cp scripts/gpu/host.env.example scripts/gpu/host.env      # untracked; set GPU_HOST=root@<ip>
 # Load the key into the local agent yourself (scripts never see the passphrase):
-SSH_AUTH_SOCK=/run/user/$(id -u)/openssh_agent ssh-add -t 8h ~/.ssh/vultr_gpu
+SSH_AUTH_SOCK=/run/user/$(id -u)/openssh_agent ssh-add -t 8h ~/.ssh/<your_gpu_host_key>
 ```
 
 ## 3. Procedures
