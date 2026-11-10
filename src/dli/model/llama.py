@@ -12,12 +12,14 @@ sequences into one such vector, so the per-layer math will not change, only the 
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import torch
 import torch.nn.functional as F
 from torch import nn
 
 from dli.model.config import ModelConfig
-from dli.model.kv_cache import KVCacheView
+from dli.model.kv_cache import BatchedKV, KVCacheView, Segment
 from dli.model.rope import apply_rope, inverse_frequencies, rope_cos_sin
 
 
@@ -60,9 +62,11 @@ class Attention(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        kv_cache: KVCacheView | None,
+        segments: Sequence[Segment],
     ) -> torch.Tensor:
         n = x.shape[0]
+        # Projections and RoPE run once over the whole flattened batch (one large matmul instead of
+        # one per sequence: this is where batching pays off). Only attention is per sequence.
         # [n, heads*dim] -> [heads, n, dim]: heads lead so SDPA treats them as the batch dimension.
         q = self.q_proj(x).view(n, self.num_heads, self.head_dim).transpose(0, 1)
         k = self.k_proj(x).view(n, self.num_kv_heads, self.head_dim).transpose(0, 1)
@@ -70,6 +74,32 @@ class Attention(nn.Module):
         q = apply_rope(q, cos, sin)
         k = apply_rope(k, cos, sin)
 
+        if len(segments) == 1:
+            out = self._attend(q, k, v, segments[0].cache)
+        else:
+            # Per-segment loop: correct reference for varlen attention. The M6 kernel processes all
+            # segments in one launch from block tables instead.
+            out = torch.cat(
+                [
+                    self._attend(
+                        q[:, s.offset : s.offset + s.length],
+                        k[:, s.offset : s.offset + s.length],
+                        v[:, s.offset : s.offset + s.length],
+                        s.cache,
+                    )
+                    for s in segments
+                ],
+                dim=1,
+            )
+        merged = out.transpose(0, 1).reshape(n, self.num_heads * self.head_dim)
+        projected: torch.Tensor = self.o_proj(merged)
+        return projected
+
+    def _attend(
+        self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, kv_cache: KVCacheView | None
+    ) -> torch.Tensor:
+        """Causal attention for ONE sequence's new tokens against its cached prefix."""
+        n = q.shape[1]
         if kv_cache is not None:
             # Keys are cached AFTER rotation: positions are absolute, so cached entries
             # never change.
@@ -92,13 +122,10 @@ class Attention(nn.Module):
             # Chunk appended to a non-empty cache: query i (absolute position past+i)
             # may see keys at positions <= past+i.
             # SDPA's is_causal aligns the mask to the top-left corner, which is wrong here.
-            q_pos = torch.arange(past, past + n, device=x.device)[:, None]
-            k_pos = torch.arange(past + n, device=x.device)[None, :]
+            q_pos = torch.arange(past, past + n, device=q.device)[:, None]
+            k_pos = torch.arange(past + n, device=q.device)[None, :]
             out = F.scaled_dot_product_attention(q, k, v, attn_mask=k_pos <= q_pos)
-
-        merged = out.transpose(0, 1).reshape(n, self.num_heads * self.head_dim)
-        projected: torch.Tensor = self.o_proj(merged)
-        return projected
+        return out
 
 
 class MLP(nn.Module):
@@ -130,9 +157,9 @@ class DecoderLayer(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        kv_cache: KVCacheView | None,
+        segments: Sequence[Segment],
     ) -> torch.Tensor:
-        x = x + self.self_attn(self.input_layernorm(x), cos, sin, kv_cache)
+        x = x + self.self_attn(self.input_layernorm(x), cos, sin, segments)
         out: torch.Tensor = x + self.mlp(self.post_attention_layernorm(x))
         return out
 
@@ -174,33 +201,46 @@ class LlamaForCausalLM(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
-        kv_cache: KVCacheView | None = None,
+        kv_cache: KVCacheView | BatchedKV | None = None,
         *,
         last_token_only: bool = False,
+        logits_indices: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Compute logits for a chunk of one sequence.
+        """Compute logits for a chunk of one sequence, or for a batch of sequence chunks.
 
         Args:
-            input_ids: ``[num_tokens]`` token ids.
-            positions: ``[num_tokens]`` absolute positions (must continue the cache if given).
-            kv_cache: Cache holding the sequence prefix; it is written for all layers and advanced
-                by ``num_tokens`` before returning.
+            input_ids: ``[num_tokens]`` token ids (flattened across sequences for a batch).
+            positions: ``[num_tokens]`` absolute positions (each continues its sequence's cache).
+            kv_cache: One sequence's cache, or a :class:`BatchedKV` describing several sequences'
+                segments. Caches are written for all layers and advanced before returning.
             last_token_only: Return logits only for the final token. The LM head is the single
                 largest matmul for small models, so skipping it during prefill matters.
+            logits_indices: Flattened-batch indices whose logits are needed (e.g. the last token of
+                each sequence that will sample). Takes precedence over ``last_token_only``.
 
         Returns:
-            Float logits ``[num_tokens, vocab]`` (or ``[1, vocab]`` with ``last_token_only``).
+            Float logits ``[k, vocab]`` for the selected tokens (all tokens by default).
         """
         if input_ids.dim() != 1 or input_ids.shape != positions.shape:
             raise ValueError("input_ids and positions must be 1-D tensors of equal length")
+        n = input_ids.shape[0]
+        if isinstance(kv_cache, BatchedKV):
+            kv_cache.validate(n)
+            segments: Sequence[Segment] = kv_cache.segments
+        else:
+            segments = (Segment(0, n, kv_cache),)
         h = self.model.embed_tokens(input_ids)
         cos, sin = rope_cos_sin(self.inv_freq, positions, h.dtype)
         for layer in self.model.layers:
-            h = layer(h, cos, sin, kv_cache)
-        if kv_cache is not None:
-            kv_cache.advance(input_ids.shape[0])
+            h = layer(h, cos, sin, segments)
+        if isinstance(kv_cache, BatchedKV):
+            kv_cache.advance()
+        elif kv_cache is not None:
+            kv_cache.advance(n)
         h = self.model.norm(h)
-        if last_token_only:
+        if logits_indices is not None:
+            h = h.index_select(0, logits_indices)
+        elif last_token_only:
             h = h[-1:]
         weight = self.model.embed_tokens.weight if self.lm_head is None else self.lm_head.weight
         return F.linear(h, weight)

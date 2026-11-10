@@ -21,6 +21,12 @@ All notable changes are documented here, following [Keep a Changelog](https://ke
 - Property-based (stateful, shadow-KV) tests, fault-injection script, stress tier (`-m stress`), paged parity spot check,
   prefix-cache eviction trace simulation `[SIM]`.
 
+- Continuous-batching engine (M3): batched attention over `BatchedKV` segments, `LLMEngine` step loop, `ModelRunner`,
+  scheduler with chunked prefill, LIFO recompute preemption, capacity rejection, abort, priority classes with aging, and
+  weighted per-tenant fair queuing; batched sampler with per-request seeded generators (`dli.sampling`).
+- Randomized adversarial scheduler tests, fault-injected fairness/preemption checks, engine overhead benchmark,
+  milestone engine-vs-unbatched parity harness.
+
 ### Fixed
 - `envinfo` recorded the revision at write time instead of run start (provenance).
 - `envinfo` reported a clean revision when untracked files were present.

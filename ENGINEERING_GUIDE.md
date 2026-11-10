@@ -1,8 +1,8 @@
 # Engineering Guide
 
 How the system works, for an engineer who needs to maintain or extend it.
-**Scope of this revision: milestones M0–M2** (model, loader, single-sequence generation, paged KV memory with
-prefix caching, tooling).
+**Scope of this revision: milestones M0–M3** (model, loader, paged KV memory with prefix caching, continuous-batching
+engine with chunked prefill, preemption, fairness, sampling, tooling).
 Sections for the scheduler, paged KV cache, API, kernels, tensor parallelism, and router are added as those land.
 Nothing described as *planned* exists yet (see `docs/implementation-plan.md`).
 
@@ -45,6 +45,27 @@ only the `KVCacheView` protocol (`length`, `write`, `advance`), so contiguous an
 the attention math did not change. Design and invariants: `docs/algorithms/paged-kv-cache.md`. Eviction policies:
 `docs/algorithms/prefix-cache-eviction.md`. Decisions: ADR-0003.
 
+## 1b. Engine step (M3)
+
+```
+LLMEngine.step()
+  Scheduler.schedule()                       budget B tokens, cap S sequences
+    running, sorted (eff. priority, arrival):  next decode token or next prompt chunk
+       reserve KV slot (append_slots) ── no memory? preempt newest unscheduled (LIFO, recompute)
+    if nothing preempted: admit waiting by (eff. priority, resumed-first, tenant vtime, arrival)
+       allocate prompt (prefix reuse) → chunk = min(remaining prompt, remaining budget)
+  ModelRunner.execute()                      apply COW copies; flatten chunks → ONE forward
+    model(ids, positions, BatchedKV(segments), logits_indices=rows that sample)
+       dense layers once over all tokens; attention per segment over its PagedSequenceView
+  sample(logits, params, per-request generators)
+  append token → stop/EOS/length → Scheduler.finish() frees KV
+  StepStats: schedule / forward / postprocess seconds
+```
+
+Invariants: a chunk always starts at the request's `num_computed_tokens` (the block manager's count). The oldest
+running request is never preempted. Every admitted request fits alone (capacity rejection), so the engine always
+makes progress. Policy rationale and complexity: `docs/algorithms/continuous-batching-scheduler.md`.
+
 ## 2. Components
 
 | Component | File | Responsibility | Key invariants |
@@ -62,6 +83,10 @@ the attention math did not change. Design and invariants: `docs/algorithms/paged
 | Eviction policies | `src/dli/kv/eviction.py` | LRU and cost-aware GDSF over leaf candidates | Only unused leaves are candidates |
 | Paged store | `src/dli/kv/paged_store.py` | KV pool tensors, slot scatter, page gather, COW copies | Layout `[layers, blocks, B, kv_heads, head_dim]` |
 | Paged generation | `src/dli/generate.py` (`PagedSequence`, `paged_greedy_generate`) | One sequence over paged KV | Equal to the contiguous path |
+| Batched attention | `src/dli/model/llama.py`, `kv_cache.py` (`BatchedKV`, `Segment`) | Many sequences in one forward pass | Segments tile the batch; each attends only to its own KV |
+| Sampler | `src/dli/sampling.py` | Greedy, temperature, top-k, top-p; per-request generators | One draw per sampled token per request (batch-invariant) |
+| Scheduler | `src/dli/engine/scheduler.py` | Budgeted chunking, LIFO recompute preemption, priority + aging + weighted fair queuing, capacity rejection, abort | Budget/cap never exceeded; chunks continue computed KV; no admission in a preempting step |
+| Runner / engine | `src/dli/engine/runner.py`, `engine.py` | One forward per step; step loop, stop rules, StepStats | Thread-confined single loop |
 
 ## 3. Data structures and memory
 
@@ -117,6 +142,9 @@ for CPU and CUDA 13.0 builds in one lockfile, matching the A16 host driver).
 | Paged output ≠ contiguous | Shared block written (missing COW), hit on uncomputed block, slot mapping off-by-one | `check_invariants()`; run the stateful test with `HYPOTHESIS_PROFILE=focused`; `scripts/dev/mutation_check_block_manager.sh` confirms the tests still catch these faults |
 | `NoFreeBlocksError` with apparently free memory | Watermark reserve at admission, or idle blocks pinned by in-use children | `stats()`; `check_invariants()` asserts idle blocks are evictable (liveness) |
 | Blocks leak over time | A sequence never freed (scheduler bug) | `stats().used_blocks` vs live sequences; stress soak pattern in `tests/stress/` |
+| Batched output ≠ unbatched | Chunk not continuing computed KV, wrong segment offsets, preemption losing progress | Fake history-hash runner (asserts chunk continuity); `test_batched_forward.py`; engine parity harness records the first divergence and the reference logit gap |
+| A request never finishes | Livelock or starvation | `has_unfinished()` loops with a step bound in tests; aging_steps; check that the request is not over capacity |
+| Throughput low despite many requests | Budget/cap too small, memory-bound preemption churn | `StepStats` (tokens per step, preemptions); `engine.bm.stats()` |
 
 ## 8. Scaling, failure handling, limitations
 
