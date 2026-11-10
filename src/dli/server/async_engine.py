@@ -25,7 +25,7 @@ import asyncio
 import contextlib
 import queue
 import threading
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from dataclasses import dataclass
 
 from dli.engine import FinishReason, LLMEngine, Priority, RequestOutput
@@ -155,7 +155,7 @@ class AsyncEngine:
         *,
         priority: Priority = Priority.INTERACTIVE,
         tenant: str = "default",
-    ) -> AsyncIterator[EngineEvent]:
+    ) -> AsyncGenerator[EngineEvent, None]:
         """Stream events for one request. Closing the iterator early aborts the request.
 
         Raises:
