@@ -9,6 +9,7 @@ manager in ``dli.kv`` solves in M2) and cannot be shared between sequences.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol
 
 import torch
@@ -87,3 +88,43 @@ class ContiguousKVCache:
     def advance(self, n: int) -> None:
         """Commit ``n`` new tokens after every layer has written them."""
         self.length += n
+
+
+@dataclass(frozen=True, slots=True)
+class Segment:
+    """A run of tokens from ONE sequence inside a flattened batch.
+
+    Attributes:
+        offset: Index of the segment's first token in the flattened batch.
+        length: Number of tokens in the segment.
+        cache: That sequence's KV view (``None`` = no cache: attend within the segment only).
+    """
+
+    offset: int
+    length: int
+    cache: KVCacheView | None
+
+
+@dataclass(frozen=True, slots=True)
+class BatchedKV:
+    """Many sequences in one forward pass (continuous batching, M3).
+
+    Dense layers run once over all tokens; attention runs per segment against that sequence's own
+    KV. Segments must tile the batch in order without gaps.
+    """
+
+    segments: tuple[Segment, ...]
+
+    def validate(self, num_tokens: int) -> None:
+        expected = 0
+        for seg in self.segments:
+            if seg.offset != expected or seg.length <= 0:
+                raise ValueError("segments must tile the batch contiguously with positive lengths")
+            expected += seg.length
+        if expected != num_tokens:
+            raise ValueError(f"segments cover {expected} tokens, batch has {num_tokens}")
+
+    def advance(self) -> None:
+        for seg in self.segments:
+            if seg.cache is not None:
+                seg.cache.advance(seg.length)
