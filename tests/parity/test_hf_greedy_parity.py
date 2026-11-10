@@ -39,6 +39,9 @@ DTYPE = getattr(torch, os.environ.get("DLI_PARITY_DTYPE", "float32"))
 LABEL = os.environ.get("DLI_EVIDENCE_LABEL", "CPU-LAPTOP")
 BF16_PREFIX = 64
 REPO_ROOT = Path(__file__).resolve().parents[2]
+# Captured once at collection time: the run can last over an hour, and commits made meanwhile
+# must not be attributed to it (see dli.envinfo.current_revision).
+RUN_REVISION = envinfo.current_revision()
 
 
 def _prompt_ids(tokenizer: Any, prompt: dict[str, Any]) -> list[int]:
@@ -118,6 +121,7 @@ def test_greedy_parity_with_transformers(repo_id: str) -> None:
     summary = {
         "model": repo_id,
         "revision": hub.PINNED_REVISIONS[repo_id],
+        "code_revision": RUN_REVISION,
         "evidence_label": LABEL,
         "device": DEVICE,
         "dtype": str(DTYPE),
@@ -135,7 +139,7 @@ def test_greedy_parity_with_transformers(repo_id: str) -> None:
         / f"{datetime.now(UTC):%Y-%m-%d}-{LABEL}-m1-greedy-parity-{str(DTYPE).split('.')[-1]}"
     )
     out_dir.mkdir(parents=True, exist_ok=True)
-    envinfo.main([str(out_dir / "env.json")])
+    envinfo.main([str(out_dir / "env.json")], revision=RUN_REVISION)
     (out_dir / f"{repo_id.split('/')[-1]}.json").write_text(
         json.dumps({"summary": summary, "records": records}, indent=1) + "\n"
     )

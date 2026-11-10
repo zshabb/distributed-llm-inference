@@ -126,7 +126,13 @@ def _torch_info() -> dict[str, Any] | None:
     return info
 
 
-def _revision() -> str | None:
+def current_revision() -> str | None:
+    """Return the code revision of this checkout *now*.
+
+    Long-running measurements must call this at START and pass the value to :func:`collect`:
+    reading it when results are written would attribute the run to whatever was committed in the
+    meantime (a real provenance bug found in the first M1 parity run; see docs/known-issues.md).
+    """
     # Synced GPU-host trees have no .git; scripts/gpu/sync.sh writes REVISION instead.
     rev_file = Path(__file__).resolve().parents[2] / "REVISION"
     if rev_file.is_file():
@@ -134,8 +140,12 @@ def _revision() -> str | None:
     return _run(["git", "describe", "--always", "--dirty", "--abbrev=12"])
 
 
-def collect() -> dict[str, Any]:
+def collect(revision: str | None = None) -> dict[str, Any]:
     """Collect a JSON-serializable description of the current execution environment.
+
+    Args:
+        revision: Code revision captured when the measured run started. If omitted, the
+            revision is read now, which is only correct for short, immediate runs.
 
     Returns:
         Mapping with timestamp, code revision, OS, CPU, memory, Python, PyTorch, and GPU details.
@@ -147,7 +157,7 @@ def collect() -> dict[str, Any]:
     return {
         "schema": "dli-env/v1",
         "collected_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "revision": _revision(),
+        "revision": revision if revision is not None else current_revision(),
         "hostname": platform.node(),
         "os": {"platform": platform.platform(), "kernel": platform.release()},
         "cpu": {"model": _cpu_model(), "logical_cores": os.cpu_count()},
@@ -158,10 +168,10 @@ def collect() -> dict[str, Any]:
     }
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, *, revision: str | None = None) -> int:
     """CLI entry point: print the manifest, or write it to the given path."""
     args = sys.argv[1:] if argv is None else argv
-    text = json.dumps(collect(), indent=2, sort_keys=True)
+    text = json.dumps(collect(revision), indent=2, sort_keys=True)
     if args:
         Path(args[0]).parent.mkdir(parents=True, exist_ok=True)
         Path(args[0]).write_text(text + "\n")
