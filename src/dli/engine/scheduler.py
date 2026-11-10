@@ -12,7 +12,9 @@ Every engine step, the scheduler builds one batch under a **token budget**
    single step, so one long prompt cannot freeze every decode in the batch for a whole prefill.
 
 KV memory is reserved through the block manager: a prompt's blocks at admission (reusing cached
-prefix blocks), and one slot per new token just before it is computed.
+prefix blocks), and one slot per new token just before it is computed. When a running request
+needs a block and none is available, the newest running request not yet in this step's batch is
+**preempted by recompute** (see :meth:`Scheduler._preempt`).
 
 Thread confinement: like the block manager, the scheduler belongs to the single engine loop.
 """
@@ -133,20 +135,45 @@ class Scheduler:
         out = SchedulerOutput()
         budget = self.config.max_num_batched_tokens
 
+        scheduled: set[str] = set()
+
         for req in list(self.running):
             if budget == 0:
                 break
+            if req.status is not RequestStatus.RUNNING:
+                continue  # preempted earlier in this loop as a victim
             n = min(req.num_tokens - req.num_computed_tokens, budget)
             if n <= 0:
                 continue
             ops = self._reserve(req)
+            while ops is None:
+                # Out of KV memory: preempt the newest running request not yet in this batch.
+                victim = self._pick_victim(exclude=scheduled | {req.request_id})
+                if victim is None:
+                    break
+                self._preempt(victim)
+                out.preempted.append(victim)
+                ops = self._reserve(req)
             if ops is None:
-                continue  # no memory for this request this step (handled by preemption later)
+                # Nobody else can yield: this request is itself the newest unscheduled one.
+                # (It is never the oldest running request: capacity rejection guarantees the
+                # oldest fits alone, so the loop above always finds a victim for it.)
+                self._preempt(req)
+                out.preempted.append(req)
+                continue
             out.copy_ops.extend(ops)
             out.chunks.append(self._chunk(req, n))
+            scheduled.add(req.request_id)
             budget -= n
 
-        while self.waiting and budget > 0 and len(self.running) < self.config.max_num_seqs:
+        # Never admit in a step that had to preempt: readmitting what was just evicted (or
+        # something equally large) would only thrash. Freed memory first serves running requests.
+        while (
+            not out.preempted
+            and self.waiting
+            and budget > 0
+            and len(self.running) < self.config.max_num_seqs
+        ):
             req = self.waiting[0]
             tokens = req.all_token_ids
             if not self.bm.can_allocate(tokens, self.config.namespace):
@@ -160,6 +187,31 @@ class Scheduler:
             out.chunks.append(self._chunk(req, n))
             budget -= n
         return out
+
+    def _pick_victim(self, exclude: set[str]) -> Request | None:
+        """Newest-admitted running request outside ``exclude`` (LIFO preemption).
+
+        LIFO protects the requests that have waited and progressed longest; combined with
+        capacity rejection, the oldest running request can always complete (liveness).
+        """
+        for cand in reversed(self.running):
+            if cand.request_id not in exclude:
+                return cand
+        return None
+
+    def _preempt(self, req: Request) -> None:
+        """Preempt by recompute: free KV now, keep outputs, recompute prompt+outputs later.
+
+        Full blocks the request computed stay in the prefix cache as cached-idle, so unless memory
+        pressure evicts them, resuming recomputes only the uncached tail. The request goes to the
+        FRONT of the waiting queue so it resumes before newer arrivals.
+        """
+        self.bm.free(req.request_id)
+        self.running.remove(req)
+        req.status = RequestStatus.WAITING
+        req.num_computed_tokens = 0
+        req.num_preemptions += 1
+        self.waiting.appendleft(req)
 
     def _chunk(self, req: Request, n: int) -> ScheduledChunk:
         start = req.num_computed_tokens
