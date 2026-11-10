@@ -28,7 +28,8 @@ Portfolio-wide rules: `ENGINEERING_STANDARDS.md` in the local planning workspace
 - **Published** (public, approved 2026-11-10): https://github.com/zshabb/distributed-llm-inference. Push validated
   progress regularly during development (feature branch pushes after validated commits), open PRs, and merge
   passing milestone branches with `--no-ff`, all without asking. Run the pre-push checks every time (fast suite, lint,
-  types, `gitleaks git`). Never force-push, rewrite published history, delete remote branches, or change visibility.
+  types, `gitleaks git` on the pushed range, and `git grep -nIE "/home/|/Users/|<host IP>"` for personal paths and
+  infrastructure details; tool output such as profiles must be path-redacted before committing). Never force-push, rewrite published history, delete remote branches, or change visibility.
 - Push from WSL with the Windows GitHub CLI as a one-off credential helper (gh is not logged in inside WSL):
   `git -c credential.helper= -c 'credential.helper=!"/mnt/c/Program Files/GitHub CLI/gh.exe" auth git-credential' push`
 - Do not rerun the M1 parity suites unless `src/dli/model/`, `src/dli/generate.py`, `uv.lock`, or the parity harness change

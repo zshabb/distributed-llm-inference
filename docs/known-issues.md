@@ -23,3 +23,4 @@
 | 19 | Requests admitted in the same step cannot share a prefix | Concurrent identical prompts compute duplicate KV | By design (blocks are shareable only after compute, ADR-0003); see also #14 |
 | 20 | Batched attention is a per-segment Python loop | Attention cost grows with the number of sequences per step on the CPU reference path | Replaced by the M6 Triton varlen paged kernel |
 | 21 | Engine-overhead absolute values vary ~2x between laptop runs | Only the flat per-sequence shape is claimed, not absolute microseconds | Inherent to the 15 W laptop CPU; re-measure on the GPU host / in M5 |
+| 22 | Published history contains absolute paths with the developer's WSL username in commit `207083c` (cProfile output) | Personal path (no credential) visible in the public branch history | Redacted going forward (file and script). Removing it from history needs a force-push: **owner decision pending** |

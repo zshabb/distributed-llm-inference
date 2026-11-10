@@ -19,6 +19,7 @@ import cProfile
 import io
 import json
 import pstats
+import re
 import statistics
 import time
 from datetime import UTC, datetime
@@ -89,8 +90,19 @@ def profile_largest(out: Path) -> str:
     prof.disable()
     buf = io.StringIO()
     pstats.Stats(prof, stream=buf).sort_stats("cumulative").print_stats(25)
-    (out / "profile_null_runner_256.txt").write_text(buf.getvalue())
+    (out / "profile_null_runner_256.txt").write_text(_redact_paths(buf.getvalue()))
     return buf.getvalue()
+
+
+def _redact_paths(text: str) -> str:
+    """Strip machine-specific absolute paths (home dirs, venvs) from profiler output.
+
+    Results are published; absolute paths would expose the developer's username and layout.
+    """
+    # Site-packages first: the venv may live inside the repo, and its prefix must not survive.
+    text = re.sub(r"/\S*/site-packages/", "<site-packages>/", text)
+    repo = str(Path(__file__).resolve().parents[2])
+    return text.replace(repo + "/", "<repo>/")
 
 
 def model_observation(
