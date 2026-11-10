@@ -22,11 +22,14 @@ cu130 = ["torch==2.14.1"]
 dev = [
     "hypothesis>=6.100",
     "mypy>=1.13",
+    "openapi-spec-validator>=0.7",
     "pytest>=8.3",
     "pytest-cov>=6.0",
+    "pyyaml>=6",
     "ruff>=0.8",
     # Reference implementation for numerical parity tests only; never imported by src/.
     "transformers>=4.46",
+    "types-pyyaml>=6.0.12.20261103",
 ]
 
 [tool.uv]

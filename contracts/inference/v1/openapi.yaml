@@ -1,0 +1,220 @@
+openapi: 3.1.0
+info:
+  title: Inference API (portfolio contract C1)
+  version: 1.0.0-draft
+  summary: OpenAI-compatible text generation subset plus optional scheduling extensions.
+  description: |
+    Contract C1 of the portfolio integration architecture. Consumers rely only on the OpenAI-standard
+    subset below plus the optional `X-*` extension headers, which servers MUST ignore if unsupported.
+    Compatibility policy: additive changes only within v1; consumers MUST ignore unknown fields.
+    Implementation status in this repository: specified at M0, served from M4.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /v1/models:
+    get:
+      operationId: listModels
+      responses:
+        "200":
+          description: Models currently loaded and ready.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ModelList" }
+  /v1/completions:
+    post:
+      operationId: createCompletion
+      parameters:
+        - $ref: "#/components/parameters/Priority"
+        - $ref: "#/components/parameters/DeadlineMs"
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompletionRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/CompletionOrStream" }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Overloaded" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+  /v1/chat/completions:
+    post:
+      operationId: createChatCompletion
+      parameters:
+        - $ref: "#/components/parameters/Priority"
+        - $ref: "#/components/parameters/DeadlineMs"
+        - $ref: "#/components/parameters/SessionId"
+        - $ref: "#/components/parameters/TenantId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChatCompletionRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/CompletionOrStream" }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Overloaded" }
+        "503": { $ref: "#/components/responses/Unavailable" }
+components:
+  parameters:
+    Priority:
+      name: X-Request-Priority
+      in: header
+      required: false
+      description: Scheduling class used by admission control.
+      schema: { type: string, enum: [interactive, batch], default: interactive }
+    DeadlineMs:
+      name: X-Deadline-Ms
+      in: header
+      required: false
+      description: Latency budget. The server MAY reject early (429) rather than queue past the deadline.
+      schema: { type: integer, minimum: 1 }
+    SessionId:
+      name: X-Session-Id
+      in: header
+      required: false
+      description: Routing-affinity hint for prefix-cache reuse. Opaque to the server.
+      schema: { type: string, maxLength: 128 }
+    TenantId:
+      name: X-Tenant-Id
+      in: header
+      required: false
+      description: Set ONLY by a trusted gateway after authentication; servers strip client-supplied values.
+      schema: { type: string, maxLength: 128 }
+  schemas:
+    ModelList:
+      type: object
+      required: [object, data]
+      properties:
+        object: { const: list }
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, object]
+            properties:
+              id: { type: string }
+              object: { const: model }
+              owned_by: { type: string }
+    SamplingParams:
+      type: object
+      properties:
+        max_tokens: { type: integer, minimum: 1 }
+        temperature: { type: number, minimum: 0, maximum: 2, default: 1 }
+        top_p: { type: number, exclusiveMinimum: 0, maximum: 1, default: 1 }
+        top_k: { type: integer, minimum: -1, description: "Extension (vLLM-compatible). -1 disables." }
+        seed: { type: integer }
+        stop:
+          oneOf:
+            - { type: string }
+            - { type: array, items: { type: string }, maxItems: 4 }
+        presence_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
+        frequency_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
+        stream: { type: boolean, default: false }
+        stream_options:
+          type: object
+          properties:
+            include_usage: { type: boolean }
+    CompletionRequest:
+      allOf:
+        - $ref: "#/components/schemas/SamplingParams"
+        - type: object
+          required: [model, prompt]
+          properties:
+            model: { type: string }
+            prompt:
+              oneOf:
+                - { type: string }
+                - { type: array, items: { type: integer }, description: "Pre-tokenized prompt" }
+    ChatMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role: { type: string, enum: [system, user, assistant] }
+        content: { type: string }
+    ChatCompletionRequest:
+      allOf:
+        - $ref: "#/components/schemas/SamplingParams"
+        - type: object
+          required: [model, messages]
+          properties:
+            model: { type: string }
+            messages:
+              type: array
+              minItems: 1
+              items: { $ref: "#/components/schemas/ChatMessage" }
+    Usage:
+      type: object
+      required: [prompt_tokens, completion_tokens, total_tokens]
+      properties:
+        prompt_tokens: { type: integer }
+        completion_tokens: { type: integer }
+        total_tokens: { type: integer }
+    Timing:
+      type: object
+      description: Optional extension field `x_timing`. Consumers MUST tolerate its absence.
+      properties:
+        queue_ms: { type: number }
+        ttft_ms: { type: number }
+        decode_ms: { type: number }
+    Choice:
+      type: object
+      required: [index, finish_reason]
+      properties:
+        index: { type: integer }
+        text: { type: string, description: "Completions endpoint" }
+        message: { $ref: "#/components/schemas/ChatMessage" }
+        finish_reason: { type: [string, "null"], enum: [stop, length, cancelled, null] }
+    CompletionResponse:
+      type: object
+      required: [id, object, created, model, choices]
+      properties:
+        id: { type: string }
+        object: { type: string, enum: [text_completion, chat.completion] }
+        created: { type: integer }
+        model: { type: string }
+        choices: { type: array, items: { $ref: "#/components/schemas/Choice" } }
+        usage: { $ref: "#/components/schemas/Usage" }
+        x_timing: { $ref: "#/components/schemas/Timing" }
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message, type]
+          properties:
+            message: { type: string }
+            type: { type: string }
+            code: { type: [string, "null"] }
+  responses:
+    CompletionOrStream:
+      description: |
+        Non-streaming JSON response, or (when `stream: true`) a `text/event-stream` of `data: <chunk JSON>`
+        lines terminated by `data: [DONE]`.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/CompletionResponse" }
+        text/event-stream:
+          schema: { type: string }
+    Error:
+      description: Invalid request.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Overloaded:
+      description: Rejected by admission control (queue full or deadline unattainable).
+      headers:
+        Retry-After: { schema: { type: integer }, description: Seconds before retrying. }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unavailable:
+      description: No model ready, or the server is draining.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
