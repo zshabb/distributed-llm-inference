@@ -29,6 +29,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from dli.engine import FinishReason, Priority
 from dli.sampling import SamplingParams
+from dli.server.admission import AdmissionConfig, AdmissionController
 from dli.server.async_engine import AsyncEngine, EngineDeadError
 from dli.server.schemas import ChatCompletionRequest, CompletionRequest
 from dli.server.text import (
@@ -65,9 +66,17 @@ class ServerConfig:
 class APIError(Exception):
     """An error rendered in the OpenAI error envelope."""
 
-    def __init__(self, status: int, message: str, err_type: str, code: str | None = None) -> None:
+    def __init__(
+        self,
+        status: int,
+        message: str,
+        err_type: str,
+        code: str | None = None,
+        retry_after: int | None = None,
+    ) -> None:
         super().__init__(message)
         self.status, self.message, self.err_type, self.code = status, message, err_type, code
+        self.retry_after = retry_after
 
 
 def error_response(
@@ -115,18 +124,26 @@ _FINISH = {
 }
 
 
-def create_app(engine: AsyncEngine, codec: TextCodec, config: ServerConfig) -> FastAPI:
+def create_app(
+    engine: AsyncEngine,
+    codec: TextCodec,
+    config: ServerConfig,
+    admission: AdmissionConfig | None = None,
+) -> FastAPI:
     app = FastAPI(title="distributed-llm-inference", version="0.1.0", docs_url=None, redoc_url=None)
     app.state.engine = engine
     app.state.codec = codec
     app.state.config = config
     app.state.draining = False
+    gate = AdmissionController(admission or AdmissionConfig())
+    app.state.admission = gate
 
     # ------------------------------------------------------------------ errors
 
     @app.exception_handler(APIError)
     async def _api_error(_: Request, exc: APIError) -> JSONResponse:
-        return error_response(exc.status, exc.message, exc.err_type, exc.code)
+        headers = {"Retry-After": str(exc.retry_after)} if exc.retry_after else None
+        return error_response(exc.status, exc.message, exc.err_type, exc.code, headers)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
@@ -190,29 +207,48 @@ def create_app(engine: AsyncEngine, codec: TextCodec, config: ServerConfig) -> F
             top_k=body.top_k,
             top_p=body.top_p,
             seed=body.seed,
+            ignore_eos=body.ignore_eos,
         )
         priority = _priority(request.headers.get("x-request-priority"))
+        deadline_ms = _deadline(request.headers.get("x-deadline-ms"))
+        rejection = gate.check(engine.snapshot, len(prompt_ids), deadline_ms,
+                               draining=app.state.draining)  # fmt: skip
+        if rejection is not None:
+            kind = "service_unavailable" if rejection.status == 503 else "rate_limit_error"
+            raise APIError(rejection.status, rejection.message, kind, rejection.code,
+                           rejection.retry_after_s)  # fmt: skip
         rid = f"{'chatcmpl' if chat else 'cmpl'}-{uuid.uuid4().hex}"
         timing = _Timing(time.perf_counter())
-        stream = _text_stream(rid, prompt_ids, params, body.stop_list, priority, "default", timing)
-        if body.stream:
-            return StreamingResponse(
-                _sse(rid, body, chat, len(prompt_ids), stream, timing),
-                media_type="text/event-stream",
-                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-            )
-        parts: list[str] = []
-        finish = _Finish("length", 0)
+        gate.inflight += 1
+        handed_off = False
         try:
-            async with aclosing(stream) as events:
-                async for ev in events:
-                    if isinstance(ev, _Delta):
-                        parts.append(ev.text)
-                    else:
-                        finish = ev
-        except TimeoutError as exc:
-            raise APIError(504, f"request exceeded {config.request_timeout_s:.0f}s", "timeout",
-                           "timeout") from exc  # fmt: skip
+            raw = _text_stream(rid, prompt_ids, params, body.stop_list, priority, "default", timing)
+            # Wait for the first event BEFORE sending headers: errors and deadline misses up to the
+            # first token are real HTTP statuses (429/4xx/5xx), not in-band events in a 200 stream.
+            first = await _first_event(raw, deadline_ms)
+            stream = _chain(first, raw)
+            if body.stream:
+                handed_off = True  # the SSE generator now owns the in-flight slot
+                return StreamingResponse(
+                    _release_after(_sse(rid, body, chat, len(prompt_ids), stream, timing)),
+                    media_type="text/event-stream",
+                    headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+                )
+            parts: list[str] = []
+            finish = _Finish("length", 0)
+            try:
+                async with aclosing(stream) as events:
+                    async for ev in events:
+                        if isinstance(ev, _Delta):
+                            parts.append(ev.text)
+                        else:
+                            finish = ev
+            except TimeoutError as exc:
+                raise APIError(504, f"request exceeded {config.request_timeout_s:.0f}s",
+                               "timeout", "timeout") from exc  # fmt: skip
+        finally:
+            if not handed_off:
+                gate.inflight -= 1
         text = "".join(parts)
         usage = _usage(len(prompt_ids), finish.completion_tokens)
         choice: dict[str, Any] = {"index": 0, "finish_reason": finish.reason, "logprobs": None}
@@ -256,6 +292,31 @@ def create_app(engine: AsyncEngine, codec: TextCodec, config: ServerConfig) -> F
             raise APIError(400, f"prompt ({len(prompt_ids)} tokens) + max_tokens ({max_tokens}) "
                            f"exceeds the {limit}-token limit", "invalid_request_error",
                            "context_length_exceeded")  # fmt: skip
+
+    async def _first_event(
+        raw: AsyncGenerator[_Delta | _Finish, None], deadline_ms: int | None
+    ) -> _Delta | _Finish:
+        try:
+            if deadline_ms is None:
+                return await anext(raw)
+            # Cancelling anext() unwinds the generator, whose aclosing() aborts the engine request,
+            # so a missed deadline never leaves work queued in the engine.
+            return await asyncio.wait_for(anext(raw), deadline_ms / 1000)
+        except TimeoutError as exc:
+            await raw.aclose()
+            raise APIError(429, f"no first token within the {deadline_ms} ms deadline",
+                           "rate_limit_error", "deadline_exceeded", 1) from exc  # fmt: skip
+        except BaseException:
+            await raw.aclose()
+            raise
+
+    async def _release_after(gen: AsyncGenerator[str, None]) -> AsyncGenerator[str, None]:
+        try:
+            async with aclosing(gen) as g:
+                async for item in g:
+                    yield item
+        finally:
+            gate.inflight -= 1
 
     async def _text_stream(
         rid: str,
@@ -349,6 +410,31 @@ def create_app(engine: AsyncEngine, codec: TextCodec, config: ServerConfig) -> F
         yield "data: [DONE]\n\n"
 
     return app
+
+
+async def _chain(
+    first: _Delta | _Finish, rest: AsyncGenerator[_Delta | _Finish, None]
+) -> AsyncGenerator[_Delta | _Finish, None]:
+    """Re-attach a prefetched first event; closing the chain closes (and aborts) the source."""
+    async with aclosing(rest) as r:
+        yield first
+        if isinstance(first, _Finish):
+            return
+        async for ev in r:
+            yield ev
+
+
+def _deadline(header: str | None) -> int | None:
+    if header is None:
+        return None
+    try:
+        value = int(header)
+    except ValueError:
+        value = 0
+    if value < 1:
+        raise APIError(400, "X-Deadline-Ms must be a positive integer", "invalid_request_error",
+                       "invalid_header")  # fmt: skip
+    return value
 
 
 async def _guard_dead(events: AsyncIterator[Any]) -> AsyncGenerator[Any, None]:

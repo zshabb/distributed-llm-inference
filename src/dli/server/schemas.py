@@ -32,6 +32,8 @@ class _SamplingFields(BaseModel):
     frequency_penalty: float = Field(default=0.0, ge=-2.0, le=2.0)
     logprobs: bool | int | None = None
     user: str | None = Field(default=None, max_length=256)
+    # Extension (vLLM-compatible): generate exactly max_tokens (fixed-length benchmarks).
+    ignore_eos: bool = False
 
     @field_validator("top_k")
     @classmethod

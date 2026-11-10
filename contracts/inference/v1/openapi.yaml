@@ -114,6 +114,10 @@ components:
             - { type: array, items: { type: string }, maxItems: 4 }
         presence_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
         frequency_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
+        ignore_eos:
+          type: boolean
+          default: false
+          description: "Extension (vLLM-compatible): ignore EOS and generate exactly max_tokens."
         stream: { type: boolean, default: false }
         stream_options:
           type: object

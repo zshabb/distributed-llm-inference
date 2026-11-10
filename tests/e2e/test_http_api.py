@@ -180,7 +180,7 @@ def test_client_disconnect_mid_stream_aborts_and_frees_kv(server: LiveServer) ->
         ({"model": MODEL, "prompt": "x", "logprobs": 3}, 400, "unsupported_parameter"),
         ({"model": MODEL, "prompt": "x", "best_of": 2}, 400, "unsupported_parameter"),
         ({"model": MODEL, "prompt": "x", "max_tokens": 5000}, 400, "invalid_parameter"),
-        ({"model": MODEL, "prompt": "x" * 250, "max_tokens": 10}, 400, "context_length_exceeded"),
+        ({"model": MODEL, "prompt": "x" * 1020, "max_tokens": 10}, 400, "context_length_exceeded"),
         ({"model": "gpt-4", "prompt": "x"}, 404, "model_not_found"),
     ],
 )

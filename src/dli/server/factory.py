@@ -10,6 +10,7 @@ from fastapi import FastAPI
 
 from dli.engine import LLMEngine, SchedulerConfig
 from dli.model import LlamaForCausalLM, load_model
+from dli.server.admission import AdmissionConfig
 from dli.server.app import ServerConfig, create_app
 from dli.server.async_engine import AsyncEngine
 from dli.server.text import TextCodec
@@ -35,6 +36,7 @@ class BuildOptions:
     default_max_tokens: int = 16
     max_tokens_limit: int = 4096
     request_timeout_s: float = 600.0
+    admission: AdmissionConfig = field(default_factory=AdmissionConfig)
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -61,4 +63,5 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
         max_tokens_limit=opts.max_tokens_limit,
         request_timeout_s=opts.request_timeout_s,
     )
-    return ServerBundle(create_app(aengine, codec, config), aengine, codec, model, config)
+    app = create_app(aengine, codec, config, opts.admission)
+    return ServerBundle(app, aengine, codec, model, config)

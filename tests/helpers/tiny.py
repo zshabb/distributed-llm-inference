@@ -20,7 +20,7 @@ TINY: dict[str, Any] = {
     "num_hidden_layers": 3,
     "num_attention_heads": 8,
     "num_key_value_heads": 2,
-    "max_position_embeddings": 256,
+    "max_position_embeddings": 4096,
     "rms_norm_eps": 1e-6,
 }
 
