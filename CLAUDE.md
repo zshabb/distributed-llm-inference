@@ -18,6 +18,9 @@ Portfolio-wide rules: `ENGINEERING_STANDARDS.md` in the local planning workspace
 | GPU host | `SYNC_FROM=head scripts/gpu/sync.sh && scripts/gpu/remote.sh <cmd>` | see `docs/operations.md` |
 
 ## Rules specific to this repo
+- **No AI co-author trailers:** never add `Co-Authored-By: Claude` (or any automatic AI attribution) to commit messages.
+  Commits use the configured identity `Zeav <95062713+zshabb@users.noreply.github.com>`. Earlier published commits that
+  carry the trailer are left as they are: no amend, rewrite, or force-push.
 - Git history is the engineering journal reviewers will read: commit each validated, independently understandable
   improvement separately with a Conventional Commit message explaining what and why (e.g.
   `fix(memory): prevent block leaks during request cancellation`). No bundling unrelated work, no trivial splitting, no
