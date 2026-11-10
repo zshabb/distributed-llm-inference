@@ -102,7 +102,7 @@ benchmark harness (M5). The M2 paged read path gathers pages and is slower than 
 |---|---|---|
 | All 100 M1 prompts submitted at once (KV pool 25% of demand → 47 preemptions; 256-token budget → chunked prefill): engine output identical to the unbatched path for 100/100 prompts × 128 tokens, SmolLM2-135M and Qwen2.5-0.5B | `[CPU-LAPTOP]` fp32 · `[GPU:A16x1@vultr]` fp32 | [`CPU`](benchmarks/results/2026-11-10-CPU-LAPTOP-m3-engine-parity-float32/), [`GPU`](benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-float32/) |
 | In **bf16**, batched vs unbatched outputs diverge for most prompts (22/100 and 18/100 identical): my pre-set criterion **failed**. Every divergence is at a bf16 near-tie (reference top-2 gap ≤ 0.375), and the fp32 runs above rule out an engine defect | `[GPU:A16x1@vultr]` | [`ANALYSIS.md`](benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-bfloat16/ANALYSIS.md) |
-| Batched engine 107 vs 21 output tok/s for sequential decoding on SmolLM2-135M (5.2×, median of 3 interleaved runs); engine overhead 0.6% of step time | `[CPU-LAPTOP]` | [`m3-scheduler-overhead/`](benchmarks/results/2026-11-10-CPU-LAPTOP-m3-scheduler-overhead/) |
+| **Preliminary CPU observation, not a GPU or production benchmark:** batched engine 107 vs 21 output tok/s for sequential decoding on SmolLM2-135M on a laptop CPU (5.2×, median of 3 interleaved runs, closed-loop, no latency percentiles); engine overhead 0.6% of step time | `[CPU-LAPTOP]` | [`m3-scheduler-overhead/`](benchmarks/results/2026-11-10-CPU-LAPTOP-m3-scheduler-overhead/) |
 
 Not yet measured: latency percentiles (TTFT/ITL) under open-loop load, or GPU throughput vs vLLM (M5).
 
