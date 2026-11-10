@@ -10,16 +10,19 @@ from fastapi import FastAPI
 
 from dli.engine import LLMEngine, SchedulerConfig
 from dli.model import LlamaForCausalLM, load_model
+from dli.server.admin import create_admin_app
 from dli.server.admission import AdmissionConfig
 from dli.server.app import ServerConfig, create_app
 from dli.server.async_engine import AsyncEngine
 from dli.server.auth import ApiKeyAuth
+from dli.server.metrics import ServerMetrics
 from dli.server.text import TextCodec
 
 
 @dataclass
 class ServerBundle:
     app: FastAPI
+    admin_app: FastAPI
     engine: AsyncEngine
     codec: TextCodec
     model: LlamaForCausalLM
@@ -40,6 +43,7 @@ class BuildOptions:
     admission: AdmissionConfig = field(default_factory=AdmissionConfig)
     auth: ApiKeyAuth | None = None
     max_body_bytes: int = 2 * 1024 * 1024
+    admin_token: str | None = None
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -67,5 +71,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
         request_timeout_s=opts.request_timeout_s,
         max_body_bytes=opts.max_body_bytes,
     )
-    app = create_app(aengine, codec, config, opts.admission, opts.auth)
-    return ServerBundle(app, aengine, codec, model, config)
+    metrics = ServerMetrics(aengine)
+    app = create_app(aengine, codec, config, opts.admission, opts.auth, metrics)
+    admin = create_admin_app(app, aengine, metrics, opts.admin_token)
+    return ServerBundle(app, admin, aengine, codec, model, config)

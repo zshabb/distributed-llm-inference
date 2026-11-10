@@ -33,6 +33,7 @@ from dli.server.admission import AdmissionConfig, AdmissionController
 from dli.server.async_engine import AsyncEngine, EngineDeadError
 from dli.server.auth import ApiKeyAuth, AuthMiddleware
 from dli.server.limits import BodySizeLimit
+from dli.server.metrics import ServerMetrics
 from dli.server.schemas import ChatCompletionRequest, CompletionRequest
 from dli.server.text import (
     ChatMessage,
@@ -133,6 +134,7 @@ def create_app(
     config: ServerConfig,
     admission: AdmissionConfig | None = None,
     auth: ApiKeyAuth | None = None,
+    metrics: ServerMetrics | None = None,
 ) -> FastAPI:
     """Build the API app. ``auth=None`` disables authentication (local development only:
     the server entry point refuses to start without keys on a non-loopback address)."""
@@ -143,6 +145,8 @@ def create_app(
     app.state.draining = False
     gate = AdmissionController(admission or AdmissionConfig())
     app.state.admission = gate
+    m = metrics or ServerMetrics(engine)
+    app.state.metrics = m
     app.add_middleware(BodySizeLimit, max_bytes=config.max_body_bytes)
 
     # Pure-ASGI layers wrap the app; the LAST added runs FIRST: auth precedes the body-size check.
@@ -155,12 +159,14 @@ def create_app(
     # ------------------------------------------------------------------ errors
 
     @app.exception_handler(APIError)
-    async def _api_error(_: Request, exc: APIError) -> JSONResponse:
+    async def _api_error(request: Request, exc: APIError) -> JSONResponse:
+        _count(request, exc.status, exc.err_type)
         headers = {"Retry-After": str(exc.retry_after)} if exc.retry_after else None
         return error_response(exc.status, exc.message, exc.err_type, exc.code, headers)
 
     @app.exception_handler(RequestValidationError)
-    async def _validation(_: Request, exc: RequestValidationError) -> JSONResponse:
+    async def _validation(request: Request, exc: RequestValidationError) -> JSONResponse:
+        _count(request, 400, "invalid_request_error")
         first = exc.errors()[0] if exc.errors() else {"msg": "invalid request", "loc": ()}
         where = ".".join(str(p) for p in first.get("loc", ()) if p != "body")
         msg = f"{where}: {first['msg']}" if where else str(first["msg"])
@@ -170,6 +176,13 @@ def create_app(
     async def _http(_: Request, exc: StarletteHTTPException) -> JSONResponse:
         kind = "not_found_error" if exc.status_code == 404 else "invalid_request_error"
         return error_response(exc.status_code, str(exc.detail), kind)
+
+    def _count(request: Request, status: int, err_type: str | None = None) -> None:
+        path = request.url.path
+        endpoint = path if path in ("/v1/completions", "/v1/chat/completions") else "other"
+        m.requests.labels(endpoint, str(status)).inc()
+        if err_type is not None:
+            m.errors.labels(err_type).inc()
 
     # ------------------------------------------------------------------ ops
 
@@ -226,15 +239,19 @@ def create_app(
         )
         priority = _priority(request.headers.get("x-request-priority"))
         deadline_ms = _deadline(request.headers.get("x-deadline-ms"))
-        rejection = gate.check(engine.snapshot, len(prompt_ids), deadline_ms,
-                               draining=app.state.draining)  # fmt: skip
+        rejection = gate.check(
+            engine.snapshot, len(prompt_ids), deadline_ms, draining=app.state.draining
+        )
         if rejection is not None:
+            m.rejections.labels(rejection.code).inc()
             kind = "service_unavailable" if rejection.status == 503 else "rate_limit_error"
-            raise APIError(rejection.status, rejection.message, kind, rejection.code,
-                           rejection.retry_after_s)  # fmt: skip
+            raise APIError(
+                rejection.status, rejection.message, kind, rejection.code, rejection.retry_after_s
+            )
         rid = f"{'chatcmpl' if chat else 'cmpl'}-{uuid.uuid4().hex}"
         timing = _Timing(time.perf_counter())
         gate.inflight += 1
+        m.prompt_tokens.inc(len(prompt_ids))
         handed_off = False
         try:
             raw = _text_stream(rid, prompt_ids, params, body.stop_list, priority, tenant, timing)
@@ -245,7 +262,7 @@ def create_app(
             if body.stream:
                 handed_off = True  # the SSE generator now owns the in-flight slot
                 return StreamingResponse(
-                    _release_after(_sse(rid, body, chat, len(prompt_ids), stream, timing)),
+                    _release_after(_sse(rid, body, chat, len(prompt_ids), stream, timing), request),
                     media_type="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
                 )
@@ -259,12 +276,14 @@ def create_app(
                         else:
                             finish = ev
             except TimeoutError as exc:
-                raise APIError(504, f"request exceeded {config.request_timeout_s:.0f}s",
-                               "timeout", "timeout") from exc  # fmt: skip
+                raise APIError(
+                    504, f"request exceeded {config.request_timeout_s:.0f}s", "timeout", "timeout"
+                ) from exc
         finally:
             if not handed_off:
                 gate.inflight -= 1
         text = "".join(parts)
+        _count(request, 200)
         usage = _usage(len(prompt_ids), finish.completion_tokens)
         choice: dict[str, Any] = {"index": 0, "finish_reason": finish.reason, "logprobs": None}
         if chat:
@@ -285,28 +304,49 @@ def create_app(
 
     def _validate(body: CompletionRequest | ChatCompletionRequest, prompt_ids: list[int]) -> None:
         if body.model != config.model_name:
-            raise APIError(404, f"model {body.model!r} is not served here", "not_found_error",
-                           "model_not_found")  # fmt: skip
+            raise APIError(
+                404,
+                f"model {body.model!r} is not served here",
+                "not_found_error",
+                "model_not_found",
+            )
         feature = body.unsupported()
         if feature:
-            raise APIError(400, f"{feature} is not supported by this server",
-                           "invalid_request_error", "unsupported_parameter")  # fmt: skip
+            raise APIError(
+                400,
+                f"{feature} is not supported by this server",
+                "invalid_request_error",
+                "unsupported_parameter",
+            )
         if any(t >= config.vocab_size for t in prompt_ids):
-            raise APIError(400, "prompt contains token ids outside the vocabulary",
-                           "invalid_request_error", "invalid_prompt")  # fmt: skip
+            raise APIError(
+                400,
+                "prompt contains token ids outside the vocabulary",
+                "invalid_request_error",
+                "invalid_prompt",
+            )
         if not prompt_ids:
-            raise APIError(400, "prompt is empty after tokenization", "invalid_request_error",
-                           "invalid_prompt")  # fmt: skip
+            raise APIError(
+                400, "prompt is empty after tokenization", "invalid_request_error", "invalid_prompt"
+            )
         max_tokens = body.max_tokens or config.default_max_tokens
         if max_tokens > config.max_tokens_limit:
-            raise APIError(400, f"max_tokens must be <= {config.max_tokens_limit}",
-                           "invalid_request_error", "invalid_parameter")  # fmt: skip
+            raise APIError(
+                400,
+                f"max_tokens must be <= {config.max_tokens_limit}",
+                "invalid_request_error",
+                "invalid_parameter",
+            )
         total = len(prompt_ids) + max_tokens
         limit = min(config.max_model_len, config.kv_capacity_tokens)
         if total > limit:
-            raise APIError(400, f"prompt ({len(prompt_ids)} tokens) + max_tokens ({max_tokens}) "
-                           f"exceeds the {limit}-token limit", "invalid_request_error",
-                           "context_length_exceeded")  # fmt: skip
+            raise APIError(
+                400,
+                f"prompt ({len(prompt_ids)} tokens) + max_tokens ({max_tokens}) "
+                f"exceeds the {limit}-token limit",
+                "invalid_request_error",
+                "context_length_exceeded",
+            )
 
     async def _first_event(
         raw: AsyncGenerator[_Delta | _Finish, None], deadline_ms: int | None
@@ -318,20 +358,32 @@ def create_app(
             # so a missed deadline never leaves work queued in the engine.
             return await asyncio.wait_for(anext(raw), deadline_ms / 1000)
         except TimeoutError as exc:
+            m.rejections.labels("deadline_exceeded").inc()
             await raw.aclose()
-            raise APIError(429, f"no first token within the {deadline_ms} ms deadline",
-                           "rate_limit_error", "deadline_exceeded", 1) from exc  # fmt: skip
+            raise APIError(
+                429,
+                f"no first token within the {deadline_ms} ms deadline",
+                "rate_limit_error",
+                "deadline_exceeded",
+                1,
+            ) from exc
         except BaseException:
             await raw.aclose()
             raise
 
-    async def _release_after(gen: AsyncGenerator[str, None]) -> AsyncGenerator[str, None]:
+    async def _release_after(
+        gen: AsyncGenerator[str, None], request: Request
+    ) -> AsyncGenerator[str, None]:
+        failed = False
         try:
             async with aclosing(gen) as g:
                 async for item in g:
+                    failed = failed or item.startswith('data: {"error"')
                     yield item
         finally:
             gate.inflight -= 1
+            # A stream answers 200 even if it later fails in-band; count the failure separately.
+            _count(request, 200, "stream_error" if failed else None)
 
     async def _text_stream(
         rid: str,
@@ -346,24 +398,36 @@ def create_app(
         detok = IncrementalDetokenizer(codec, prompt_ids)
         matcher = StopStringMatcher(stops)
         produced = 0
+        last_token_at = timing.start
         events = engine.generate(rid, prompt_ids, params, priority=priority, tenant=tenant)
         async with asyncio.timeout(config.request_timeout_s), aclosing(events) as evs:
             async for ev in _guard_dead(evs):
                 if ev.error is not None:
                     raise APIError(500, ev.error, "server_error", "engine_failure")
                 if ev.finish_reason is FinishReason.CAPACITY:
-                    raise APIError(400, "request can never fit in the KV cache",
-                                   "invalid_request_error", "context_length_exceeded")  # fmt: skip
+                    raise APIError(
+                        400,
+                        "request can never fit in the KV cache",
+                        "invalid_request_error",
+                        "context_length_exceeded",
+                    )
                 for tok in ev.token_ids:
                     produced += 1
+                    now = time.perf_counter()
+                    m.generation_tokens.inc()
                     if timing.first_token is None:
-                        timing.first_token = time.perf_counter()
+                        timing.first_token = now
+                        m.ttft.observe(now - timing.start)
+                    else:
+                        m.itl.observe(now - last_token_at)
+                    last_token_at = now
                     safe, hit = matcher.feed(detok.push(tok))
                     if safe:
                         yield _Delta(safe)
                     if hit:
                         # Leaving `async with` closes the engine stream, aborting the request.
                         timing.end = time.perf_counter()
+                        m.latency.observe(timing.end - timing.start)
                         yield _Finish("stop", produced)
                         return
                 if ev.finished:
@@ -371,6 +435,7 @@ def create_app(
                     if tail:
                         yield _Delta(tail)
                     timing.end = time.perf_counter()
+                    m.latency.observe(timing.end - timing.start)
                     reason = ev.finish_reason or FinishReason.LENGTH
                     yield _Finish(_FINISH.get(reason, "stop"), produced)
                     return
@@ -395,8 +460,13 @@ def create_app(
                 choice["delta"] = d
             else:
                 choice["text"] = delta or ""
-            payload = {"id": rid, "object": obj, "created": created,
-                       "model": config.model_name, "choices": [choice]}  # fmt: skip
+            payload = {
+                "id": rid,
+                "object": obj,
+                "created": created,
+                "model": config.model_name,
+                "choices": [choice],
+            }
             return f"data: {json.dumps(payload)}\n\n"
 
         if chat:
@@ -418,9 +488,15 @@ def create_app(
             err = {"error": {"message": "request timed out", "type": "timeout", "code": "timeout"}}
             yield f"data: {json.dumps(err)}\n\n"
         if body.include_usage:
-            usage = {"id": rid, "object": obj, "created": created, "model": config.model_name,
-                     "choices": [], "usage": _usage(prompt_tokens, completion_tokens),
-                     "x_timing": timing.as_dict()}  # fmt: skip
+            usage = {
+                "id": rid,
+                "object": obj,
+                "created": created,
+                "model": config.model_name,
+                "choices": [],
+                "usage": _usage(prompt_tokens, completion_tokens),
+                "x_timing": timing.as_dict(),
+            }
             yield f"data: {json.dumps(usage)}\n\n"
         yield "data: [DONE]\n\n"
 
@@ -447,8 +523,12 @@ def _deadline(header: str | None) -> int | None:
     except ValueError:
         value = 0
     if value < 1:
-        raise APIError(400, "X-Deadline-Ms must be a positive integer", "invalid_request_error",
-                       "invalid_header")  # fmt: skip
+        raise APIError(
+            400,
+            "X-Deadline-Ms must be a positive integer",
+            "invalid_request_error",
+            "invalid_header",
+        )
     return value
 
 
@@ -466,8 +546,12 @@ def _priority(header: str | None) -> Priority:
         return Priority.INTERACTIVE
     if header == "batch":
         return Priority.BATCH
-    raise APIError(400, "X-Request-Priority must be 'interactive' or 'batch'",
-                   "invalid_request_error", "invalid_header")  # fmt: skip
+    raise APIError(
+        400,
+        "X-Request-Priority must be 'interactive' or 'batch'",
+        "invalid_request_error",
+        "invalid_header",
+    )
 
 
 def _usage(prompt_tokens: int, completion_tokens: int) -> dict[str, int]:

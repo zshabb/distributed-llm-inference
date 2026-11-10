@@ -28,12 +28,16 @@ MODEL = "tiny-llama"
 @dataclass
 class LiveServer:
     url: str
+    admin_url: str
     bundle: ServerBundle
-    server: uvicorn.Server
-    thread: threading.Thread
+    servers: list[uvicorn.Server]
+    threads: list[threading.Thread]
 
     def client(self, **kw: object) -> httpx.Client:
         return httpx.Client(base_url=self.url, timeout=30.0, **kw)  # type: ignore[arg-type]
+
+    def admin(self, **kw: object) -> httpx.Client:
+        return httpx.Client(base_url=self.admin_url, timeout=30.0, **kw)  # type: ignore[arg-type]
 
 
 def _free_port() -> int:
@@ -43,13 +47,10 @@ def _free_port() -> int:
         return port
 
 
-def start_server(bundle: ServerBundle) -> LiveServer:
+def _serve(app: object) -> tuple[uvicorn.Server, threading.Thread, int]:
     port = _free_port()
-    config = uvicorn.Config(
-        bundle.app, host="127.0.0.1", port=port, log_level="warning", lifespan="off"
-    )
+    config = uvicorn.Config(app, host="127.0.0.1", port=port, log_level="warning", lifespan="off")  # type: ignore[arg-type]
     server = uvicorn.Server(config)
-    bundle.engine.start()
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     deadline = time.monotonic() + 10
@@ -57,12 +58,28 @@ def start_server(bundle: ServerBundle) -> LiveServer:
         if time.monotonic() > deadline:
             raise RuntimeError("server did not start")
         time.sleep(0.01)
-    return LiveServer(f"http://127.0.0.1:{port}", bundle, server, thread)
+    return server, thread, port
+
+
+def start_server(bundle: ServerBundle) -> LiveServer:
+    """API and admin apps on two real ports (as in production), sharing one engine."""
+    bundle.engine.start()
+    api, api_thread, api_port = _serve(bundle.app)
+    admin, admin_thread, admin_port = _serve(bundle.admin_app)
+    return LiveServer(
+        f"http://127.0.0.1:{api_port}",
+        f"http://127.0.0.1:{admin_port}",
+        bundle,
+        [api, admin],
+        [api_thread, admin_thread],
+    )
 
 
 def stop_server(live: LiveServer) -> None:
-    live.server.should_exit = True
-    live.thread.join(10)
+    for server in live.servers:
+        server.should_exit = True
+    for thread in live.threads:
+        thread.join(10)
     live.bundle.engine.stop()
 
 
