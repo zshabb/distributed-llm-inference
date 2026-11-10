@@ -81,7 +81,16 @@ immediately (`CAPACITY`). Deadline-aware admission (`X-Deadline-Ms`) and queue b
 - **Real checkpoints (milestone):** see §10 and `benchmarks/results/*-m3-engine-parity-*`.
 
 ## 10. Performance measurements
-Filled from `benchmarks/results/*-m3-scheduler-overhead/` and the engine parity runs. See README *Verified results*.
+- **Engine overhead** (null runner, no model work): median 28–37 µs per sequence per decode step, flat from 8 to 256
+  concurrent sequences `[CPU-LAPTOP]`, code `380a1fa`. An unrecorded dry run measured ~14 µs, so absolute values vary ~2×
+  between runs on this laptop; only the flat shape is claimed. Largest component: argmax over `[batch, vocab]` logits
+  (cProfile in the result directory).
+- **Batching gain** (SmolLM2-135M, 24 prompts × 32 tokens, interleaved ×3): 107.2 vs 20.8 output tok/s (5.2×); engine
+  overhead 0.58% of step time `[CPU-LAPTOP]`.
+- **Correctness at scale:** 100 concurrent prompts × 128 tokens with 47 preemptions and chunked prefill: 100/100 identical
+  to the unbatched path for both models in fp32, on CPU and on the A16. In bf16 most outputs diverge at bf16 near-ties
+  (pre-set criterion failed, analysis in the result directory).
+- **Not measured yet:** TTFT/ITL percentiles under open-loop load, GPU throughput, comparison with vLLM (M5).
 
 ## 11. Remaining limitations
 Single-threaded engine loop (the async API arrives in M4); no swap preemption; no deadline-aware admission yet (M4);

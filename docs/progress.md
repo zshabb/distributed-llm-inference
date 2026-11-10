@@ -2,6 +2,58 @@
 
 Per-session record (ENGINEERING_STANDARDS §13). Newest first.
 
+## 2026-11-10 — Session 3: publication + M3 continuous batching (complete, branch `feat/m3-continuous-batching`)
+
+### Completed
+- Repository **published** (public, owner-approved) with its full history; first GitHub CI + security runs passed.
+- Portfolio standards: commit-history-as-engineering-journal, development visibility, **no AI co-author trailers**
+  (applied from commit `8d26e41` onward; earlier published commits left unchanged).
+- **M3:** `BatchedKV` batched attention (refactor), `dli.sampling`, `dli.engine` (request lifecycle, scheduler with
+  chunked prefill, LIFO recompute preemption, capacity rejection, abort, priority + aging + weighted tenant fairness,
+  `ModelRunner`, `LLMEngine` with `StepStats`), overhead benchmark, milestone parity harness.
+
+### Tests executed (results)
+| Suite | Result | Label |
+|---|---|---|
+| Fast suite | 140 passed (< 15 s) | `[CPU-LAPTOP]` |
+| Randomized scheduler scenarios, focused (2,000) | passed | 12 s |
+| Fault injection: fairness (FIFO, no aging, banking) and scheduler (lost request, over-admission, ignored cached prefix) | 6/6 detected (+1 equivalent mutant explained) | — |
+| Engine parity fp32, 100 prompts × 128 tokens × 2 models, 47 preemptions each | 100/100 + 100/100 | `[CPU-LAPTOP]` code `6132814` |
+| Same, fp32 | 100/100 + 100/100 | `[GPU:A16x1@vultr]` code `5b4254c` |
+| Same, bf16 | 22/100 + 18/100: **pre-set criterion failed**; all divergences at bf16 near-ties | `[GPU:A16x1@vultr]` code `6132814` |
+| Overhead / batching gain | 28–37 µs/seq/step (flat); 5.2× tok/s on SmolLM2; overhead 0.58% | `[CPU-LAPTOP]` code `380a1fa` |
+
+### Defects and corrections found
+1. Test-design errors in early preemption tests (a request sized over capacity; an "oldest" request used as the
+   intended victim; an under-sized scenario that never preempted). Fixed. Each one revealed a true property: capacity
+   rejection, and the oldest request is never preempted.
+2. Shared-prefix test assumed same-step requests share blocks. They cannot by design (rule 2); documented (known issue 19).
+3. **Acceptance-rule error:** the bf16 exact-match rule copied from M1 is invalid for batched-vs-unbatched comparisons.
+   Recorded the failure, proved engine exactness in fp32, and moved bf16 quality to M5 evaluation.
+4. Push failed once on a transient WSL DNS error; retried successfully.
+
+### Four-perspective review
+- **Staff:** clean boundaries (scheduler is tensor-free; runner owns tensors; sampler stateless). Debt: O(W) admission
+  scan, per-segment attention loop, `generate.py` bridge APIs kept as test references.
+- **Security:** `abort` is idempotent; capacity rejection prevents a single request from wedging the engine. Open (M4):
+  request size limits, deadline/queue bounds, tenant identity from authentication (today tenant is a caller argument).
+- **SRE:** `StepStats` gives per-step timing and preemption counts. Prometheus export and alerts arrive in M4.
+  Preemption churn under sustained overload has not been characterized yet (M5 load tests).
+- **Interviewer:** the bf16 episode (failed criterion → root cause → decisive fp32 control) and the fault-injected
+  fairness tests are the strongest evidence; all numbers are labeled and tied to commits.
+No critical findings open.
+
+### GPU usage (M3)
+| Start (UTC) | End (UTC) | Duration | Purpose |
+|---|---|---|---|
+| 22:07:06 | 22:07:08 | 2 s | Sync + environment refresh |
+| 22:07:20 | 22:16:05 | 525 s | bf16 engine parity |
+| 22:17:24 | 22:26:14 | 529 s | fp32 engine parity (decisive check) |
+
+### Next (awaiting approval)
+M4: OpenAI-compatible async API server (SSE streaming, cancellation on disconnect, deadline-aware admission,
+backpressure, Prometheus metrics, stop strings).
+
 ## 2026-11-10 — Session 2: portfolio policy consolidation + M2 paged KV cache (complete, branch `feat/m2-paged-kv`)
 
 ### Completed

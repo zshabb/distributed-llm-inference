@@ -1,8 +1,8 @@
 # QnA: implementation-specific technical questions
 
-> **Scope: milestones M0–M2 (30 questions).** The release target is ≥ 30 questions across architecture, implementation,
+> **Scope: milestones M0–M3 (38 questions).** The release target is ≥ 30 questions across architecture, implementation,
 > scalability, reliability, security, performance, debugging, and system design (master prompt §17).
-> Questions about components that do not exist yet (scheduler, API, kernels, TP, router) are
+> Questions about components that do not exist yet (API server, kernels, TP, router) are
 > added when those components land, because answering them now would describe unbuilt software.
 > Every number carries an evidence label and a result directory.
 
@@ -240,6 +240,80 @@ slow when evictions are rare. Decision: LRU stays the default and cost-aware is 
 the policy against the same synthetic traces used to evaluate it. Follow-ups (frequency decay, ARC-style adaptation)
 must be judged with the same paired method and, more importantly, with latency measurements once the engine exists (M5).
 
+## Continuous batching and scheduling (M3)
+
+### 31. Walk through one engine step.
+`LLMEngine.step()` (`src/dli/engine/engine.py`) calls `Scheduler.schedule()`, which builds one batch under a token
+budget and a sequence cap. Running requests come first, sorted by (effective priority, arrival): each gets its next
+decode token or its next prompt chunk, after reserving a KV slot. Then, if nothing was preempted, waiting requests are
+admitted by (effective priority, resumed-first, tenant virtual time, arrival), with prompts chunked to the remaining
+budget. `ModelRunner.execute()` applies copy-on-write copies and runs **one** forward pass over a `BatchedKV`.
+Embedding, projections, MLP, and the LM head run once over all flattened tokens, and attention runs per segment against
+each sequence's paged KV. Logits are computed only for rows that sample. Then `sample()` runs per request, stop rules are
+applied, and finished requests free their KV. `StepStats` times each phase.
+
+### 32. Why serve running requests before admitting new ones, and why chunk prefills?
+Prefill-first lets a burst of new prompts stall every in-flight decode for a whole step: inter-token latency spikes
+exactly under load. Running-first keeps decodes flowing, and chunking caps any prompt's share of a step at the remaining
+budget, so one 40K-token prompt cannot freeze the batch. `test_long_prompt_is_chunked_and_running_decodes_are_not_stalled`
+shows a running request decoding every step while a 40-token prompt is processed in ≤ 7-token chunks. The cost is that
+a long prompt's time to first token grows with the number of chunks. That trade-off is tunable via the budget.
+
+### 33. How does preemption work, and why can't the system livelock?
+When a running request needs a KV block and none is available (`_reserve` fails), the scheduler preempts the **newest
+running request not already in this step's batch** (`_pick_victim`). It frees the victim's blocks (its full blocks stay
+prefix-cached), keeps its generated tokens, and puts it at the front of the waiting queue. On readmission it recomputes
+`prompt + outputs`, reusing any cached prefix. Liveness: victims are always newer than the requester, so the request at
+the front of the running order is never preempted. Capacity rejection (`Scheduler.add`) guarantees any admitted request
+fits in the pool alone, so the front request always completes. No admission happens in a step that preempted, which
+prevents preempt/readmit thrashing. The randomized scenarios enforce a step bound, and the over-admission mutant
+(admitting one block too large) is caught as a livelock.
+
+### 34. Why recompute instead of swapping preempted KV to host memory?
+Recompute needs no extra memory or transfer path and combines with the prefix cache: the victim's full blocks
+usually survive as cached-idle, so resume recomputes only part of the sequence (`test_resumed_request_reuses_its_cached_prefix`).
+Swap wins when PCIe transfer of the KV is cheaper than recomputing it, which depends on model size, context length, and
+the GPU. That has to be measured on GPU hardware, so swap is deferred (known issue 17), not ruled out.
+
+### 35. How does tenant fairness work, and how did you show it does something?
+Each tenant has a virtual time that advances by tokens served divided by its weight (`_charge`). Admission picks the
+tenant furthest behind. A tenant that becomes active starts at the current virtual clock (the minimum among active
+tenants), so idle time cannot be banked as credit. Priority classes order INTERACTIVE before BATCH, and aging
+(`aging_steps`) promotes long-waiting work, which bounds starvation. Tests show equal shares despite one tenant's 20-request
+head start, a 2:1 weighted share, no credit banking, and a batch request admitted within `aging_steps + 3` under a
+continuous interactive stream. Fault injection shows each test is necessary: FIFO admission fails the share tests, removing
+aging fails the starvation test, and allowing banking fails the banking test.
+
+### 36. How do you test a scheduler without a real model, and why trust the result?
+`tests/unit/engine/fake.py` is a deterministic model whose next token hashes the **entire** token history. Any
+dropped, duplicated, or reordered token, or progress lost across preemption, changes every later token. Each request is
+compared with the same rule run alone. The fake runner also asserts that every chunk starts exactly at the block manager's
+computed count. On top of that, Hypothesis generates adversarial scenarios (1-token budgets, single-sequence caps, pools
+barely larger than requests, cancellations at every lifecycle stage) and checks budget, cap, chunk continuity, and
+block invariants every step, plus liveness, exact outputs, and zero leaks. The focused profile (2,000 scenarios) passed,
+and three injected scheduler faults were detected. Real tensors are then covered by tiny-model engine tests and the
+real-checkpoint parity runs.
+
+### 37. Your bf16 engine parity check failed. What happened and what did you conclude?
+Batched vs unbatched on the A16 in bf16, 100 prompts × 128 tokens: only 22/100 (SmolLM2) and 18/100 (Qwen2.5)
+were identical, failing my pre-set "≥ 98% identical over 64 tokens" rule copied from M1. I recorded the failure unedited,
+then analyzed it. Every divergence occurred at a reference top-2 gap ≤ 0.375 (median 0.0 for SmolLM2: exact bf16 ties),
+none beyond bf16 rounding, and preempted requests diverged no more often than others. The decisive test was the same
+engine, configuration, and GPU in **fp32**: 100/100 identical for both models, with the same 47 preemptions, and CPU fp32
+agrees. So the engine is exact, and the bf16 differences come from batched GEMMs accumulating in a different order. My
+error was the acceptance rule: token identity across different batch shapes is only a valid criterion in fp32. For bf16,
+the right checks are "no divergence beyond rounding" plus task-level quality (M5).
+(`benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-bfloat16/ANALYSIS.md`)
+
+### 38. How much does the engine itself cost, and what limits throughput at 10× load?
+With a null runner (no model), engine overhead was flat at roughly 28–37 µs per sequence per step from 8 to 256
+concurrent sequences `[CPU-LAPTOP]` (≈ 2× run-to-run variance on this laptop, so only the flat shape is claimed). The
+largest component is the sampler's argmax over `[batch, vocab]`. On SmolLM2-135M the engine produced 107 output tok/s vs
+21 tok/s for sequential decoding (5.2×, median of 3 interleaved runs), with overhead at 0.6% of step time. At 10× load
+the limits are, in order: the per-segment Python attention loop (replaced by the M6 kernel), KV memory (more preemption;
+the pool size and prefix-hit rate decide recompute waste), the single-threaded loop (M4 adds async ingress), and
+eventually the O(W) admission scan (known issue 16) at ~10⁴ queued requests.
+
 ## Results (labeled evidence)
 
 | Claim | Label | Evidence |
@@ -251,3 +325,7 @@ must be judged with the same paired method and, more importantly, with latency m
 | Paged decoding == contiguous decoding, 40/40 runs (cold + shared-prefix), SmolLM2-135M, block 16 | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m2-paged-parity/` |
 | Block manager: 10^6 random ops per policy, 0 invariant violations, 0 leaks; 10k-request soak, 0 leaks | `[CPU-LAPTOP]` | `tests/stress/test_block_manager_soak.py` (run output in commit aeacae5) |
 | Eviction policy hit rates (cost-aware wins shared-system, loses multi-turn) | `[SIM]` | `benchmarks/results/2026-11-10-SIM-m2-prefix-eviction/` |
+| Engine == unbatched path, 100/100 prompts × 128 tokens, both models, fp32, with 47 preemptions and chunked prefill | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m3-engine-parity-float32/` |
+| Same, fp32 on GPU | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-float32/` |
+| bf16 engine vs unbatched: 22/100 and 18/100 identical (criterion failed); all divergences at bf16 near-ties | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-bfloat16/ANALYSIS.md` |
+| Batched engine 5.2× sequential output tok/s on SmolLM2 (107 vs 21, median of 3 interleaved); engine overhead 0.6% of step time | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m3-scheduler-overhead/` |

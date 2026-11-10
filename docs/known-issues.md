@@ -17,3 +17,9 @@
 | 13 | Prefix sharing is block-granular (16 tokens by default) | Prefixes shorter than a block, and the partial tail of longer ones, are not shared | Accepted (ADR-0003); radix/partial-block sharing is a possible extension |
 | 14 | Identical prompts admitted before either is computed keep private copies | Temporary duplicate memory (counted in `duplicate_registrations`) | Accepted; merge-on-register is a possible optimization |
 | 15 | Eviction-policy results are trace simulations of hit rate only | No latency/TTFT evidence for the policies yet | Measure with the engine in M3/M5 |
+| 16 | Admission scans the waiting queue with `min()`: O(W) per admitted request | Measured negligible at W = 512 (0.04 s per 512 admissions); would matter at ~10^4 queued requests | Open; per-tenant queues + a heap over tenants when profiling shows it |
+| 17 | Preemption is recompute-only (no swap to host memory) | Preempted work is recomputed, partly recovered by prefix-cache hits | Swap needs GPU measurements of PCIe vs recompute cost; revisit with M6/M10 |
+| 18 | Engine loop is single-threaded and synchronous | No concurrent API yet; cancellation is applied between steps | The async API with a request/cancel queue arrives in M4 |
+| 19 | Requests admitted in the same step cannot share a prefix | Concurrent identical prompts compute duplicate KV | By design (blocks are shareable only after compute, ADR-0003); see also #14 |
+| 20 | Batched attention is a per-segment Python loop | Attention cost grows with the number of sequences per step on the CPU reference path | Replaced by the M6 Triton varlen paged kernel |
+| 21 | Engine-overhead absolute values vary ~2x between laptop runs | Only the flat per-sequence shape is claimed, not absolute microseconds | Inherent to the 15 W laptop CPU; re-measure on the GPU host / in M5 |
