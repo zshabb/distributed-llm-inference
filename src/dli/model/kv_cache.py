@@ -9,7 +9,37 @@ manager in ``dli.kv`` solves in M2) and cannot be shared between sequences.
 
 from __future__ import annotations
 
+from typing import Protocol
+
 import torch
+
+
+class KVCacheView(Protocol):
+    """What the model needs from a KV cache for ONE sequence.
+
+    Implemented by :class:`ContiguousKVCache` (M1) and ``dli.kv.paged_store.PagedSequenceView``
+    (M2). The model only appends at ``length`` and reads the whole prefix back, so storage layout,
+    paging, and sharing stay invisible to the attention math.
+    """
+
+    @property
+    def length(self) -> int:
+        """Tokens whose K/V are written for all layers."""
+        ...
+
+    def write(
+        self, layer: int, start: int, k: torch.Tensor, v: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Store ``[kv_heads, n, head_dim]`` K/V at positions ``[start, start+n)``.
+
+        Returns:
+            K and V for positions ``[0, start+n)`` as ``[kv_heads, start+n, head_dim]``.
+        """
+        ...
+
+    def advance(self, n: int) -> None:
+        """Commit ``n`` tokens after every layer has written them."""
+        ...
 
 
 class ContiguousKVCache:
