@@ -67,4 +67,5 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 - [x] bf16 engine parity: **pre-set criterion failed**, analyzed (bf16 near-ties only; fp32 exact). Exact-match
       criteria now apply to fp32 only; bf16 quality moves to M5 evaluation
 - [ ] Moved to M4: async ingress, deadline-aware admission, stop strings (needs detokenization)
-- [ ] Moved to M5: TTFT/ITL percentiles under open-loop load; bf16 task-quality comparison
+- [ ] Moved to M5: TTFT/ITL percentiles under open-loop load; bf16 fidelity and task-quality evaluation per
+      `docs/evaluation-plan-m5.md` (the M3 bf16 exact-match criterion remains recorded as FAILED)
