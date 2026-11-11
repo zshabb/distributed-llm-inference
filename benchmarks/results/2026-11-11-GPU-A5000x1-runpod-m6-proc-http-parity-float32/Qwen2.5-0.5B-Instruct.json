@@ -1,0 +1,291 @@
+{
+ "summary": {
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "code_revision": "488dde2eafc0",
+  "evidence_label": "GPU-A5000x1-runpod",
+  "device": "cuda",
+  "dtype": "torch.float32",
+  "prompts": 24,
+  "concurrent_requests": 48,
+  "max_new_tokens": 48,
+  "identical_texts": 24,
+  "stream_equals_non_stream": 24,
+  "reference_hit_eos": 0,
+  "finish_and_usage_correct": 24,
+  "wall_seconds_http": 2.9,
+  "cuda_graphs": {
+   "status": "captured",
+   "capture_s": 0.313,
+   "memory_overhead_mib": 124.0,
+   "device_free_drop_mib": 160.0,
+   "replays": 0,
+   "fallbacks": {},
+   "graphs": [
+    {
+     "batch": 16,
+     "width_blocks": 24,
+     "status": "captured",
+     "free_before_capture_mib": 17468,
+     "eager_peak_mib": 9.3,
+     "capture_s": 0.068,
+     "replays": 0
+    },
+    {
+     "batch": 64,
+     "width_blocks": 24,
+     "status": "captured",
+     "free_before_capture_mib": 17562,
+     "eager_peak_mib": 38.3,
+     "capture_s": 0.153,
+     "replays": 0
+    }
+   ]
+  },
+  "engine": "process",
+  "graph_replays_from_snapshot": 99,
+  "note": "Correctness run; requests are concurrent and wall time is not a benchmark."
+ },
+ "records": [
+  {
+   "id": 0,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 1,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 2,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 3,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 4,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 5,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 6,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 7,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 8,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 9,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 10,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 11,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 12,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 13,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 14,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 15,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 16,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 17,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 18,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 19,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 20,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 21,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 22,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 23,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  }
+ ]
+}
