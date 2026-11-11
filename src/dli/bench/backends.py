@@ -240,6 +240,8 @@ def start(
                 "hf_cache", os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")
             )
         )
+        # Environment for the vLLM process (both launchers), recorded with the server.
+        venv_env = {str(k): str(v) for k, v in settings.get("env", {}).items()}
         if launcher == "docker":
             container = f"dli-bench-vllm-{port}"
             inner = Path("/root/.cache/huggingface") / model_dir.relative_to(hf_home)
@@ -259,6 +261,7 @@ def start(
                 f"{hf_home}:/root/.cache/huggingface:ro",
                 "-e",
                 "HF_HUB_OFFLINE=1",
+                *[a for k, v in venv_env.items() for a in ("-e", f"{k}={v}")],
                 settings.get("image", VLLM_IMAGE),
                 "--model",
                 str(inner),
@@ -308,9 +311,10 @@ def start(
                 cmd,
                 stdout=log_path.open("wb"),
                 stderr=subprocess.STDOUT,
-                env={**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONUNBUFFERED": "1"},
+                env={**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONUNBUFFERED": "1", **venv_env},
             )
         r.info["launcher"] = launcher
+        r.info["env"] = venv_env
     else:
         raise ValueError(f"unknown backend {name!r}")
     try:

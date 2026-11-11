@@ -16,3 +16,13 @@ only on 127.0.0.1, and is never shipped. Re-lock when a vLLM release accepts a f
 
 The two runtimes are the same vLLM release but not byte-identical builds (image vs wheels), so results record which
 launcher ran (`launcher` in each server record); compare vLLM numbers only within one launcher and host.
+
+## Sampler setting on GPUs with more than 16 SMs (recorded 2026-11-11)
+vLLM 0.32.0 uses FlashInfer's top-k/top-p sampling kernels only on GPUs with more than 16 SMs. On the A16 (10 SMs) it
+logged "FlashInfer top-p/top-k sampling unavailable ... falling back" and used its PyTorch sampler in every M5 run. On
+the RTX A5000 (64 SMs) it tries FlashInfer sampling, which in a pip install needs either a CUDA toolkit to JIT-compile
+the kernel or FlashInfer's JIT-cache wheel (whose cu130 build depends on Blackwell-only companion wheels). Plans for
+the A5000 therefore set `VLLM_USE_FLASHINFER_SAMPLER=0`, vLLM's documented switch: the same sampler as every A16 run,
+so the vLLM configuration is identical across GPUs. Attention uses `FLASH_ATTN` on both. Benchmarks decode greedily,
+where the sampler is a negligible share of a step. The environment is recorded with each server (`env`).
+

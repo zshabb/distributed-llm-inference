@@ -1,6 +1,6 @@
 {
   "name": "m5-a5000-pilot",
-  "description": "CALIBRATION ONLY, not evidence: RTX A5000 (RunPod). One repetition per backend and model: (1) every backend starts, incl. vLLM from the pinned venv (no Docker in a pod); (2) vLLM KV-cache capacity at --gpu-memory-utilization 0.85 on 24 GB, to size the native pool to the same number of tokens; (3) throughput ranges for the baseline rate grids.",
+  "description": "CALIBRATION ONLY, not evidence: RTX A5000 (RunPod). One repetition per backend and model: (1) every backend starts, incl. vLLM from the pinned venv (no Docker in a pod); (2) vLLM KV-cache capacity at --gpu-memory-utilization 0.85 on 24 GB, to size the native pool to the same number of tokens; (3) throughput ranges for the baseline rate grids. vLLM runs with VLLM_USE_FLASHINFER_SAMPLER=0: the sampler it used on the A16 (where FlashInfer sampling is unavailable below 17 SMs); see benchmarks/baselines/vllm/README.md.",
   "label": "GPU-A5000x1-runpod",
   "device": "cuda",
   "dtype": "bfloat16",
@@ -20,7 +20,10 @@
       "max_model_len": 4096,
       "extra_args": [
         "--enable-prefix-caching"
-      ]
+      ],
+      "env": {
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      }
     },
     "hf": {
       "max_batch": 16,
