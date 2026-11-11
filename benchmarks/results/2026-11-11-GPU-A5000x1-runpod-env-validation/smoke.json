@@ -1,0 +1,42 @@
+{
+  "kind": "gpu-smoke (not a benchmark)",
+  "checks": {
+    "matmul_fp32_vs_fp64": {
+      "max_rel_err": 4.1300920200007436e-07,
+      "ok": true
+    },
+    "matmul_bf16_vs_fp64": {
+      "max_rel_err": 0.003578949779483536,
+      "ok": true
+    },
+    "sdpa_causal_fp32_vs_cpu": {
+      "max_rel_err": 6.142469300119099e-07,
+      "ok": true
+    },
+    "allocate_90pct_free": {
+      "free_gib": 23.27,
+      "total_gib": 23.55,
+      "ok": true
+    },
+    "triton_vector_add": {
+      "ok": true,
+      "version": "3.8.0"
+    }
+  },
+  "timings_smoke": {
+    "matmul4096_fp32_tflops": 18.29,
+    "matmul4096_tf32_tflops": 44.18,
+    "matmul4096_fp16_tflops": 96.48,
+    "matmul4096_bf16_tflops": 85.46,
+    "device_copy_gbps": 679.2
+  },
+  "device": {
+    "name": "NVIDIA RTX A5000",
+    "capability": "8.6",
+    "total_memory_gib": 23.55,
+    "multiprocessors": 64,
+    "bf16_supported": true
+  },
+  "peak_allocated_mib": 21452,
+  "ok": true
+}
