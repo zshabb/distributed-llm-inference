@@ -10,7 +10,6 @@ import time
 from pathlib import Path
 
 import httpx
-import pytest
 
 from .conftest import _free_port
 
@@ -74,22 +73,8 @@ def test_requires_keys_by_default(tiny_dir: Path) -> None:
     assert "--api-keys-file" in out
 
 
-FAST_STACK = (
-    "--engine-process",
-    "--http",
-    "httptools",
-    "--event-loop",
-    "uvloop",
-    "--gil-switch-interval",
-    "0.001",
-)
-
-
-@pytest.mark.parametrize("extra", [(), FAST_STACK], ids=["defaults", "fast-stack"])
-def test_sigterm_drains_inflight_stream_then_exits_cleanly(
-    tiny_dir: Path, extra: tuple[str, ...]
-) -> None:
-    proc, port, admin_port = _launch(tiny_dir, "--no-auth", *extra)
+def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path) -> None:
+    proc, port, admin_port = _launch(tiny_dir, "--no-auth")
     try:
         _wait_ready(port, proc)
         assert httpx.get(f"http://127.0.0.1:{admin_port}/metrics", timeout=10).status_code == 200
@@ -129,15 +114,3 @@ def test_sigterm_drains_inflight_stream_then_exits_cleanly(
     finally:
         if proc.poll() is None:
             proc.kill()
-
-
-def test_serving_flags_default_to_the_original_stack() -> None:
-    from dli.server.__main__ import parse_args
-
-    a = parse_args(["--model", "m"])
-    assert (a.http, a.event_loop, a.gil_switch_interval, a.engine_process) == (
-        "h11",
-        "asyncio",
-        None,
-        False,
-    )

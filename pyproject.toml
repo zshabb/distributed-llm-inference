@@ -15,9 +15,6 @@ dependencies = [
     "safetensors>=0.4.5",
     "tokenizers>=0.20",
     "uvicorn>=0.32",
-    # Optional fast paths for the HTTP server (--http httptools, --event-loop uvloop); M6 serving work.
-    "httptools>=0.6",
-    "uvloop>=0.21; sys_platform != 'win32'",
 ]
 
 [project.scripts]
@@ -67,8 +64,6 @@ constraint-dependencies = [
     "nvidia-ml-py<=13.615.71",
     "pyarrow<=26.0.0",
     "scipy<=1.18.1",
-    "httptools<=0.9.0",
-    "uvloop<=0.23.0",
 ]
 conflicts = [[{ extra = "cpu" }, { extra = "cu130" }]]
 
