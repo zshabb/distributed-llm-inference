@@ -25,6 +25,38 @@
         "--cuda-graphs",
         "--engine-process"
       ]
+    },
+    "dli-proc-gil": {
+      "kind": "dli",
+      "block_size": 16,
+      "extra_args": [
+        "--cuda-graphs",
+        "--engine-process",
+        "--gil-switch-interval",
+        "0.0005"
+      ]
+    },
+    "dli-proc-httptools": {
+      "kind": "dli",
+      "block_size": 16,
+      "extra_args": [
+        "--cuda-graphs",
+        "--engine-process",
+        "--http",
+        "httptools"
+      ]
+    },
+    "dli-proc-uvloop": {
+      "kind": "dli",
+      "block_size": 16,
+      "extra_args": [
+        "--cuda-graphs",
+        "--engine-process",
+        "--http",
+        "httptools",
+        "--event-loop",
+        "uvloop"
+      ]
     }
   },
   "models": [
@@ -33,7 +65,10 @@
       "repo": "Qwen/Qwen2.5-0.5B-Instruct",
       "backends": [
         "dli-graphs",
-        "dli-graphs-proc"
+        "dli-graphs-proc",
+        "dli-proc-gil",
+        "dli-proc-httptools",
+        "dli-proc-uvloop"
       ],
       "experiments": [
         "closed-fixed"
@@ -43,6 +78,15 @@
           "num_blocks": 100416
         },
         "dli-graphs-proc": {
+          "num_blocks": 100416
+        },
+        "dli-proc-gil": {
+          "num_blocks": 100416
+        },
+        "dli-proc-httptools": {
+          "num_blocks": 100416
+        },
+        "dli-proc-uvloop": {
           "num_blocks": 100416
         }
       }
@@ -68,7 +112,10 @@
       "n_per_concurrency": 4,
       "backends": [
         "dli-graphs",
-        "dli-graphs-proc"
+        "dli-graphs-proc",
+        "dli-proc-gil",
+        "dli-proc-httptools",
+        "dli-proc-uvloop"
       ]
     }
   }
