@@ -109,3 +109,10 @@ are, not between equally optimized kernels.
   Qwen2.5-0.5B only (SmolLM2-135M is too weak for the task to be informative). Power: with a discordance rate d ≤ 5 %,
   the 95 % CI half-width of a paired accuracy difference is about 1.96·√(d/n) ≤ 0.9 points, inside the ±2-point
   tolerance, so the full test set can show equivalence if it holds.
+
+### Changes after the first runs (results kept, explained in the analyses)
+- **Saturation rule** (2026-11-11, `3685485`): the achieved-rate test was biased by the drain tail and stopped sweeps
+  early; replaced by a queue-growth test. The campaign keeps the original rule's results. That test in turn sees
+  continuous-batching overload late (known issue #35).
+- **AC5** was re-measured with `benchmarks/plans/m5-gpu-ac5.json` at ≥ 2× the corrected saturation, because the
+  campaign's overload point did not meet the pre-registered 2× condition. Criteria unchanged.

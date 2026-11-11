@@ -36,12 +36,21 @@ All notable changes are documented here, following [Keep a Changelog](https://ke
 - Tests: real-HTTP e2e suite, contract conformance of live responses, official `openai` SDK compatibility,
   real-checkpoint HTTP parity (`-m parity`).
 
+- Benchmarking and evaluation (M5, `dli.bench`): open/closed-loop and session load generator, workloads (synthetic,
+  shared-prefix, OASST1 multi-turn), HF static-batching baseline server, backend launchers (native, vLLM in Docker, HF),
+  NVML/metrics monitor, campaign runner and reports, bf16 precision study (teacher-forced fidelity, perplexity, ARC),
+  engine step profiler; `--no-prefix-caching` ablation switch; M5 CPU and A16 results with analyses.
+
 ### Fixed
 - `envinfo` recorded the revision at write time instead of run start (provenance).
 - `envinfo` reported a clean revision when untracked files were present.
 - Server (found by M4 tests before release): a client disconnect during a non-streaming request, or while queued, did
   not abort generation; the request timeout never fired for streams (it was bound to the wrong asyncio task); the
   admin listener's logging config silenced the API server's startup and access logs.
+- Admission (found by M5): the TTFT predictor over-predicted 10-50x on a decode-bound engine (prefill rate measured on
+  decode-dominated steps) and rejected half of the requests that met their deadline; replaced by a step model.
+- Benchmark harness: saturation detection was biased by the drain tail; recorded commands no longer include the home
+  directory; non-streaming end time was stamped after JSON parsing.
 - `setup_docker.sh` now merges the localhost bind into an existing `daemon.json` instead of skipping it.
 
 ### Security

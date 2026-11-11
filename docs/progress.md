@@ -2,6 +2,67 @@
 
 Per-session record (ENGINEERING_STANDARDS §13). Newest first.
 
+## 2026-11-11 — Session 5: M5 benchmarking and evaluation (complete, branch `feat/m5-benchmarks`)
+
+### Completed
+- `dli.bench`: load generator (open/closed loop, sessions), workloads (synthetic, shared-prefix, OASST1 multi-turn), HF
+  static-batching baseline, backend launchers (native, vLLM v0.32.0 in Docker by digest, HF), monitor, campaign runner,
+  reports; bf16 precision study; engine step profiler; `--no-prefix-caching` ablation switch.
+- Methodology and acceptance pre-registered (`benchmarks/methodology.md`, ADR-0004) before evidence runs; calibration
+  pilot kept separate from evidence.
+- Evidence: CPU campaign (5 reps), A16 campaign (3 reps, 4 models, 3 backends), AC5 rerun, precision study, profile.
+- Owner policy adopted: GPU-first testing (portfolio standards §6.2, CLAUDE.md).
+
+### Results (labeled)
+| Item | Result | Label |
+|---|---|---|
+| AC3 CPU (≥ 2× HF static at c=16) | **failed**: 0.73× (54.5 vs 74.4 tok/s) | `[CPU-LAPTOP]` `d6ffccc` |
+| AC3 GPU (≥ 5×) | **failed**: 0.33× (224.6 vs 676.5 tok/s, Qwen2.5-0.5B) | `[GPU:A16x1@vultr]` `8e790c1` |
+| AC4 vLLM comparison | published; vLLM 1.7–9.2× faster | `[GPU:A16x1@vultr]` `8e790c1` |
+| AC5 (≥ 2× saturation) | **failed** on rejection latency (P99 2.01 s); no crash; admitted TTFT P99 1.98 s | `[GPU:A16x1@vultr]` `3b98d95` |
+| bf16 study | fp32 engine exact; quality within tolerance; margin target missed (99.85% vs 99.9%) | `[GPU:A16x1@vultr]` `8e790c1` |
+| Bottleneck | per-sequence attention loop: 11,888 kernels/step at batch 64, ~35× bandwidth floor | `[GPU:A16x1@vultr]` |
+| Fast suite | 268 passed | `[CPU-LAPTOP]` |
+
+### Defects and corrections found
+1. Admission predictor over-predicted TTFT 10–50× (prefill rate measured on decode-dominated steps): fixed (`939e134`),
+   regression test. The corrected model is optimistic under ~4× overload (AC5), recorded (#26).
+2. Saturation rule biased by the drain tail stopped sweeps early and set the overload rate too low: fixed (`3685485`),
+   AC5 re-run. The new rule sees continuous-batching overload late (#35).
+3. vLLM's CUDA 12.9 image cannot start (torchcodec needs CUDA 13); pinned the CUDA 13.0 build of the same release.
+4. Personal home-directory paths in recorded command lines: redacted before commit (documented), harness fixed.
+5. Load generator stamped non-streaming end times after JSON parsing: fixed in development.
+6. Test-design errors caught by their own failures: a teacher-forcing preemption test that never preempted; an
+   assumption that recompute re-samples rows (it does not).
+7. Process: one commit type `bench:` is non-standard (`d6ffccc`, published; `chore(bench)` used afterwards).
+8. pytest-xdist evaluated and rejected (< 10% faster, intermittent timing failure).
+
+### Four-perspective review
+- **Staff:** the harness is backend-agnostic and tested where answers are exact (fp32 identities, baseline equality);
+  the engine's scheduling is cheap (0.1–0.4 ms/step) and its attention path is the bottleneck: M6 has a measured target.
+- **Security:** benchmark servers bind loopback; vLLM ports published on 127.0.0.1; HF cache mounted read-only;
+  datasets fetched at pinned revisions; no personal paths in published results; pip-audit clean with the new group.
+- **SRE:** admission bounds admitted TTFT under 4× overload (1.98 s vs 90 s) but rejects late for a fifth of requests;
+  KV accounting exact; memory dominated by the preallocated pool.
+- **Interviewer:** strong, honest negative results with causes measured, pre-registration, and two self-found defects
+  disclosed. Weakness: the engine is not yet fast.
+
+### GPU usage
+| Start (UTC) | End (UTC) | Duration | Purpose |
+|---|---|---|---|
+| 00:45:23 | 01:08:02 | ~4 min in short sessions | inspection, image pulls (one image rejected), model downloads, flag discovery |
+| 01:09:36 | 01:23:27 | 13.9 min | calibration pilot |
+| 01:27:22 | 05:16:11 | 228.8 min | campaign (3 h 09 min) + precision study (36 min) + profile (5 min) |
+| 15:12:24 | 15:49:22 | 37.0 min | AC5 rerun |
+
+About 4.7 GPU-hours of work, ≈ $2.20 at $0.471/h; the host also stood idle 05:16–15:12 (it bills while it exists).
+
+### Next steps (awaiting approval)
+M6: batched GQA-aware paged-attention kernel and CUDA graphs, re-measuring AC3/AC5 on the same hardware. Separately
+proposed: provider-independent GPU host profiles and migration of GPU work to an RTX A5000 (RunPod), assessed and
+awaiting approval.
+
+
 ## 2026-11-10/11 — Session 4: M4 OpenAI-compatible async server (complete, branch `feat/m4-openai-api`)
 
 ### Completed
