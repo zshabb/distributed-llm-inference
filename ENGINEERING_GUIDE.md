@@ -1,9 +1,9 @@
 # Engineering Guide
 
 How the system works, for an engineer who needs to maintain or extend it.
-**Scope of this revision: milestones M0–M3** (model, loader, paged KV memory with prefix caching, continuous-batching
-engine with chunked prefill, preemption, fairness, sampling, tooling).
-Sections for the scheduler, paged KV cache, API, kernels, tensor parallelism, and router are added as those land.
+**Scope of this revision: milestones M0–M4** (model, loader, paged KV memory with prefix caching, continuous-batching
+engine with chunked prefill, preemption, fairness, sampling, OpenAI-compatible async HTTP server, tooling).
+Sections for kernels, tensor parallelism, and the router are added as those land.
 Nothing described as *planned* exists yet (see `docs/implementation-plan.md`).
 
 ## 1. End-to-end flow today (M1)
@@ -66,6 +66,31 @@ Invariants: a chunk always starts at the request's `num_computed_tokens` (the bl
 running request is never preempted. Every admitted request fits alone (capacity rejection), so the engine always
 makes progress. Policy rationale and complexity: `docs/algorithms/continuous-batching-scheduler.md`.
 
+## 1c. HTTP request (M4)
+
+```
+uvicorn (asyncio)                                                      engine thread (AsyncEngine)
+ BodySizeLimit (413) → AuthMiddleware (401, Argon2 in a worker thread)
+ route: pydantic + unsupported() (400) → tokenize / sandboxed chat template → length checks
+ AdmissionController.check(snapshot) → 503 draining | 429 busy/queue/deadline + Retry-After
+ _text_stream ─ generate(rid, ids, params) ──── _Add ──────────────► queue → step() loop
+      ◄────────── EngineEvent(token_ids, finished) via call_soon_threadsafe ◄──┘
+   _before(deadline) → _guard_dead (503) → IncrementalDetokenizer → StopStringMatcher
+ _first_event (under _unless_disconnected; X-Deadline-Ms → 429 if no first token in time)
+   stream=false: _collect (under _unless_disconnected; 504 on timeout) → JSON + usage + x_timing
+   stream=true : _sse → role chunk, deltas, final chunk, [usage chunk], [DONE]; errors in-band
+ any exit path closes the generator → finally: _Abort ─────────────► scheduler.abort → KV freed
+```
+
+Rules that keep this correct:
+- **The engine thread is the only code that touches the engine.** Handlers communicate by command queue and read the
+  immutable `EngineSnapshot`; there are no locks around engine state.
+- **One exit path.** Generators are always wrapped in `aclosing()`, so disconnect, stop string, timeout, deadline,
+  error, and shutdown all reach the same `finally` that aborts the request.
+- **Time limits are per await, not `asyncio.timeout()`,** because generators are started in one task and iterated in
+  another (QnA.md, question 45).
+- **Nothing is sent before the first token,** so pre-token failures are real HTTP statuses (QnA.md, question 44).
+
 ## 2. Components
 
 | Component | File | Responsibility | Key invariants |
@@ -87,6 +112,13 @@ makes progress. Policy rationale and complexity: `docs/algorithms/continuous-bat
 | Sampler | `src/dli/sampling.py` | Greedy, temperature, top-k, top-p; per-request generators | One draw per sampled token per request (batch-invariant) |
 | Scheduler | `src/dli/engine/scheduler.py` | Budgeted chunking, LIFO recompute preemption, priority + aging + weighted fair queuing, capacity rejection, abort | Budget/cap never exceeded; chunks continue computed KV; no admission in a preempting step |
 | Runner / engine | `src/dli/engine/runner.py`, `engine.py` | One forward per step; step loop, stop rules, StepStats | Thread-confined single loop |
+| Async engine | `src/dli/server/async_engine.py` | Engine on its own thread; add/abort/stop commands; per-request event queues; `EngineSnapshot` | Only the engine thread touches the engine; a crash marks it unhealthy and fails every open request |
+| HTTP app | `src/dli/server/app.py`, `schemas.py` | Routes, validation, termination, SSE, timeouts, disconnect handling | Every request path aborts its engine request on exit; in-flight counter always released |
+| Text | `src/dli/server/text.py` | Tokenizer, sandboxed chat template, incremental detokenizer, stop strings | Never emits a partial UTF-8 character or a partial stop string |
+| Admission | `src/dli/server/admission.py` | In-flight/queue caps, deadline feasibility, draining | Decisions use only the published snapshot |
+| Auth / limits | `src/dli/server/auth.py`, `limits.py` | API keys (Argon2id), body-size limit | Both run before the body is parsed |
+| Metrics / admin | `src/dli/server/metrics.py`, `admin.py` | Prometheus registry, admin listener (state, drain) | Bounded label cardinality; separate port |
+| Entry point | `src/dli/server/__main__.py`, `factory.py` | CLI (`dli-serve`), safe defaults, graceful drain on SIGTERM | Refuses unauthenticated public binds |
 
 ## 3. Data structures and memory
 
@@ -120,6 +152,12 @@ makes progress. Policy rationale and complexity: `docs/algorithms/continuous-bat
    identical for both models in fp32 `[CPU-LAPTOP]` and bf16 `[GPU:A16x1@vultr]` (see README *Verified results*).
    Long runs capture the code revision at start (`envinfo.current_revision`) because HEAD can move during a 70-minute run.
 3. **Rejection paths:** every loader and config error has a test that triggers it.
+4. **Server (M4), all over real TCP** (`tests/e2e/`): a uvicorn server backed by the real engine and a tiny random
+   model with a character tokenizer, so every layer runs in milliseconds. Covers streaming, disconnects (stream,
+   non-stream, queued), overload and deadlines, timeouts, malformed input, auth, body limits, metrics, admin, the real
+   `dli-serve` process (refusals and SIGTERM drain), contract C1 schema conformance of every response, and the official
+   `openai` SDK. On real checkpoints (`tests/parity/test_http_real_checkpoint.py`): prompt ids equal `transformers`'
+   for 100 prompts, and concurrent HTTP output equals `transformers`' decode of the unbatched reference tokens.
 
 Why exact token equality is meaningful in fp32: both implementations perform the same operations in the same
 order, so per-step logit differences are ~1e-6, far below typical top-2 gaps. A token flip in fp32 would point to a
@@ -145,8 +183,15 @@ for CPU and CUDA 13.0 builds in one lockfile, matching the A16 host driver).
 | Batched output ≠ unbatched | Chunk not continuing computed KV, wrong segment offsets, preemption losing progress | Fake history-hash runner (asserts chunk continuity); `test_batched_forward.py`; engine parity harness records the first divergence and the reference logit gap |
 | A request never finishes | Livelock or starvation | `has_unfinished()` loops with a step bound in tests; aging_steps; check that the request is not over capacity |
 | Throughput low despite many requests | Budget/cap too small, memory-bound preemption churn | `StepStats` (tokens per step, preemptions); `engine.bm.stats()` |
+| Many 429s | In-flight/queue caps, or deadlines tighter than the predicted TTFT | `dli_admission_rejections_total{reason}`; `/admin/state` (queue, prefill rate) |
+| KV usage does not return to 0 when idle | A request path that does not close its generator | `dli_kv_blocks_used`; `/admin/state`; the disconnect tests in `tests/e2e/test_http_api.py` show the pattern |
+| Streams cut with an in-band error | Request timeout, or engine failure (`dli_engine_healthy` = 0) | `dli_request_errors_total{type}`; server log |
+| `/readyz` 503 | Draining or engine dead | `/admin/state` (`draining`, `engine.healthy`, `engine.error`) |
 
 ## 8. Scaling, failure handling, limitations
 
-Not applicable yet. M1 is a single-sequence, in-process path, so scaling (batching, paging, routing) and failure handling
-(admission, cancellation, worker loss) begin at M2–M4 and M8. Current limitations: `docs/known-issues.md`.
+One worker process serves one model on one device. Within it: continuous batching and paged KV (M2–M3) set capacity;
+admission control turns overload into fast 429s instead of unbounded queues; cancellation returns memory as soon as a
+client leaves; an engine crash marks the worker unready so an orchestrator stops routing to it. Across workers
+(routing, retries, worker loss) is M8–M9. Performance under load is not yet measured (M5). Current limitations:
+`docs/known-issues.md`.

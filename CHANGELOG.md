@@ -27,9 +27,21 @@ All notable changes are documented here, following [Keep a Changelog](https://ke
 - Randomized adversarial scheduler tests, fault-injected fairness/preemption checks, engine overhead benchmark,
   milestone engine-vs-unbatched parity harness.
 
+- OpenAI-compatible async server (M4, `dli.server`): `/v1/completions`, `/v1/chat/completions`, `/v1/models`, SSE
+  streaming with `include_usage`, stop strings, sandboxed chat templates, incremental detokenization; `AsyncEngine`
+  (engine on a dedicated thread); deadline/capacity admission with 429 + `Retry-After`; client-disconnect cancellation;
+  request timeouts; API-key auth (Argon2id); body-size limit; Prometheus metrics and an admin listener (state, drain);
+  `dli-serve` entry point with safe defaults and graceful SIGTERM drain; `python -m dli.server.auth new <tenant>`.
+- Contract C1: documented 401/404/413/500/504 responses and the `CompletionChunk` stream event schema (additive).
+- Tests: real-HTTP e2e suite, contract conformance of live responses, official `openai` SDK compatibility,
+  real-checkpoint HTTP parity (`-m parity`).
+
 ### Fixed
 - `envinfo` recorded the revision at write time instead of run start (provenance).
 - `envinfo` reported a clean revision when untracked files were present.
+- Server (found by M4 tests before release): a client disconnect during a non-streaming request, or while queued, did
+  not abort generation; the request timeout never fired for streams (it was bound to the wrong asyncio task); the
+  admin listener's logging config silenced the API server's startup and access logs.
 - `setup_docker.sh` now merges the localhost bind into an existing `daemon.json` instead of skipping it.
 
 ### Security

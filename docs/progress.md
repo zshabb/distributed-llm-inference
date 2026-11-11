@@ -2,6 +2,59 @@
 
 Per-session record (ENGINEERING_STANDARDS §13). Newest first.
 
+## 2026-11-10/11 — Session 4: M4 OpenAI-compatible async server (complete, branch `feat/m4-openai-api`)
+
+### Completed
+- M3 follow-ups: path-disclosure record (`SECURITY.md`, known issue #22 closed per owner decision), M5 bf16 evaluation
+  plan, 5.2× figure labeled as a preliminary CPU observation.
+- **M4:** `dli.server`: text layer (sandboxed chat templates, incremental detokenizer, stop strings), `AsyncEngine`,
+  OpenAI routes with SSE, admission control and drain, API-key auth and body limits, Prometheus metrics and admin
+  listener, `dli-serve` entry point with graceful drain; contract C1 extended (additive).
+
+### Tests executed (results)
+| Suite | Result | Label |
+|---|---|---|
+| Fast suite (incl. 63 real-HTTP e2e tests) | 231 passed (~45 s) | `[CPU-LAPTOP]` |
+| HTTP parity fp32, 24 prompts × 48 tokens × 2 models, 48 concurrent SDK requests | 24/24 + 24/24 on every check | `[CPU-LAPTOP]` code `7463dd4` |
+| Same, fp32 | 24/24 + 24/24 on every check | `[GPU:A16x1@vultr]` code `7463dd4` |
+| Same, bf16 | stream == non-stream 11/24 + 15/24: **pre-set criterion failed**; divergences at near-ties | `[GPU:A16x1@vultr]` code `7463dd4` |
+| Prompt tokenization vs `transformers`, 100 prompts × 2 models | 100/100 + 100/100 | all runs |
+| pip-audit (cpu + cu130), gitleaks full history | no known vulnerabilities; no leaks | — |
+
+### Defects and corrections found
+1. Non-streaming and queued requests were not cancelled on client disconnect (found while writing the KV-leak tests;
+   fixed in `3eb47cb` with regression tests).
+2. The request timeout never fired for streams: `asyncio.timeout()` inside a generator binds to the task that entered
+   it (fixed in `f073e64`; regression test for both forms).
+3. **Process error:** `3eb47cb` was pushed with one test failing; `pytest | tail` hid the exit code. Fixed by
+   `f073e64`; test commands now run with `pipefail`.
+4. Contract C1 lacked five statuses the server returns and had no stream-event schema (found by the conformance tests).
+5. uvicorn installs its own signal handlers, which would skip draining; overridden via `capture_signals`.
+6. A real `dli-serve` run logged no uvicorn startup or access lines: the admin listener's uvicorn config reset the
+   process-wide loggers. Found by smoke-testing the README; fixed in `de754c2` with a regression assertion.
+7. **Acceptance-rule error (again bf16):** the HTTP test asserted stream == non-stream in every dtype although M3 had
+   shown bf16 is batch-composition dependent. Recorded as failed with an analysis; assertion now fp32-only (`e85c572`).
+
+### Four-perspective review
+- **Staff:** the engine stays synchronous and single-owner; the server talks to it only through a command queue and an
+  immutable snapshot. Every request path ends in one `aclosing()` exit. Debt: deadline predictor ignores decode load
+  (#26); keys load at startup (#25).
+- **Security:** auth on by default and before parsing; Argon2id hashes; no timing oracle on key ids; bounded bodies and
+  generation; sandboxed templates; admin surface off the public port. Dependencies audited. No TLS in-process (#24).
+- **SRE:** readiness reflects drain and engine health; SIGTERM drains; metrics cover the golden signals plus KV and
+  queue state. No alerts or dashboards yet (M9).
+- **Interviewer:** behaviour proven over real TCP with the official SDK and the contract; two real concurrency bugs
+  found by tests; a second honest negative bf16 result. No performance claims (M5).
+
+### GPU usage
+| Start (UTC) | End (UTC) | Duration | Purpose |
+|---|---|---|---|
+| 2026-11-11 00:06:04 | 00:08:18 | 134 s | M4 HTTP parity, bf16 + fp32 (incl. dependency sync), ≈ $0.018 |
+
+### Next steps (awaiting approval)
+M5: benchmark harness and baselines (HF static batching, vLLM on the A16), open-loop TTFT/ITL percentiles, bf16
+evaluation per `docs/evaluation-plan-m5.md`.
+
 ## 2026-11-10 — Session 3: publication + M3 continuous batching (complete, branch `feat/m3-continuous-batching`)
 
 ### Completed

@@ -1,7 +1,38 @@
 # Operations
 
-This runbook currently covers the **remote GPU development host**. Serving, deployment, alerting, and incident
-runbooks are added as those components land (milestones M4, M8, M9).
+This runbook covers the **inference server** (M4, section 0) and the **remote GPU development host** (sections 1-5).
+Router, deployment, alerting, and incident runbooks are added as those components land (M8, M9).
+
+## 0. Running the inference server
+
+```bash
+# 1. Create API keys. The key is printed once (stderr); only its Argon2id hash goes in the file.
+uv run --frozen python -m dli.server.auth new acme            # prints {"key_id": ..., "secret_hash": ...}
+#    Put the printed JSON objects in a list: [ {...}, {...} ] -> keys.json (keep it out of Git)
+
+# 2. Serve (defaults: API on 127.0.0.1:8000, admin on 127.0.0.1:8001, auth required)
+uv run --frozen dli-serve --model HuggingFaceTB/SmolLM2-135M-Instruct --api-keys-file keys.json --kv-cache-gb 1
+
+# Local development only: no auth, refused unless --host is a loopback address
+uv run --frozen dli-serve --model HuggingFaceTB/SmolLM2-135M-Instruct --no-auth
+```
+
+Any OpenAI client works: `OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="<key>")`. `--model` takes a local
+checkpoint directory or a repo id from the pinned list in `dli.model.hub` (unpinned ids are refused).
+
+| Concern | Behaviour | Flags |
+|---|---|---|
+| Binding | Loopback by default. A public `--host` requires API keys | `--host`, `--port` |
+| Authentication | `Authorization: Bearer dli_<id>_<secret>`; Argon2id hashes verified off the event loop, before the body is parsed. Tenant comes from the key; client `X-Tenant-Id` is ignored | `--api-keys-file`, `--no-auth` |
+| Admin listener | `/metrics` (Prometheus), `/admin/state`, `/admin/drain`, `/admin/undrain` on a separate loopback port. Optional bearer token, compared in constant time | `--admin-host`, `--admin-port`, `--admin-token-env` (default `DLI_ADMIN_TOKEN`) |
+| Overload | 429 + `Retry-After` when in-flight or queued limits are reached, or an `X-Deadline-Ms` budget cannot be met (predicted from the measured prefill rate); a request whose deadline passes while queued is aborted with 429 before any byte is sent | `--max-inflight-requests`, `--max-queued-requests` |
+| Limits | Body ≤ 2 MiB (413), `max_tokens` ≤ 4096 and ≤ context, ≤ 4 stop strings, non-streaming timeout 504 | `--request-timeout` |
+| KV pool | Fixed at startup | `--num-blocks` or `--kv-cache-gb`, `--block-size` |
+| Shutdown | SIGINT/SIGTERM: new requests get 503 and `/readyz` fails, in-flight requests finish (bounded), then exit 0 | `--drain-timeout` |
+| Health | `/healthz` (process up), `/readyz` (engine healthy and not draining) on the API port | |
+
+Clients that disconnect mid-stream are detected and their engine request is aborted, which frees its KV blocks. Engine
+failure marks the server unhealthy: new requests get 503 and streaming requests receive an in-band error event.
 
 ## 1. GPU host model
 

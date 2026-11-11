@@ -314,6 +314,84 @@ the limits are, in order: the per-segment Python attention loop (replaced by the
 the pool size and prefix-hit rate decide recompute waste), the single-threaded loop (M4 adds async ingress), and
 eventually the O(W) admission scan (known issue 16) at ~10⁴ queued requests.
 
+## OpenAI-compatible server (M4)
+
+### 39. Walk through one HTTP request.
+`BodySizeLimit` bounds the body (413) and `AuthMiddleware` checks the bearer key (401) before anything is parsed.
+The handler validates the request (pydantic, plus an explicit list of unsupported OpenAI features that get 400 instead
+of being silently ignored), tokenizes or renders the chat template in a sandboxed Jinja environment, and checks lengths
+against the context and the KV pool. Admission control then accepts or rejects (429/503) from the latest engine snapshot.
+An accepted request becomes an async generator over `AsyncEngine.generate()`: token ids arrive from the engine thread,
+pass through the incremental detokenizer and the stop-string matcher, and leave as one JSON body or SSE chunks.
+
+### 40. Why a dedicated engine thread rather than running the engine on the event loop?
+A step is a blocking forward pass (milliseconds to hundreds of milliseconds). On the loop it would stall every
+connection, including health checks and disconnect detection. A thread pool would break the engine's single-owner
+invariant (the block manager is thread-confined since M2). So one thread owns the engine and receives typed commands
+(add, abort, stop) through a queue; results go back with `loop.call_soon_threadsafe`. After each step the thread
+publishes an immutable `EngineSnapshot` that admission, readiness, and metrics read without locks.
+
+### 41. How does cancellation work, and how do you know memory is freed?
+Every request is an async generator wrapped in `aclosing()`; whatever ends it (client disconnect, stop string, timeout,
+deadline miss, shutdown) runs its `finally`, which sends an abort to the engine thread, which frees the KV blocks. Tests
+check the outcome, not the mechanism: after a client drops a stream, `kv_used_blocks` returns to 0 and the generated-token
+count stops short of `max_tokens`. Writing those tests for the non-streaming and still-queued cases found a real gap:
+disconnects were noticed only when a chunk was written, so an abandoned 3000-token non-streaming request ran to the end.
+A watcher on the ASGI `http.disconnect` message now cancels the work (commit 3eb47cb).
+
+### 42. What does admission control reject, and why reject rather than queue?
+Four reasons: draining (503), too many in-flight requests or too many queued requests (429 + `Retry-After`), and a
+deadline that cannot be met: with `X-Deadline-Ms`, predicted time to first token = queued prefill tokens ÷ measured prefill
+rate (EWMA). A request still queued when its deadline passes is aborted and gets 429 before any byte is sent. Queuing
+work that will miss its deadline wastes capacity and gives the client no signal; a fast 429 lets a router or client
+retry elsewhere. The predictor is deliberately simple and ignores decode contention (known issue #26).
+
+### 43. How do stop strings work when a stop string spans tokens?
+Stop strings are matched on decoded text. `StopStringMatcher` holds back any suffix of the output that is a prefix of
+a stop string, so a partial match is never streamed and then "taken back". On a full match the text before it is
+emitted, `finish_reason` is `stop`, and the generator is closed, which aborts the engine request at once. The
+incremental detokenizer never emits a partial UTF-8 character (it waits while the decoded text ends in U+FFFD).
+
+### 44. Why wait for the first token before sending response headers?
+Once a 200 and SSE headers are sent, an error can only be reported in-band. Waiting for the first event means anything
+that fails before then (deadline missed while queued, context or capacity errors, a dead engine) is a real HTTP status
+that clients and load balancers understand. After the first token, failures are a `data: {"error": ...}` event followed
+by `[DONE]`, as OpenAI does.
+
+### 45. Describe a concurrency bug you found in your own async code.
+The request timeout used `asyncio.timeout()` inside the request generator. That context manager cancels the task that
+*entered* it, but the generator is entered in one task and iterated in another (Starlette iterates streams in its own
+task). For streams, the timeout therefore never fired. It surfaced when the disconnect watcher moved the first-token
+wait into its own task and the 504 contract test started failing. The fix bounds each wait separately with
+`asyncio.wait_for` against a fixed deadline, in whichever task is iterating, and a regression test covers both forms.
+
+### 46. Which security controls does the server have?
+Safe defaults: loopback bind, auth required (refuses to start without keys, refuses `--no-auth` on a public address).
+API keys `dli_<id>_<secret>`: only Argon2id hashes are stored; lookup by id, a dummy verification for unknown ids
+(no timing oracle on key existence), verification off the event loop, a SHA-256 cache of verified tokens. Auth and the
+body limit run before parsing. The tenant comes from the key; a client's `X-Tenant-Id` is ignored. Chat templates run in
+an immutable sandboxed Jinja environment. Metrics and drain controls are on a separate loopback listener with an
+optional constant-time-compared token. Limits on `max_tokens`, stop strings, and request time bound resource use.
+
+### 47. How do you know it is actually OpenAI-compatible?
+Three layers, all against the real server over TCP: (1) every response's status must be documented in contract C1 and
+its body must validate against the contract schema, stream events included (writing these found five undocumented
+statuses); (2) the official `openai` Python SDK, unchanged, for both endpoints, streaming, stop sequences, exception
+mapping (401/400/404/429/503) and async cancellation; (3) on real checkpoints, prompt ids equal `transformers`' tokenizer
+and chat template for all 100 prompts, and concurrent HTTP output equals `transformers`' decode of the unbatched
+reference tokens.
+
+### 48. Why are metrics on a separate port, and what do they tell an operator?
+Metrics reveal traffic and tenant activity, and drain is a control action: neither belongs on the public port. They
+show requests by endpoint and status, errors by type (including in-band stream failures and client disconnects),
+rejections by reason, prompt and generated tokens, TTFT / inter-token / end-to-end latency histograms, and engine state
+from the snapshot (queue depth, KV blocks used/free/cached, prefill rate, step time, preemptions, prefix hit ratio,
+health), plus process and GPU memory.
+
+### 49. What has M4 not shown?
+Performance. The tests prove behaviour under overload, cancellation and failure, not throughput or latency; the HTTP and
+detokenization overhead is unmeasured. Open-loop load with TTFT/ITL percentiles and comparison to vLLM are M5.
+
 ## Results (labeled evidence)
 
 | Claim | Label | Evidence |
@@ -328,4 +406,6 @@ eventually the O(W) admission scan (known issue 16) at ~10⁴ queued requests.
 | Engine == unbatched path, 100/100 prompts × 128 tokens, both models, fp32, with 47 preemptions and chunked prefill | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m3-engine-parity-float32/` |
 | Same, fp32 on GPU | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-float32/` |
 | bf16 engine vs unbatched: 22/100 and 18/100 identical (criterion failed); all divergences at bf16 near-ties | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-bfloat16/ANALYSIS.md` |
+| HTTP server (OpenAI SDK, 48 concurrent requests) on real checkpoints: output identical to `transformers`' decode of the unbatched reference 24/24 + 24/24, stream == non-stream 24/24, prompt ids equal `transformers`' for 100/100 prompts, fp32 | `[CPU-LAPTOP]` · `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-11-CPU-LAPTOP-m4-http-parity-float32/`, `benchmarks/results/2026-11-11-GPU-A16x1-vultr-m4-http-parity-float32/` |
+| Same in bf16: stream == non-stream criterion **failed** (11/24, 15/24); every divergence at a near-tie | `[GPU:A16x1@vultr]` | `benchmarks/results/2026-11-11-GPU-A16x1-vultr-m4-http-parity-bfloat16/ANALYSIS.md` |
 | Batched engine 5.2× sequential output tok/s on SmolLM2 (107 vs 21, median of 3 interleaved); engine overhead 0.6% of step time | `[CPU-LAPTOP]` | `benchmarks/results/2026-11-10-CPU-LAPTOP-m3-scheduler-overhead/` |

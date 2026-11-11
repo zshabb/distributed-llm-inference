@@ -30,3 +30,7 @@ benchmarks/results/**/scratch/
 
 # Host security posture (sshd/firewall/listening sockets) stays local: never in a public repository.
 benchmarks/results/**/inspect.txt
+
+# API key records (Argon2 hashes) for dli-serve
+keys.json
+*.keys.json
