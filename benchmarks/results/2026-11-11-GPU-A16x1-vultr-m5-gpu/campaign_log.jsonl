@@ -1,0 +1,244 @@
+{"event": "start", "unix": 1794360444.8712413, "revision": "8e790c1d9c3a"}
+{"event": "server", "rep": 0, "model": "qwen2.5-0.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/closed-fixed@1", "wall_s": 21.957552091000252}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/closed-fixed@16", "wall_s": 22.795082453998475}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/closed-fixed@64", "wall_s": 62.15020894900226}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-lognormal@0.5", "wall_s": 52.83099178500197}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-lognormal@1", "wall_s": 43.469349355000304}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-lognormal@2", "wall_s": 51.1323892879991}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-shared-prefix@0.5", "wall_s": 50.70317236600022}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-shared-prefix@1", "wall_s": 39.91640551599994}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-shared-prefix@2", "wall_s": 37.81002122300197}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-shared-prefix@4", "wall_s": 42.38399621899953}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/open-shared-prefix@8", "wall_s": 76.14096609000262}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/multiturn@0.25", "wall_s": 92.30442547999701}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/multiturn@0.5", "wall_s": 41.109531346999574}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/multiturn@1", "wall_s": 55.835497022999334}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/multiturn@2", "wall_s": 86.01059286000236}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/multiturn@4", "wall_s": 158.17159182999967}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/overload@2-x2-deadline2s", "wall_s": 41.78633251299834}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep0/overload@2-x2-nodeadline", "wall_s": 49.52387680500033}
+{"event": "server", "rep": 0, "model": "qwen2.5-0.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 68.7}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/closed-fixed@1", "wall_s": 9.305549714998051}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/closed-fixed@16", "wall_s": 4.0172604889994545}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/closed-fixed@64", "wall_s": 6.7924524350019055}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-lognormal@0.5", "wall_s": 50.2661233559993}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-lognormal@1", "wall_s": 39.249302786000044}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-lognormal@2", "wall_s": 36.654850890998205}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-lognormal@4", "wall_s": 37.817894315998274}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-lognormal@8", "wall_s": 45.48561582500042}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@0.5", "wall_s": 50.00609575799899}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@1", "wall_s": 39.269035047000216}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@2", "wall_s": 36.81573903200115}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@4", "wall_s": 35.29887468499874}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@8", "wall_s": 35.35264149399882}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/open-shared-prefix@16", "wall_s": 34.729942149002454}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/multiturn@0.25", "wall_s": 88.38288478100003}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/multiturn@0.5", "wall_s": 35.4688136069999}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/multiturn@1", "wall_s": 44.814114812998014}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/multiturn@2", "wall_s": 43.23327210700154}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep0/multiturn@4", "wall_s": 38.45309967900175}
+{"event": "server", "rep": 0, "model": "qwen2.5-0.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep0/closed-fixed@1", "wall_s": 21.504677933000494}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep0/closed-fixed@16", "wall_s": 7.571149342998979}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep0/closed-fixed@64", "wall_s": 23.05248423199737}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep0/open-lognormal@0.5", "wall_s": 65.10258479099866}
+{"event": "server", "rep": 0, "model": "qwen2.5-0.5b", "name": "dli-noprefix", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800 --no-prefix-caching", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/open-shared-prefix@0.5", "wall_s": 50.76368960000036}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/open-shared-prefix@1", "wall_s": 40.03160266299892}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/open-shared-prefix@2", "wall_s": 38.16023629399933}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/open-shared-prefix@4", "wall_s": 54.36321688099997}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/multiturn@0.25", "wall_s": 92.59533800799909}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/multiturn@0.5", "wall_s": 41.74673735000033}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/multiturn@1", "wall_s": 57.156122374002734}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/multiturn@2", "wall_s": 89.21931270999994}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep0/multiturn@4", "wall_s": 165.60970218299917}
+{"event": "server", "rep": 0, "model": "qwen2.5-1.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 20078 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep0/closed-fixed-large@16", "wall_s": 23.82589550099874}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep0/closed-fixed-large@64", "wall_s": 78.1030098759984}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep0/open-lognormal-large@0.25", "wall_s": 92.96223209500022}
+{"event": "server", "rep": 0, "model": "qwen2.5-1.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 72.7}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep0/closed-fixed-large@16", "wall_s": 7.921958112998254}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep0/closed-fixed-large@64", "wall_s": 15.68639079300192}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep0/open-lognormal-large@0.25", "wall_s": 90.20040461999815}
+{"event": "server", "rep": 0, "model": "qwen2.5-1.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep0/closed-fixed-large@16", "wall_s": 9.654676540001674}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep0/closed-fixed-large@64", "wall_s": 38.632539651000116}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep0/open-lognormal-large@0.25", "wall_s": 93.26555285300128}
+{"event": "server", "rep": 0, "model": "smollm2-1.7b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 2965 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 4.0}
+{"event": "point", "file": "smollm2-1.7b/dli/rep0/closed-fixed-large@16", "wall_s": 18.90765878000093}
+{"event": "point", "file": "smollm2-1.7b/dli/rep0/closed-fixed-large@64", "wall_s": 55.40884916399955}
+{"event": "point", "file": "smollm2-1.7b/dli/rep0/open-lognormal-large@0.25", "wall_s": 93.7725975100002}
+{"event": "server", "rep": 0, "model": "smollm2-1.7b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 71.7}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep0/closed-fixed-large@16", "wall_s": 11.382847560998925}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep0/closed-fixed-large@64", "wall_s": 29.01522986100099}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep0/open-lognormal-large@0.25", "wall_s": 91.49695111999972}
+{"event": "server", "rep": 0, "model": "qwen2.5-7b-awq", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct-AWQ/snapshots/b25037543e9394b818fdfca67ab2a00ecc7dd641 --served-model-name qwen2.5-7b-awq --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 92.8}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep0/closed-fixed-large@16", "wall_s": 17.494455145999382}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep0/closed-fixed-large@64", "wall_s": 53.87986051799817}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep0/open-lognormal-large@0.25", "wall_s": 94.7324471139982}
+{"event": "server", "rep": 1, "model": "qwen2.5-0.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 69.7}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/closed-fixed@1", "wall_s": 9.295712167000602}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/closed-fixed@16", "wall_s": 3.9818312999996124}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/closed-fixed@64", "wall_s": 6.743990891001886}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-lognormal@0.5", "wall_s": 50.89701837699977}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-lognormal@1", "wall_s": 34.07284801800051}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-lognormal@2", "wall_s": 44.60086371299985}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@0.5", "wall_s": 50.551434472003166}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@1", "wall_s": 30.805822543999966}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@2", "wall_s": 44.13116473199989}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@4", "wall_s": 40.78698393400191}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@8", "wall_s": 41.73276384900237}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@16", "wall_s": 31.120937747000426}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/open-shared-prefix@32", "wall_s": 23.891227361997153}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/multiturn@0.25", "wall_s": 67.57646262799972}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/multiturn@0.5", "wall_s": 43.10669327999858}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/multiturn@1", "wall_s": 35.13840488099959}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/multiturn@2", "wall_s": 47.81002091999835}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep1/multiturn@4", "wall_s": 45.69898457100135}
+{"event": "server", "rep": 1, "model": "qwen2.5-0.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep1/closed-fixed@1", "wall_s": 21.660679193999385}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep1/closed-fixed@16", "wall_s": 7.54686030800076}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep1/closed-fixed@64", "wall_s": 22.941015543001413}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep1/open-lognormal@0.5", "wall_s": 80.50602238399733}
+{"event": "server", "rep": 1, "model": "qwen2.5-0.5b", "name": "dli-noprefix", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800 --no-prefix-caching", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/open-shared-prefix@0.5", "wall_s": 51.27793113000007}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/open-shared-prefix@1", "wall_s": 31.53207168299923}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/open-shared-prefix@2", "wall_s": 45.29691096400347}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/multiturn@0.25", "wall_s": 71.87487065999812}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/multiturn@0.5", "wall_s": 48.170642420998774}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/multiturn@1", "wall_s": 51.58270811799957}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/multiturn@2", "wall_s": 86.37029770899971}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep1/multiturn@4", "wall_s": 158.82508653100012}
+{"event": "server", "rep": 1, "model": "qwen2.5-0.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/closed-fixed@1", "wall_s": 22.111782468000456}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/closed-fixed@16", "wall_s": 22.68112964899774}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/closed-fixed@64", "wall_s": 62.153190399003506}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-lognormal@0.5", "wall_s": 54.03749186999994}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-lognormal@1", "wall_s": 42.68020443599744}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-lognormal@2", "wall_s": 62.129877593000856}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-shared-prefix@0.5", "wall_s": 51.19661723000172}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-shared-prefix@1", "wall_s": 31.449359975002153}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/open-shared-prefix@2", "wall_s": 45.116331811001146}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/multiturn@0.25", "wall_s": 71.79656997599886}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/multiturn@0.5", "wall_s": 48.02994161300012}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/multiturn@1", "wall_s": 51.47551830500015}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/multiturn@2", "wall_s": 86.03232058900176}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/multiturn@4", "wall_s": 159.30326943600085}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/overload@2-x2-deadline2s", "wall_s": 46.26541756200095}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep1/overload@2-x2-nodeadline", "wall_s": 60.43015248699885}
+{"event": "server", "rep": 1, "model": "qwen2.5-1.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 72.7}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep1/closed-fixed-large@16", "wall_s": 7.887124924000091}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep1/closed-fixed-large@64", "wall_s": 15.732896410998364}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep1/open-lognormal-large@0.25", "wall_s": 66.9164008780026}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep1/open-lognormal-large@0.5", "wall_s": 45.843556837000506}
+{"event": "server", "rep": 1, "model": "qwen2.5-1.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep1/closed-fixed-large@16", "wall_s": 9.654174251998484}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep1/closed-fixed-large@64", "wall_s": 38.56741564500044}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep1/open-lognormal-large@0.25", "wall_s": 82.91360778699891}
+{"event": "server", "rep": 1, "model": "qwen2.5-1.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 20078 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep1/closed-fixed-large@16", "wall_s": 23.922369219999382}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep1/closed-fixed-large@64", "wall_s": 78.74690362399997}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep1/open-lognormal-large@0.25", "wall_s": 69.10080654500052}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep1/open-lognormal-large@0.5", "wall_s": 51.536826503001066}
+{"event": "server", "rep": 1, "model": "smollm2-1.7b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 73.7}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep1/closed-fixed-large@16", "wall_s": 11.375527678999788}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep1/closed-fixed-large@64", "wall_s": 28.956903641999816}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep1/open-lognormal-large@0.25", "wall_s": 67.830810053998}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep1/open-lognormal-large@0.5", "wall_s": 47.94377410300149}
+{"event": "server", "rep": 1, "model": "smollm2-1.7b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 2965 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 5.0}
+{"event": "point", "file": "smollm2-1.7b/dli/rep1/closed-fixed-large@16", "wall_s": 18.98524346400154}
+{"event": "point", "file": "smollm2-1.7b/dli/rep1/closed-fixed-large@64", "wall_s": 55.64155639599994}
+{"event": "point", "file": "smollm2-1.7b/dli/rep1/open-lognormal-large@0.25", "wall_s": 69.79045843099811}
+{"event": "point", "file": "smollm2-1.7b/dli/rep1/open-lognormal-large@0.5", "wall_s": 53.375314531000186}
+{"event": "server", "rep": 1, "model": "qwen2.5-7b-awq", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct-AWQ/snapshots/b25037543e9394b818fdfca67ab2a00ecc7dd641 --served-model-name qwen2.5-7b-awq --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 92.8}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep1/closed-fixed-large@16", "wall_s": 17.42286247299853}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep1/closed-fixed-large@64", "wall_s": 53.90198185600093}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep1/open-lognormal-large@0.25", "wall_s": 69.87071673100218}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep1/open-lognormal-large@0.5", "wall_s": 53.318310277998535}
+{"event": "server", "rep": 2, "model": "qwen2.5-0.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep2/closed-fixed@1", "wall_s": 22.206150736998097}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep2/closed-fixed@16", "wall_s": 7.730333539999265}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep2/closed-fixed@64", "wall_s": 23.761558729998796}
+{"event": "point", "file": "qwen2.5-0.5b/hf/rep2/open-lognormal@0.5", "wall_s": 60.40094103899901}
+{"event": "server", "rep": 2, "model": "qwen2.5-0.5b", "name": "dli-noprefix", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800 --no-prefix-caching", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/open-shared-prefix@0.5", "wall_s": 53.64500020799824}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/open-shared-prefix@1", "wall_s": 32.86306879999756}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/open-shared-prefix@2", "wall_s": 33.85408383399772}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/open-shared-prefix@4", "wall_s": 54.479718275997584}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/multiturn@0.25", "wall_s": 84.24827258100049}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/multiturn@0.5", "wall_s": 42.13485514200147}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/multiturn@1", "wall_s": 51.53390432600281}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/multiturn@2", "wall_s": 85.29441100300028}
+{"event": "point", "file": "qwen2.5-0.5b/dli-noprefix/rep2/multiturn@4", "wall_s": 160.74625852600002}
+{"event": "server", "rep": 2, "model": "qwen2.5-0.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 59185 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 4.0}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/closed-fixed@1", "wall_s": 22.37055025399968}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/closed-fixed@16", "wall_s": 23.006524676999106}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/closed-fixed@64", "wall_s": 62.43323602900273}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-lognormal@0.5", "wall_s": 56.59147577300246}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-lognormal@1", "wall_s": 44.58063527700142}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-shared-prefix@0.5", "wall_s": 53.55728198699944}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-shared-prefix@1", "wall_s": 32.78062998399764}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-shared-prefix@2", "wall_s": 33.544114074997196}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/open-shared-prefix@4", "wall_s": 45.098950366998906}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/multiturn@0.25", "wall_s": 84.07306536299802}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/multiturn@0.5", "wall_s": 42.06638933100112}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/multiturn@1", "wall_s": 52.231892454001354}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/multiturn@2", "wall_s": 85.12788631100193}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/multiturn@4", "wall_s": 159.56827477700426}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/overload@1-x2-deadline2s", "wall_s": 33.945861375003005}
+{"event": "point", "file": "qwen2.5-0.5b/dli/rep2/overload@1-x2-nodeadline", "wall_s": 43.50055537200387}
+{"event": "server", "rep": 2, "model": "qwen2.5-0.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 69.7}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/closed-fixed@1", "wall_s": 9.319310964005126}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/closed-fixed@16", "wall_s": 4.004887676994258}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/closed-fixed@64", "wall_s": 6.785251474997494}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-lognormal@0.5", "wall_s": 53.46184964200074}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-lognormal@1", "wall_s": 32.61937802500324}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-lognormal@2", "wall_s": 32.44566264799505}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-lognormal@4", "wall_s": 43.81055727299827}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-lognormal@8", "wall_s": 46.49963117900188}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@0.5", "wall_s": 52.673803500998474}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@1", "wall_s": 32.112627674003306}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@2", "wall_s": 32.175373496997054}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@4", "wall_s": 41.66989690799528}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@8", "wall_s": 43.45260547399812}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/open-shared-prefix@16", "wall_s": 35.5135823380042}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/multiturn@0.25", "wall_s": 80.37805987799948}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/multiturn@0.5", "wall_s": 36.68851905200427}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/multiturn@1", "wall_s": 34.1760580400005}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/multiturn@2", "wall_s": 39.10840605299745}
+{"event": "point", "file": "qwen2.5-0.5b/vllm/rep2/multiturn@4", "wall_s": 48.6349456359967}
+{"event": "server", "rep": 2, "model": "qwen2.5-1.5b", "name": "hf", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --device cuda --dtype bfloat16 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep2/closed-fixed-large@16", "wall_s": 9.641906732998905}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep2/closed-fixed-large@64", "wall_s": 38.57250637200195}
+{"event": "point", "file": "qwen2.5-1.5b/hf/rep2/open-lognormal-large@0.25", "wall_s": 85.34445445299934}
+{"event": "server", "rep": 2, "model": "qwen2.5-1.5b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 20078 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 5.0}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep2/closed-fixed-large@16", "wall_s": 22.926383379999606}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep2/closed-fixed-large@64", "wall_s": 74.91004137900018}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep2/open-lognormal-large@0.25", "wall_s": 80.14838799900463}
+{"event": "point", "file": "qwen2.5-1.5b/dli/rep2/open-lognormal-large@0.5", "wall_s": 43.537455246005266}
+{"event": "server", "rep": 2, "model": "qwen2.5-1.5b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-1.5B-Instruct/snapshots/989aa7980e4cf806f80c7fef2b1adb7bc71aa306 --served-model-name qwen2.5-1.5b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 74.8}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/closed-fixed-large@16", "wall_s": 7.885091559997818}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/closed-fixed-large@64", "wall_s": 15.742658306000521}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/open-lognormal-large@0.25", "wall_s": 79.5617922609963}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/open-lognormal-large@0.5", "wall_s": 38.3646180479991}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/open-lognormal-large@1", "wall_s": 38.79238714099483}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/open-lognormal-large@2", "wall_s": 37.260025254996435}
+{"event": "point", "file": "qwen2.5-1.5b/vllm/rep2/open-lognormal-large@4", "wall_s": 54.92936788399675}
+{"event": "server", "rep": 2, "model": "smollm2-1.7b", "name": "dli", "cmd": "/root/work/distributed-llm-inference/.venv/bin/python -m dli.server --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 2965 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 4.0}
+{"event": "point", "file": "smollm2-1.7b/dli/rep2/closed-fixed-large@16", "wall_s": 18.963791219997802}
+{"event": "point", "file": "smollm2-1.7b/dli/rep2/closed-fixed-large@64", "wall_s": 55.34284250500059}
+{"event": "point", "file": "smollm2-1.7b/dli/rep2/open-lognormal-large@0.25", "wall_s": 80.34107148600015}
+{"event": "point", "file": "smollm2-1.7b/dli/rep2/open-lognormal-large@0.5", "wall_s": 45.398251822996826}
+{"event": "server", "rep": 2, "model": "smollm2-1.7b", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-1.7B-Instruct/snapshots/31b70e2e869a7173562077fd711b654946d38674 --served-model-name smollm2-1.7b --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 73.7}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep2/closed-fixed-large@16", "wall_s": 11.39604789900477}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep2/closed-fixed-large@64", "wall_s": 28.960315536998678}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep2/open-lognormal-large@0.25", "wall_s": 79.84336739600258}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep2/open-lognormal-large@0.5", "wall_s": 40.74845005899988}
+{"event": "point", "file": "smollm2-1.7b/vllm/rep2/open-lognormal-large@1", "wall_s": 44.446857271002955}
+{"event": "server", "rep": 2, "model": "qwen2.5-7b-awq", "name": "vllm", "cmd": "docker run --rm -d --name dli-bench-vllm-8300 --gpus all --ipc=host -p 127.0.0.1:8300:8000 -v /root/.cache/huggingface:/root/.cache/huggingface:ro -e HF_HUB_OFFLINE=1 vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9 --model /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-7B-Instruct-AWQ/snapshots/b25037543e9394b818fdfca67ab2a00ecc7dd641 --served-model-name qwen2.5-7b-awq --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --gpu-memory-utilization 0.85 --max-model-len 4096 --seed 0 --enable-prefix-caching", "startup_s": 92.8}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep2/closed-fixed-large@16", "wall_s": 17.451480932999402}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep2/closed-fixed-large@64", "wall_s": 53.853936289997364}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep2/open-lognormal-large@0.25", "wall_s": 81.21067773299728}
+{"event": "point", "file": "qwen2.5-7b-awq/vllm/rep2/open-lognormal-large@0.5", "wall_s": 44.55820274400321}
+{"event": "end", "unix": 1794371757.9469483}

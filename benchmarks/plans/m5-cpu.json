@@ -1,0 +1,49 @@
+{
+  "name": "m5-cpu",
+  "description": "AC3 on CPU: continuous batching (dli) vs HF transformers static batching, SmolLM2-135M fp32, laptop. 5 repetitions with backend order rotated per repetition (ENGINEERING_STANDARDS 7.4/7.5).",
+  "label": "CPU-LAPTOP",
+  "device": "cpu",
+  "dtype": "float32",
+  "reps": 5,
+  "port": 8300,
+  "max_num_seqs": 32,
+  "max_num_batched_tokens": 512,
+  "saturation_ttft_s": 5.0,
+  "request_timeout_s": 600,
+  "backends": {
+    "dli": {"kv_cache_gb": 0.5, "block_size": 16},
+    "hf": {"max_batch": 16, "max_wait_ms": 20}
+  },
+  "models": [
+    {
+      "name": "smollm2-135m",
+      "repo": "HuggingFaceTB/SmolLM2-135M-Instruct",
+      "backends": ["dli", "hf"],
+      "experiments": ["closed-fixed", "open-lognormal"]
+    }
+  ],
+  "experiments": {
+    "closed-fixed": {
+      "description": "Max throughput at fixed concurrency. Input 128 / output 64 tokens. AC3 is the c=16 point.",
+      "workload": {"type": "synthetic", "input": {"fixed": 128}, "output": {"fixed": 64}},
+      "mode": "closed",
+      "points": [1, 16],
+      "n_per_concurrency": 4,
+      "n_extra": 8
+    },
+    "open-lognormal": {
+      "description": "Latency under Poisson load. Log-normal lengths: input median 128 (sigma 0.6, 16-512), output median 64 (sigma 0.6, 8-256).",
+      "workload": {
+        "type": "synthetic",
+        "input": {"median": 128, "sigma": 0.6, "lo": 16, "hi": 512},
+        "output": {"median": 64, "sigma": 0.6, "lo": 8, "hi": 256}
+      },
+      "mode": "open",
+      "points": [0.5, 1, 2, 4],
+      "duration_s": 45,
+      "min_n": 20,
+      "max_n": 200,
+      "drain_s": 120
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+ "mode": "open",
+ "rate": 0.25,
+ "seed": 1025,
+ "n": 20,
+ "requests": 20,
+ "ok": 20,
+ "rejected": 0,
+ "error": 0,
+ "timeout": 0,
+ "completion_rate": 1.0,
+ "span_s": 67.83067168399793,
+ "output_tokens": 3001,
+ "output_tok_per_s": 44.242522232136054,
+ "completed_req_per_s": 0.2948518642594872,
+ "ttft_s": {
+  "n": 20,
+  "mean": 0.22878801479894362,
+  "p50": 0.18941544153695755,
+  "p90": 0.41559409811064263,
+  "p95": 0.45271106927977633,
+  "p99": 0.5535331766628339,
+  "max": 0.5787387035085985
+ },
+ "e2e_s": {
+  "n": 20,
+  "mean": 4.188403001948633,
+  "p50": 3.1246616894553867,
+  "p90": 7.497450759840868,
+  "p95": 8.41839277553791,
+  "p99": 12.805274862842397,
+  "max": 13.90199538466853
+ },
+ "tpot_s": {
+  "n": 20,
+  "mean": 0.026349508055094666,
+  "p50": 0.026136369509155582,
+  "p90": 0.02871306389320539,
+  "p95": 0.029195604416188525,
+  "p99": 0.030039763642293264,
+  "max": 0.03025080344881945
+ },
+ "itl_s": {
+  "n": 2980,
+  "mean": 0.026572538013084377,
+  "p50": 0.025777224500416196,
+  "p90": 0.028592090598976938,
+  "p95": 0.029147650100821917,
+  "p99": 0.037051782188900685,
+  "max": 0.5498422370001208
+ },
+ "rejection_latency_s": null,
+ "client_lag_s": {
+  "n": 20,
+  "mean": 0.0016757356987237237,
+  "p50": 0.0010585845671826632,
+  "p90": 0.0023422440104070587,
+  "p95": 0.003631535853995343,
+  "p99": 0.009184733566442017,
+  "max": 0.0105730329945537
+ },
+ "experiment": "open-lognormal-large",
+ "point": 0.25,
+ "tag": "",
+ "rep": 1,
+ "backend": "vllm",
+ "model": "smollm2-1.7b",
+ "workload": {
+  "n": 20,
+  "input_len": {
+   "kind": "lognormal",
+   "value": 512,
+   "sigma": 0.8,
+   "lo": 32,
+   "hi": 2048
+  },
+  "output_len": {
+   "kind": "lognormal",
+   "value": 128,
+   "sigma": 0.8,
+   "lo": 16,
+   "hi": 512
+  },
+  "vocab": 49152,
+  "seed": 1025
+ },
+ "resources": {
+  "gpu_mem_used_max": 13836484608.0,
+  "gpu_mem_used_mean": 13836484608.0,
+  "gpu_util_max": 100.0,
+  "gpu_util_mean": 72.72727272727273,
+  "vllm:kv_cache_usage_perc_max": 0.07962213225371118,
+  "vllm:kv_cache_usage_perc_mean": 0.01980585204269415,
+  "vllm:num_preemptions_total_max": 0.0,
+  "vllm:num_preemptions_total_mean": 0.0,
+  "vllm:num_requests_running_max": 4.0,
+  "vllm:num_requests_running_mean": 1.196969696969697,
+  "vllm:num_requests_waiting_max": 0.0,
+  "vllm:num_requests_waiting_mean": 0.0,
+  "vllm:prefix_cache_hits_total_max": 0.0,
+  "vllm:prefix_cache_hits_total_mean": 0.0,
+  "vllm:prefix_cache_queries_total_max": 54429.0,
+  "vllm:prefix_cache_queries_total_mean": 46688.454545454544,
+  "samples": 132
+ },
+ "started_unix": 1794367254.6629977,
+ "headers": {}
+}

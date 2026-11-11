@@ -96,12 +96,18 @@ class LLMEngine:
         block_size: int = 16,
         config: SchedulerConfig | None = None,
         eviction_policy: str = "lru",
+        enable_prefix_caching: bool = True,
         eos_token_ids: Collection[int] = (),
         seed: int = 0,
     ) -> LLMEngine:
         device = model.inv_freq.device
         dtype = model.model.embed_tokens.weight.dtype
-        bm = BlockManager(num_blocks, block_size, eviction_policy=eviction_policy)
+        bm = BlockManager(
+            num_blocks,
+            block_size,
+            eviction_policy=eviction_policy,
+            enable_prefix_caching=enable_prefix_caching,
+        )
         store = PagedKVStore.for_model(
             model.config, num_blocks, block_size, dtype=dtype, device=device
         )

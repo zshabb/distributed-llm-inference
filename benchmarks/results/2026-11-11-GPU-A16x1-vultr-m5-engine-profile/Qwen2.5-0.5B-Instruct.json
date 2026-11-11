@@ -1,0 +1,303 @@
+{
+ "code_revision": "8e790c1d9c3a",
+ "runs": [
+  {
+   "model": "Qwen/Qwen2.5-0.5B-Instruct",
+   "batch": 16,
+   "profiled_steps": 20,
+   "step_ms_mean": 151.1338804000843,
+   "schedule_ms_mean": 0.10717954937717877,
+   "forward_ms_mean": 149.11615865057684,
+   "postprocess_ms_mean": 1.910542200130294,
+   "decode_tokens_per_step": 16,
+   "tokens_per_s": 105.86640108521343,
+   "cuda_kernels_per_step": 3705.0,
+   "op_calls_per_step": {
+    "aten::copy_": 930.0,
+    "aten::index_select": 770.0,
+    "aten::cat": 73.0,
+    "aten::linear": 169.0,
+    "aten::scaled_dot_product_attention": 384.0,
+    "aten::mm": 97.0
+   },
+   "bandwidth_floor_ms": 5.2494323199999995,
+   "floor_inputs": {
+    "weight_bytes": 988065536,
+    "kv_bytes_read": 61820928.0,
+    "mean_context": 314.4375,
+    "assumed_bandwidth_gbs": 200.0
+   },
+   "top_ops_by_device_time": [
+    {
+     "op": "aten::scaled_dot_product_attention",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 8.725577449999033,
+     "self_cpu_ms_per_step": 4.461536599999024
+    },
+    {
+     "op": "aten::_scaled_dot_product_flash_attention",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 8.725577449999033,
+     "self_cpu_ms_per_step": 2.2513349999983956
+    },
+    {
+     "op": "aten::_flash_attention_forward",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 8.725577449999033,
+     "self_cpu_ms_per_step": 4.626311200001031
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<64, 128, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 128, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, false, true, false, false>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 8.725577449999033,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::copy_",
+     "calls_per_step": 930.0,
+     "device_ms_per_step": 8.279938149999946,
+     "self_cpu_ms_per_step": 5.070479550001453
+    },
+    {
+     "op": "aten::clone",
+     "calls_per_step": 792.0,
+     "device_ms_per_step": 7.944823500000051,
+     "self_cpu_ms_per_step": 1.6556138999993482
+    },
+    {
+     "op": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1})",
+     "calls_per_step": 792.0,
+     "device_ms_per_step": 7.944823500000051,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::repeat_interleave",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 7.89195869999993,
+     "self_cpu_ms_per_step": 3.3140405000005027
+    },
+    {
+     "op": "aten::linear",
+     "calls_per_step": 169.0,
+     "device_ms_per_step": 7.774609749999439,
+     "self_cpu_ms_per_step": 0.42162375000082947
+    },
+    {
+     "op": "aten::matmul",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 6.9206979499994645,
+     "self_cpu_ms_per_step": 0.13603199999931787
+    },
+    {
+     "op": "aten::mm",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 6.9206979499994645,
+     "self_cpu_ms_per_step": 1.8935545000001075
+    },
+    {
+     "op": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x10_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x10_tn_align8::Params)",
+     "calls_per_step": 49.0,
+     "device_ms_per_step": 4.903555449999806,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::index_select",
+     "calls_per_step": 770.0,
+     "device_ms_per_step": 1.6283998000007667,
+     "self_cpu_ms_per_step": 7.139832999998544
+    },
+    {
+     "op": "aten::gather",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.6119520500007127,
+     "self_cpu_ms_per_step": 6.729381450002006
+    },
+    {
+     "op": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.6119520500007127,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "ampere_bf16_s16816gemm_bf16_64x64_ldg8_f2f_stages_64x5_tn",
+     "calls_per_step": 24.0,
+     "device_ms_per_step": 1.555191299999998,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::index_copy_",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.364535950000857,
+     "self_cpu_ms_per_step": 6.591810100000108
+    },
+    {
+     "op": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1}>(long, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1})",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.364535950000857,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::addmm",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.8539117999999737,
+     "self_cpu_ms_per_step": 1.2867287500000182
+    },
+    {
+     "op": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.8539117999999737,
+     "self_cpu_ms_per_step": 0.0
+    }
+   ]
+  },
+  {
+   "model": "Qwen/Qwen2.5-0.5B-Instruct",
+   "batch": 64,
+   "profiled_steps": 20,
+   "step_ms_mean": 517.3377646497102,
+   "schedule_ms_mean": 0.3959660003602039,
+   "forward_ms_mean": 514.4688403506734,
+   "postprocess_ms_mean": 2.472958298676531,
+   "decode_tokens_per_step": 64,
+   "tokens_per_s": 123.71028054241208,
+   "cuda_kernels_per_step": 11888.0,
+   "op_calls_per_step": {
+    "aten::copy_": 3330.0,
+    "aten::index_select": 3074.0,
+    "aten::cat": 73.0,
+    "aten::linear": 169.0,
+    "aten::scaled_dot_product_attention": 1536.0,
+    "aten::mm": 97.0
+   },
+   "bandwidth_floor_ms": 6.16476544,
+   "floor_inputs": {
+    "weight_bytes": 988065536,
+    "kv_bytes_read": 244887552.0,
+    "mean_context": 311.390625,
+    "assumed_bandwidth_gbs": 200.0
+   },
+   "top_ops_by_device_time": [
+    {
+     "op": "aten::scaled_dot_product_attention",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 34.85694330000566,
+     "self_cpu_ms_per_step": 17.065210450000258
+    },
+    {
+     "op": "aten::_scaled_dot_product_flash_attention",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 34.85694330000566,
+     "self_cpu_ms_per_step": 8.805269899987094
+    },
+    {
+     "op": "aten::_flash_attention_forward",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 34.85694330000566,
+     "self_cpu_ms_per_step": 18.096857200008078
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_kernel<Flash_fwd_kernel_traits<64, 128, 128, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 128, 128, 4, cutlass::bfloat16_t> >, false, false, false, false, false, true, false, false>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 34.85694330000566,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::copy_",
+     "calls_per_step": 3330.0,
+     "device_ms_per_step": 32.1114397500054,
+     "self_cpu_ms_per_step": 17.910294000002754
+    },
+    {
+     "op": "aten::clone",
+     "calls_per_step": 3096.0,
+     "device_ms_per_step": 31.368323600003627,
+     "self_cpu_ms_per_step": 6.212734399992113
+    },
+    {
+     "op": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1})",
+     "calls_per_step": 3096.0,
+     "device_ms_per_step": 31.368323600003627,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::repeat_interleave",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 31.295327200004028,
+     "self_cpu_ms_per_step": 12.89993935001685
+    },
+    {
+     "op": "aten::linear",
+     "calls_per_step": 169.0,
+     "device_ms_per_step": 8.67109514999924,
+     "self_cpu_ms_per_step": 0.41168254999880916
+    },
+    {
+     "op": "aten::matmul",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 7.775519449999214,
+     "self_cpu_ms_per_step": 0.13342070000069417
+    },
+    {
+     "op": "aten::mm",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 7.775519449999214,
+     "self_cpu_ms_per_step": 1.6699662999989275
+    },
+    {
+     "op": "aten::index_select",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 6.477956000003253,
+     "self_cpu_ms_per_step": 27.791073449971115
+    },
+    {
+     "op": "aten::gather",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 6.477956000003253,
+     "self_cpu_ms_per_step": 26.446295450008677
+    },
+    {
+     "op": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 6.477956000003253,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::index_copy_",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 5.477996649995506,
+     "self_cpu_ms_per_step": 25.984165549969227
+    },
+    {
+     "op": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1}>(long, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1})",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 5.477996649995506,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "ampere_bf16_s16816gemm_bf16_64x64_sliced1x2_ldg8_f2f_stages_64x6_tn",
+     "calls_per_step": 48.0,
+     "device_ms_per_step": 3.793456550000284,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x10_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x10_tn_align8::Params)",
+     "calls_per_step": 1.0,
+     "device_ms_per_step": 1.8030665999997786,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "ampere_bf16_s16816gemm_bf16_64x64_sliced1x2_ldg8_f2f_stages_64x5_tn",
+     "calls_per_step": 24.0,
+     "device_ms_per_step": 1.7985837499999444,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::addmm",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.8955757000000256,
+     "self_cpu_ms_per_step": 1.34603004999997
+    }
+   ]
+  }
+ ]
+}

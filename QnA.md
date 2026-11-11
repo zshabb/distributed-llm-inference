@@ -392,6 +392,60 @@ health), plus process and GPU memory.
 Performance. The tests prove behaviour under overload, cancellation and failure, not throughput or latency; the HTTP and
 detokenization overhead is unmeasured. Open-loop load with TTFT/ITL percentiles and comparison to vLLM are M5.
 
+## Benchmarking and evaluation (M5)
+
+### 50. How did you make the benchmark comparison fair?
+The rules were committed before any run (ADR-0004, `benchmarks/methodology.md`). Every backend is driven through the
+same OpenAI-compatible API by the same client; requests are seeded token-id prompts with `ignore_eos`, so every backend
+does identical work. Both engines get the same scheduler limits and the **same KV capacity in tokens**: vLLM sizes its
+pool from a memory fraction and logs the capacity, and the native pool is set to the same number of blocks. vLLM runs
+its normal optimized configuration from a digest-pinned image; detuning a baseline would be a form of fabrication. The
+static-batching baseline is tested to produce exactly the tokens of unbatched generation. One server is on the GPU at a
+time and the backend order rotates each repetition.
+
+### 51. Why open-loop load, and how is latency measured?
+In a closed loop, a slow server slows its own client, so latency percentiles look best exactly when the system is
+overloaded (coordinated omission). The load generator schedules Poisson arrivals in advance and measures every latency
+from the scheduled arrival, not from when the request was sent; its own lateness is recorded (P99 ≤ 24 ms in every GPU
+run, so the client was never the bottleneck). Closed loop is used only for maximum throughput at a stated concurrency.
+
+### 52. What did the benchmarks show?
+On the A16 the native engine reaches 225 output tok/s at concurrency 16 on Qwen2.5-0.5B, vLLM 1,279 and HF static
+batching 677. vLLM leads by 1.7-9.2x across the model ladder, and the engine is 0.33-0.49x of static batching, so
+AC3 (≥ 5x static batching) failed, as did its CPU part (0.73x vs 2x). The engine does win on latency under load:
+sub-second TTFT where static batching queues for 10-30 s. All of it is published, including the failures.
+
+### 53. Why is your engine slower than plain `transformers` with static batching?
+The profile answers it. Each decode step loops over every sequence in every layer: gather that sequence's KV pages,
+expand 2 KV heads to 14 by copying, call attention. That is ~170 kernel launches per sequence per step: 11,888 per
+step at batch 64, ~35x the memory-bandwidth floor, with the GPU ~49% busy. Static batching makes one padded attention
+call per layer, so its kernel count does not grow with the batch. The scheduler is not the problem (0.1-0.4 ms per
+step). M6 replaces the loop with one batched, GQA-aware paged-attention kernel per layer, then adds CUDA graphs.
+
+### 54. What did the bf16 study conclude about the M3/M4 failures?
+Teacher forcing fed every configuration the same tokens. The fp32 engine matched the fp32 reference at 100% of
+12,800 steps through 47 preemptions, so the engine adds no error. bf16 changes 1.4-1.5% of argmax decisions, all at
+reference top-2 gaps ≤ 0.39, equally with or without batching (98.57% unbatched vs 98.64% engine). Perplexity rose
+0.05-0.09% and ARC-Easy accuracy moved +0.04 points [−0.38, +0.46]: inside the pre-registered tolerances. One target
+was missed: agreement at margins above one bf16 ulp was 99.85% vs ≥ 99.9%, equally for unbatched bf16, because
+measured per-logit error is several ulps. The exact-match failures stay recorded; they meant rounding, not bugs.
+
+### 55. What went wrong in your own benchmark harness, and how did you handle it?
+Two defects surfaced in the data. The saturation rule divided completed requests by a span that included the drain
+after the last arrival, so stable points with long outputs looked saturated: sweeps stopped early and the AC5 overload
+test ran at about 0.5-1x of true saturation instead of 2x. And the admission predictor, estimating prefill speed from
+decode-dominated steps, over-predicted TTFT 10-50x and rejected half of the requests that would have met their
+deadline. Both were reproduced in regression tests and fixed; the original results stay, with the explanation.
+AC5 was re-measured at ~4x saturation: no crash, admitted TTFT P99 1.98 s (vs 90 s without admission control), but
+rejection latency P99 2.01 s against < 50 ms, because the corrected predictor is now optimistic for 13-18% of
+requests, which are admitted and then expire in the queue. AC5 is recorded as failed on that criterion.
+
+### 56. Does prefix caching help?
+On prompts dominated by long shared prefixes, yes: median TTFT 60 vs 157 ms at 2 req/s, and the engine stays stable at
+a load where the ablation saturates. On short multi-turn conversations it saves 32% of KV memory (hit ratio 0.69) but
+no latency, because this engine's step time is dominated by decode overhead, not by the prefill it avoids. That
+should change once M6 removes the decode overhead, and will be re-measured.
+
 ## Results (labeled evidence)
 
 | Claim | Label | Evidence |

@@ -23,6 +23,7 @@
 | Model | `dli.model` | Llama-family decoder (Llama, Qwen2), weight loading, RoPE | implemented M1 |
 | Kernels / parallel | `dli.kernels`, `dli.parallel` | Triton paged attention; tensor-parallel linear layers | planned M6 / M7 |
 | Environment evidence | `dli.envinfo` | Hardware/software manifest for every result | implemented M0 |
+| Benchmarking (outside the serving path) | `dli.bench` | Load generator (open/closed loop, sessions), workloads, HF static-batching baseline, backend launchers (native, vLLM in Docker, HF), resource monitor, campaign runner and report, bf16 precision study | implemented M5 |
 
 Dependency rule: each layer depends only on layers below it. The model layer has no notion of requests, and the
 scheduler never touches tensors.

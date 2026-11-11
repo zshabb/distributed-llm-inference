@@ -1,0 +1,86 @@
+{
+ "name": "m5-gpu-ac5",
+ "description": "AC5 rerun. The 2026-11-11 campaign's overload test ran at ~0.5-1x of true saturation because of a biased saturation rule (fixed in 3685485), and with a TTFT predictor that over-predicted 10-50x (fixed in 939e134). This run measures the native engine's saturation with the corrected rule, then offers 2x the highest unsaturated rate with the 2 s TTFT deadline and without it (control). Pre-registered AC5 criteria unchanged. The original results are kept.",
+ "label": "GPU-A16x1-vultr",
+ "device": "cuda",
+ "dtype": "bfloat16",
+ "reps": 3,
+ "port": 8300,
+ "max_num_seqs": 128,
+ "max_num_batched_tokens": 2048,
+ "saturation_ttft_s": 10.0,
+ "request_timeout_s": 900,
+ "backends": {
+  "dli": {
+   "kind": "dli",
+   "block_size": 16,
+   "num_blocks": 59185
+  }
+ },
+ "models": [
+  {
+   "name": "qwen2.5-0.5b",
+   "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+   "backends": [
+    "dli"
+   ],
+   "experiments": [
+    "open-lognormal",
+    "overload"
+   ]
+  }
+ ],
+ "experiments": {
+  "open-lognormal": {
+   "workload": {
+    "type": "synthetic",
+    "input": {
+     "median": 512,
+     "sigma": 0.8,
+     "lo": 32,
+     "hi": 2048
+    },
+    "output": {
+     "median": 128,
+     "sigma": 0.8,
+     "lo": 16,
+     "hi": 512
+    }
+   },
+   "mode": "open",
+   "points": [
+    1,
+    2,
+    3,
+    4,
+    6
+   ],
+   "duration_s": 40,
+   "min_n": 30,
+   "max_n": 500,
+   "drain_s": 120
+  },
+  "overload": {
+   "mode": "overload",
+   "base": "open-lognormal",
+   "factors": [
+    2
+   ],
+   "overrides": {
+    "drain_s": 300
+   },
+   "variants": [
+    {
+     "name": "deadline2s",
+     "headers": {
+      "X-Deadline-Ms": "2000"
+     }
+    },
+    {
+     "name": "nodeadline",
+     "headers": {}
+    }
+   ]
+  }
+ }
+}

@@ -33,3 +33,86 @@ block size 16. `[CPU-LAPTOP]`.
 - **Metric:** prompt-token hit rate. **Not** latency, TTFT, or throughput.
 - **Known biases:** uniform random tokens make unrelated prompts never share content beyond designed prefixes. Sequential
   replay has no concurrent memory pressure from in-flight requests. Synthetic popularity and session distributions.
+
+## M5 serving benchmarks (pre-registered 2026-11-11, before any evidence run)
+
+Harness: `src/dli/bench/` (`python -m dli.bench.campaign run <plan> --out <dir>`, then `report <dir>`). Plans:
+`benchmarks/plans/m5-cpu.json` (laptop) and `m5-gpu.json` (A16). `m5-gpu-pilot.json` is a calibration run (one
+repetition) used only to size KV pools and choose rate grids; its numbers are not evidence.
+
+### Systems under test
+| Backend | What | Configuration |
+|---|---|---|
+| `dli` | This engine, `dli-serve` | bf16 (GPU) / fp32 (CPU), eager PyTorch, paged KV with prefix caching, block 16 |
+| `vllm` | vLLM v0.32.0, official image pinned by digest (`dli.bench.backends.VLLM_IMAGE`) | Its normal production configuration (CUDA graphs and compilation on), prefix caching on, `--seed 0` |
+| `hf` | `transformers` `generate` with static batching (`dli.bench.hf_server`) | Batch ≤ 16, 20 ms collection window, SDPA attention, greedy, no streaming |
+
+Fairness rules:
+1. Identical model files (the same pinned Hugging Face snapshot is mounted into the vLLM container), identical dtype.
+2. Identical scheduler limits: `max_num_seqs` 128 and `max_num_batched_tokens` 2048 on both engines.
+3. **Equal KV-cache capacity in tokens**, not an equal memory fraction: vLLM sizes its pool from
+   `--gpu-memory-utilization 0.85` and logs the capacity; the native pool is set to the same number of tokens
+   (from the calibration pilot, recorded in the plan).
+4. One server on the GPU at a time; each backend starts fresh, is warmed up with 8 unrecorded requests, and the
+   backend order rotates every repetition.
+5. Every backend receives the identical request list per (repetition, point): seeded workloads, token-id prompts,
+   `ignore_eos`, temperature 0.
+
+### Workloads
+| Name | Requests | Purpose |
+|---|---|---|
+| `closed-fixed` | input 256, output 128 tokens | Max throughput at concurrency 1/16/64 (AC3 at 16) |
+| `open-lognormal` | input median 512 (σ 0.8, 32–2048), output median 128 (σ 0.8, 16–512) | Latency vs offered load |
+| `open-shared-prefix` | 8 prefixes of 1,024 tokens (Zipf s = 1.1) + 64 unique, output 64 | Prefix reuse across tenants |
+| `multiturn` | OASST1 (train) conversations, 3 user turns, 3 shared system prompts, output 96 per turn, think time Exp(1 s) | Conversation prefix reuse with real text and chat templates |
+
+### Load and metrics
+- **Open loop:** Poisson arrivals scheduled in advance; latency is measured from the scheduled arrival (no coordinated
+  omission); client lateness is reported. Each point offers `rate × 60 s` requests (bounded 30–600). A sweep stops one
+  point after saturation: completion < 99 %, achieved rate < 90 % of offered, or median TTFT > 10 s.
+- **Closed loop:** `c` workers, each sending its next request when the previous one completes.
+- **TTFT** = first content chunk − arrival. **TPOT** = (end − first chunk) / (output tokens − 1), per request.
+  **ITL** = gaps between content chunks (pooled). **E2E** = end − arrival. **Throughput** = output tokens of completed
+  requests / (last completion − first arrival). Token counts come from each server's usage record.
+- The HF baseline does not stream: its TTFT equals its E2E latency; it is compared on throughput and E2E only.
+- **Repetitions:** 3 on the GPU (expensive), 5 on the laptop. Tables show the median and [min–max] across repetitions.
+- **Resources:** NVML device memory and utilization, server RSS (CPU), and each server's own KV/queue metrics, sampled
+  every 0.5 s.
+
+### Acceptance (spec 01 §15)
+- **AC3:** output tok/s of `dli` ≥ 2× `hf` at closed-loop concurrency 16 on CPU; ≥ 5× on the GPU `[TARGET]`.
+- **AC4:** vLLM vs `dli` on identical GPU, model and workload, reported whatever the gap: throughput, TTFT and ITL
+  percentiles, for every model on the ladder (Qwen2.5-0.5B, Qwen2.5-1.5B, SmolLM2-1.7B bf16; Qwen2.5-7B-AWQ is
+  vLLM-only because the engine has no quantized path; the 80 GB part of AC4 needs a rental and is out of scope).
+- **AC5:** at 2× the highest unsaturated open-loop rate of `dli`, with `X-Deadline-Ms: 2000` (the TTFT SLO): no
+  crash or OOM; rejections answered in < 50 ms (P99); admitted requests' TTFT P99 ≤ 2 s `[TARGET]`. The same rate
+  without a deadline header is run as the control.
+
+### Threats to validity
+The load generator runs on the same 6-vCPU host as the server (localhost, no network); client lateness is reported so
+saturation of the client is visible. The A16 is one GA107 GPU of a four-GPU board: absolute numbers are specific to it
+and never multi-GPU evidence. Random-token prompts make every non-designed prefix unique. vLLM is run in its normal
+optimized configuration and the native engine is eager PyTorch: the comparison is between the two systems as they
+are, not between equally optimized kernels.
+
+## M5 bf16 precision study (pre-registered, `docs/evaluation-plan-m5.md`)
+
+`python -m dli.bench.precision --model <repo> --parts fidelity,ppl,arc --out <dir>` on the A16
+(`src/dli/bench/precision.py`). Sample sizes fixed before running:
+- **Fidelity:** the 100 M1 prompts × 128 teacher-forced steps (12,800 steps per model and configuration). Engine
+  configurations C/D use the M3 settings that produced the failed bf16 result (48 sequences, 256-token budget, KV pool
+  at 25 % of demand).
+- **Perplexity:** WikiText-103 test, the first 200 windows of 512 tokens; the last 256 tokens of each window are scored
+  given the first 256 (51,200 scored tokens per configuration). The engine configuration for C is production-like
+  (128 sequences, 2,048-token budget, ample pool).
+- **ARC-Easy:** all 2,376 test items (9,501 choices), sum log-likelihood scoring, prompt `Question: …\nAnswer:`;
+  Qwen2.5-0.5B only (SmolLM2-135M is too weak for the task to be informative). Power: with a discordance rate d ≤ 5 %,
+  the 95 % CI half-width of a paired accuracy difference is about 1.96·√(d/n) ≤ 0.9 points, inside the ±2-point
+  tolerance, so the full test set can show equivalence if it holds.
+
+### Changes after the first runs (results kept, explained in the analyses)
+- **Saturation rule** (2026-11-11, `3685485`): the achieved-rate test was biased by the drain tail and stopped sweeps
+  early; replaced by a queue-growth test. The campaign keeps the original rule's results. That test in turn sees
+  continuous-batching overload late (known issue #35).
+- **AC5** was re-measured with `benchmarks/plans/m5-gpu-ac5.json` at ≥ 2× the corrected saturation, because the
+  campaign's overload point did not meet the pre-registered 2× condition. Criteria unchanged.

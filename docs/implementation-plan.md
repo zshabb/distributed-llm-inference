@@ -10,7 +10,7 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 | M2 | Paged KV-cache block manager + prefix sharing | T0 (+ [SIM] policy study) | **done** (branch `feat/m2-paged-kv`) |
 | M3 | Continuous batching, chunked prefill, preemption, cancellation | T0 · T2 | **done** (branch `feat/m3-continuous-batching`) |
 | M4 | OpenAI API server, SSE, admission control, backpressure, metrics | T0 · T2 | **done** (branch `feat/m4-openai-api`) |
-| M5 | Benchmark harness + baselines (HF static batching; vLLM on A16) | T0 · T2 (Gate B) | not started |
+| M5 | Benchmark harness + baselines (HF static batching; vLLM on A16) | T0 · T2 (Gate B) | **done** (branch `feat/m5-benchmarks`; AC3 and AC5 failed, recorded) |
 | M6 | Triton paged-attention decode kernel | T0 interpreter · T2 | not started |
 | M7 | Tensor parallelism | T0 gloo · T3 rental | not started |
 | M8 | Go router | T0 · K8S-KIND · T2 (logic) | not started |
@@ -86,5 +86,22 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
       conformance of every response, official `openai` SDK compatibility, real-process SIGTERM drain
 - [x] Real checkpoints over HTTP: fp32 24/24 + 24/24 identical to the reference, stream == non-stream, on CPU and A16;
       bf16 stream-equality criterion **failed** (batch-composition effect, analyzed; fp32 control exact)
-- [ ] Moved to M5: latency/throughput of the server under open-loop load (TTFT/ITL percentiles), HTTP overhead,
-      admission-predictor calibration (known issue #26)
+- [x] Moved to M5: latency/throughput of the server under open-loop load (TTFT/ITL percentiles) and
+      admission-predictor calibration: done in M5 (predictor rewritten, #26)
+
+## M5 acceptance (spec 01 §12/§15, M5 scope)
+
+- [x] Harness: open-loop Poisson (latency from scheduled arrival) and closed-loop load, sessions; synthetic, shared-
+      prefix and OASST1 multi-turn workloads; NVML and server-metric monitoring; campaign runner and reports (tested)
+- [x] Baselines: HF static batching (tested equal to unbatched greedy) and vLLM 0.32.0 (digest-pinned); equal KV capacity
+- [x] Methodology and acceptance pre-registered (`benchmarks/methodology.md`, ADR-0004) before evidence runs
+- [x] CPU campaign `[CPU-LAPTOP]` (5 reps) and A16 campaign (3 reps): throughput, TTFT/TPOT/ITL/E2E percentiles,
+      completion rates, memory, KV usage, prefix-cache ablation, load sweeps
+- [ ] **AC3** ≥ 2× (CPU) / ≥ 5× (GPU) HF static batching at c=16: **failed** (0.73× / 0.33×), cause profiled
+- [x] **AC4** vLLM comparison published (≤ 2B bf16 ladder + 7B-AWQ vLLM-only; 80 GB part needs a rental)
+- [ ] **AC5** at ≥ 2× saturation: no crash ✔, admitted TTFT P99 ≤ 2 s ✔, rejections < 50 ms **failed** (P99 2.01 s)
+- [x] bf16 study per `docs/evaluation-plan-m5.md`: fp32 control exact; quality within tolerance; margin-conditional
+      agreement target missed (99.85% vs 99.9%, equally by unbatched bf16)
+- [x] Bottleneck profiled (`engine_profile.py`): launch-bound per-sequence attention, input to M6
+- [x] Defects found and fixed with regression tests: admission predictor (over-prediction), saturation rule (tail bias)
+- [ ] Moved to M6: batched paged-attention kernel + CUDA graphs, then re-measure AC3/AC5 on the same hardware

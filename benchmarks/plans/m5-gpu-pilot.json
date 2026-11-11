@@ -1,0 +1,32 @@
+{
+  "name": "m5-gpu-pilot",
+  "description": "CALIBRATION ONLY, not evidence: one repetition per backend and model to (1) check every backend starts, (2) read vLLM's KV-cache capacity so the native pool can be sized to the same number of tokens, (3) find throughput ranges for the open-loop rate grids of m5-gpu.json.",
+  "label": "GPU-A16x1-vultr",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "reps": 1,
+  "port": 8300,
+  "max_num_seqs": 128,
+  "max_num_batched_tokens": 2048,
+  "saturation_ttft_s": 10.0,
+  "request_timeout_s": 900,
+  "backends": {
+    "dli": {"kv_cache_gb": 6.0, "block_size": 16},
+    "vllm": {"gpu_memory_utilization": 0.85, "max_model_len": 4096, "extra_args": ["--enable-prefix-caching"]},
+    "hf": {"max_batch": 16, "max_wait_ms": 20}
+  },
+  "models": [
+    {"name": "qwen2.5-0.5b", "repo": "Qwen/Qwen2.5-0.5B-Instruct", "backends": ["dli", "vllm", "hf"], "experiments": ["closed-fixed"]},
+    {"name": "qwen2.5-1.5b", "repo": "Qwen/Qwen2.5-1.5B-Instruct", "backends": ["dli", "vllm", "hf"], "experiments": ["closed-fixed"]},
+    {"name": "smollm2-1.7b", "repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct", "backends": ["dli", "vllm"], "experiments": ["closed-fixed"]},
+    {"name": "qwen2.5-7b-awq", "repo": "Qwen/Qwen2.5-7B-Instruct-AWQ", "backends": ["vllm"], "experiments": ["closed-fixed"]}
+  ],
+  "experiments": {
+    "closed-fixed": {
+      "workload": {"type": "synthetic", "input": {"fixed": 256}, "output": {"fixed": 128}},
+      "mode": "closed",
+      "points": [16, 64],
+      "n_per_concurrency": 2
+    }
+  }
+}

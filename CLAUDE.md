@@ -34,6 +34,11 @@ Portfolio-wide rules: `ENGINEERING_STANDARDS.md` in the local planning workspace
   `git -c credential.helper= -c 'credential.helper=!"/mnt/c/Program Files/GitHub CLI/gh.exe" auth git-credential' push`
 - Do not rerun the M1 parity suites unless `src/dli/model/`, `src/dli/generate.py`, `uv.lock`, or the parity harness change
   in a way that affects numerics. Record the decision in `docs/progress.md`.
+- **GPU-first testing** (owner policy 2026-11-11, portfolio standards §6.2): CPU runs correctness (unit tests, fp32
+  parity, scheduler/block-manager properties, memory safety, API/e2e, targeted regressions); performance is measured
+  on the A16. No CPU performance campaigns unless an acceptance criterion names CPU, and then only the smallest
+  focused measurement (flag it). Targeted tests while developing (`pytest <path> -k ...`), one fast-suite run before a
+  push, comprehensive suites and GPU campaigns at milestone checkpoints. Targets and unfavourable results are kept.
 - Evidence directories: `benchmarks/results/<UTC date>-<label>-<name>/` with `env.json` whose revision is captured at
   run start (`envinfo.current_revision`). Never edit raw results; add a correction note beside them instead.
 - Parity results are evidence for the tested models, prompts, precision modes, and greedy settings only.

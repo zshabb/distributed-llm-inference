@@ -1,0 +1,88 @@
+{
+  "name": "m5-gpu",
+  "description": "M5 A16 campaign (AC3 GPU, AC4, AC5): native engine vs vLLM v0.32.0 vs HF static batching, bf16. KV pools: native num_blocks = vLLM's reported KV capacity / 16 at --gpu-memory-utilization 0.85 (pilot 2026-11-11: 946,960 / 321,248 / 47,440 tokens). Rate grids from the pilot's closed-loop throughput.",
+  "label": "GPU-A16x1-vultr",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "reps": 3,
+  "port": 8300,
+  "max_num_seqs": 128,
+  "max_num_batched_tokens": 2048,
+  "saturation_ttft_s": 10.0,
+  "request_timeout_s": 900,
+  "backends": {
+    "dli": {"kind": "dli", "block_size": 16},
+    "dli-noprefix": {"kind": "dli", "block_size": 16, "extra_args": ["--no-prefix-caching"]},
+    "vllm": {"kind": "vllm", "gpu_memory_utilization": 0.85, "max_model_len": 4096, "extra_args": ["--enable-prefix-caching"]},
+    "hf": {"kind": "hf", "max_batch": 16, "max_wait_ms": 20}
+  },
+  "models": [
+    {
+      "name": "qwen2.5-0.5b", "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+      "backends": ["dli", "vllm", "hf", "dli-noprefix"],
+      "experiments": ["closed-fixed", "open-lognormal", "open-shared-prefix", "multiturn", "overload"],
+      "overrides": {"dli": {"num_blocks": 59185}, "dli-noprefix": {"num_blocks": 59185}}
+    },
+    {
+      "name": "qwen2.5-1.5b", "repo": "Qwen/Qwen2.5-1.5B-Instruct",
+      "backends": ["dli", "vllm", "hf"],
+      "experiments": ["closed-fixed-large", "open-lognormal-large"],
+      "overrides": {"dli": {"num_blocks": 20078}}
+    },
+    {
+      "name": "smollm2-1.7b", "repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "backends": ["dli", "vllm"],
+      "experiments": ["closed-fixed-large", "open-lognormal-large"],
+      "overrides": {"dli": {"num_blocks": 2965}}
+    },
+    {
+      "name": "qwen2.5-7b-awq", "repo": "Qwen/Qwen2.5-7B-Instruct-AWQ",
+      "backends": ["vllm"],
+      "experiments": ["closed-fixed-large", "open-lognormal-large"]
+    }
+  ],
+  "experiments": {
+    "closed-fixed": {
+      "description": "Max throughput at concurrency 1/16/64; input 256, output 128. AC3 is the c=16 point.",
+      "workload": {"type": "synthetic", "input": {"fixed": 256}, "output": {"fixed": 128}},
+      "mode": "closed", "points": [1, 16, 64], "n_per_concurrency": 2, "n_extra": 8,
+      "backends": ["dli", "vllm", "hf"]
+    },
+    "closed-fixed-large": {
+      "workload": {"type": "synthetic", "input": {"fixed": 256}, "output": {"fixed": 128}},
+      "mode": "closed", "points": [16, 64], "n_per_concurrency": 2
+    },
+    "open-lognormal": {
+      "description": "Latency vs offered load; input median 512 (sigma 0.8, 32-2048), output median 128 (sigma 0.8, 16-512).",
+      "workload": {"type": "synthetic", "input": {"median": 512, "sigma": 0.8, "lo": 32, "hi": 2048},
+                   "output": {"median": 128, "sigma": 0.8, "lo": 16, "hi": 512}},
+      "mode": "open", "points": [0.5, 1, 2, 4, 8, 16, 32], "duration_s": 40, "min_n": 30, "max_n": 500,
+      "drain_s": 120, "backends": ["dli", "vllm", "hf"]
+    },
+    "open-lognormal-large": {
+      "workload": {"type": "synthetic", "input": {"median": 512, "sigma": 0.8, "lo": 32, "hi": 2048},
+                   "output": {"median": 128, "sigma": 0.8, "lo": 16, "hi": 512}},
+      "mode": "open", "points": [0.25, 0.5, 1, 2, 4, 8], "duration_s": 40, "min_n": 20, "max_n": 400,
+      "drain_s": 120
+    },
+    "open-shared-prefix": {
+      "description": "8 prefixes x 1024 tokens (Zipf 1.1) + 64 unique tokens, output 64.",
+      "workload": {"type": "shared_prefix", "num_prefixes": 8, "prefix_len": 1024, "suffix": {"fixed": 64},
+                   "output": {"fixed": 64}, "zipf_s": 1.1},
+      "mode": "open", "points": [0.5, 1, 2, 4, 8, 16, 32], "duration_s": 40, "min_n": 30, "max_n": 500,
+      "drain_s": 120, "backends": ["dli", "dli-noprefix", "vllm"]
+    },
+    "multiturn": {
+      "description": "OASST1 sessions (3 user turns), shared system prompts, output 96 per turn, think time Exp(1 s). Points are sessions/s.",
+      "workload": {"type": "multiturn", "system_prompts": "benchmarks/workloads/system_prompts.json", "min_turns": 3,
+                   "max_turns": 3, "output_tokens": 96},
+      "mode": "sessions", "points": [0.25, 0.5, 1, 2, 4], "duration_s": 40, "min_n": 20, "max_n": 250,
+      "think_s": 1.0, "drain_s": 180, "backends": ["dli", "dli-noprefix", "vllm"]
+    },
+    "overload": {
+      "description": "AC5: 2x the highest unsaturated open-lognormal rate, with the 2 s TTFT deadline and without (control).",
+      "mode": "overload", "base": "open-lognormal", "factors": [2], "backends": ["dli"],
+      "variants": [{"name": "deadline2s", "headers": {"X-Deadline-Ms": "2000"}}, {"name": "nodeadline", "headers": {}}]
+    }
+  }
+}

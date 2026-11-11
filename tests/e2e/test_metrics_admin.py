@@ -97,3 +97,15 @@ def test_metrics_are_not_exposed_on_the_public_port(server: LiveServer) -> None:
     with server.client() as c:
         assert c.get("/metrics").status_code == 404
         assert c.post("/admin/drain").status_code == 404
+
+
+def test_prefix_caching_can_be_disabled(make_server: ServerFactory) -> None:
+    """Ablation switch: with prefix caching off, a repeated prompt gets no cache hits."""
+    body = {"model": MODEL, "prompt": "shared prefix " * 8, "max_tokens": 2, "temperature": 0}
+    on, off = make_server(), make_server(enable_prefix_caching=False)
+    for live in (on, off):
+        with live.client() as c:
+            for _ in range(3):
+                assert c.post("/v1/completions", json=body).status_code == 200
+    assert scrape(on)["dli_prefix_cache_hit_ratio{}"] > 0
+    assert scrape(off)["dli_prefix_cache_hit_ratio{}"] == 0

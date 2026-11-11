@@ -44,6 +44,7 @@ class BuildOptions:
     auth: ApiKeyAuth | None = None
     max_body_bytes: int = 2 * 1024 * 1024
     admin_token: str | None = None
+    enable_prefix_caching: bool = True
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -59,6 +60,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
         block_size=opts.block_size,
         config=opts.scheduler,
         eos_token_ids=codec.eos_token_ids,
+        enable_prefix_caching=opts.enable_prefix_caching,
     )
     aengine = AsyncEngine(engine)
     config = ServerConfig(

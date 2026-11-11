@@ -55,8 +55,13 @@ class EngineSnapshot:
     kv_cached_idle_blocks: int = 0
     kv_used_blocks: int = 0
     kv_total_blocks: int = 0
-    prefill_tokens_per_s: float = 0.0  # EWMA over steps that did prefill work
+    prefill_tokens_per_s: float = 0.0  # EWMA over steps that did prefill work (metrics only)
     step_seconds: float = 0.0  # EWMA of total step time
+    max_num_batched_tokens: int = 0  # scheduler token budget per step
+    max_num_seqs: int = 0  # scheduler cap on running sequences
+    # Tokens each running request may still generate (max_tokens - generated), ascending: the
+    # earliest a sequence slot can free up. An upper bound when a request stops early at EOS.
+    running_remaining_tokens: tuple[int, ...] = ()
     total_steps: int = 0
     total_preemptions: int = 0
     total_generated_tokens: int = 0
@@ -283,6 +288,11 @@ class AsyncEngine:
             kv_total_blocks=st.num_blocks,
             prefill_tokens_per_s=self._c.prefill_rate,
             step_seconds=self._c.step_s,
+            max_num_batched_tokens=sched.config.max_num_batched_tokens,
+            max_num_seqs=sched.config.max_num_seqs,
+            running_remaining_tokens=tuple(
+                sorted(max(0, r.params.max_tokens - len(r.output_ids)) for r in sched.running)
+            ),
             total_steps=self._c.steps,
             total_preemptions=self._c.preemptions,
             total_generated_tokens=self._c.generated,

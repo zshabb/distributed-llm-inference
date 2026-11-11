@@ -1,0 +1,1299 @@
+2026-11-11 15:37:29,333 INFO dli.server serving qwen2.5-0.5b on http://127.0.0.1:8300 (admin http://127.0.0.1:8301), KV pool 59185 blocks x 16
+INFO:     Started server process [547598]
+INFO:     Started server process [547598]
+INFO:     Uvicorn running on http://127.0.0.1:8300 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://127.0.0.1:8301 (Press CTRL+C to quit)
+INFO:     127.0.0.1:60844 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60888 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60894 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60896 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60910 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60920 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60924 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60926 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60932 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60936 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60942 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60958 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60972 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60982 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60996 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:32768 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35788 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35800 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35808 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53144 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53154 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53170 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53186 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53200 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53212 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53214 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53228 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53244 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53248 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53264 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53270 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53276 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53288 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56338 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56348 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56360 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56364 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45328 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45332 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45348 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45358 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45362 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45366 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45380 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45392 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45402 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45410 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45436 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45446 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45458 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33090 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33100 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33110 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33116 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33126 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33136 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33140 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33150 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33152 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33166 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33172 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33176 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33188 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33204 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33206 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33220 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33230 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33244 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33258 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43692 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43698 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43712 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43722 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43742 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43744 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43746 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43758 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43766 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43768 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43816 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43800 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43866 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43870 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43882 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43890 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43902 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43904 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36646 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36662 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36688 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36704 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36706 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36712 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36722 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36738 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36746 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36754 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36756 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36760 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36786 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36788 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36804 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36818 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58554 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58556 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58564 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58576 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58588 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58602 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58610 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58618 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58646 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58658 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58666 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58676 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58680 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58684 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58700 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58702 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58708 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58720 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58736 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58750 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58760 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58770 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58772 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58788 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58804 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58826 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58884 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58894 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37926 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37934 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37942 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37950 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37958 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37970 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37978 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37982 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37988 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37998 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38004 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38020 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38024 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38026 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38030 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38038 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38048 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38058 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38074 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38088 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38100 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38108 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38124 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38140 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38144 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38148 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38158 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38162 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38166 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38180 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38196 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38212 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38222 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38228 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38234 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38248 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38254 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38264 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58446 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58456 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58466 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58478 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58484 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58498 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58504 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58512 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58528 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58544 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58546 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58550 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58566 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58572 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58578 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58584 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58596 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58608 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58616 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58624 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58640 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58642 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58658 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58662 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58694 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58710 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58718 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58726 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58740 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58748 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58764 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58766 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58772 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58786 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58796 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58802 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58818 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34624 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34640 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38114 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38120 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38134 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38148 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38156 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38166 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38178 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38192 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38198 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38204 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38214 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38230 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38240 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38246 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38248 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38250 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38254 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38268 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38284 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38286 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38288 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38298 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38304 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38318 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38334 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38342 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38350 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59044 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59060 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59072 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59088 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59090 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59104 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59114 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59130 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59146 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59156 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59170 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59182 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59198 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59208 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59224 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59236 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59244 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59246 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59250 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59256 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59264 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59278 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59292 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59302 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59306 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59322 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59330 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59346 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59360 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59366 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59382 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59398 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59412 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59430 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59442 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59450 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59454 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59464 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59476 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59492 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59508 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59516 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59524 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59528 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59534 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59544 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59558 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37120 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37138 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37154 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37170 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37182 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37194 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37196 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37202 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37212 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37226 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37238 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37242 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37244 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37256 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37258 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37266 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37272 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37286 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37302 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37304 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37306 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37320 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37334 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37338 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37354 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37358 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37362 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37370 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37382 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37386 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37394 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37406 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37408 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37416 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37432 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37442 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46290 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46304 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46318 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46328 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46332 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46344 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46350 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46364 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46380 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46384 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46390 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46406 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46414 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46424 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46432 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46442 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46452 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46460 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46472 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46482 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46494 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46508 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46510 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46518 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46532 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46548 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46562 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46572 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46578 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46592 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46598 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46606 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50578 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50588 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50604 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50616 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50642 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50668 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50672 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50674 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58090 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58104 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58114 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58118 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58142 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58158 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58162 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58176 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58190 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58206 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58222 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58224 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58226 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58228 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58242 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58246 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58262 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58276 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58286 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58302 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58318 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58324 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58334 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58348 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58350 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58354 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58360 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58362 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58370 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58378 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58386 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58392 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58394 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58396 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58404 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58420 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58424 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58438 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58452 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58460 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58470 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58484 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58498 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47524 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47538 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47540 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47550 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47566 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47574 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47578 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47584 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47592 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47608 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47616 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47636 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47660 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47668 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47704 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47716 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47718 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47722 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47734 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47746 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47750 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47758 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47766 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47796 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47806 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47820 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47854 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47856 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47888 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47904 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47914 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47918 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47934 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47936 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47940 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47956 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47972 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47988 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48002 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48014 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48022 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48026 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48038 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48052 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48056 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48064 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48080 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48084 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48086 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48094 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48108 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48114 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48124 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48134 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49994 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50010 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49996 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50016 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50028 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50038 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50054 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50056 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50064 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50074 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50076 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50092 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50098 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50108 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50120 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50136 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50138 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50150 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50162 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50176 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50180 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50184 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50188 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50196 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50198 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50204 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50210 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50220 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50236 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50240 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50250 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50264 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50266 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50270 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50288 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50302 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50318 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50332 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50342 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50350 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50362 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50372 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50386 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50402 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50408 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50410 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50432 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50442 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50448 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50452 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50468 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51108 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51112 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51122 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51138 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51148 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51158 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51172 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51176 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51190 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51196 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51212 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51210 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51222 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51224 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51240 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51252 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51268 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51274 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51280 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51294 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51300 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51302 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51314 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51324 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51340 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51346 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51354 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51356 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51372 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51384 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51396 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51398 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51410 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51438 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51446 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51450 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51458 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51466 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51478 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51494 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51510 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51524 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51540 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51548 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51556 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33552 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33554 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33566 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33582 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33584 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33586 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33590 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33608 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33616 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33620 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33624 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33640 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33662 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33664 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33666 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33680 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33694 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33710 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33718 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33724 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33732 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33738 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33748 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50838 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50878 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50884 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50900 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50922 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50934 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50936 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50942 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50950 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50958 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50960 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50970 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50974 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50980 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50990 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51002 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51014 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51028 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51032 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51036 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51042 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51048 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51054 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51058 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51066 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51078 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51090 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51094 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51102 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51116 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51142 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51156 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51160 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51168 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51172 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51186 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51198 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51202 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51146 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51214 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51228 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51238 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51246 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51250 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51252 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58284 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58288 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58296 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58310 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58320 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58332 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58348 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58360 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58366 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58368 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58354 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58372 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58382 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58396 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58406 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58414 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58424 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58428 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58436 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58452 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58458 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58460 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58464 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58466 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58478 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58484 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58496 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58512 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58526 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58548 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58550 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58562 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58570 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58584 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58598 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58600 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58610 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58624 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58636 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58640 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58670 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58688 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58700 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58716 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58738 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58742 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58750 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58758 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58764 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58780 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58786 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58794 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58806 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58826 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58860 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58872 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58884 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58894 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58908 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58924 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58926 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49580 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49600 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49606 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49610 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49646 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58910 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49670 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49622 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49682 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49622 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49696 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49708 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49724 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49726 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49700 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49748 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49760 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49766 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49774 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49748 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49760 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49766 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49798 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49808 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49824 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49784 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49808 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:49830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35458 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35468 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35484 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35488 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35502 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35522 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35474 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35484 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35488 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35502 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35522 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35536 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35552 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35554 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35558 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35564 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35572 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35588 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35514 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35526 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35552 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35554 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35558 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35536 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35564 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35572 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35588 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38830 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38754 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38756 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38768 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38780 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38782 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38786 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38794 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38810 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38826 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:35592 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38794 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38810 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38826 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38832 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38846 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38918 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38910 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38864 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38872 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38864 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38878 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38892 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38896 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38906 - "POST /v1/completions HTTP/1.1" 429 Too Many Requests
+INFO:     127.0.0.1:38862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33482 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33498 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33500 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33514 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33516 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33530 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33532 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33538 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33548 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33562 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33574 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33592 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33590 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33602 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33610 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33626 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33628 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33648 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33664 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33672 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33676 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33700 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33710 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33722 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33736 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33748 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33752 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33754 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49658 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49668 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49682 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49694 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49708 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49714 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49738 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49750 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49760 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49762 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49764 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49778 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49736 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49790 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49804 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49814 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49858 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49874 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49882 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49896 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49912 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49932 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49918 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49942 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49928 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49948 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49962 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49966 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49968 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49978 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49984 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49998 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50014 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50022 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50026 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50032 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50042 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50056 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50060 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50070 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50084 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50096 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50108 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50112 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50122 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50130 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50134 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50144 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50156 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50170 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50178 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50190 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50204 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50218 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50230 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50238 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50242 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50254 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50266 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50272 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50286 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50288 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50292 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50308 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50314 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50326 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50336 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44610 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44618 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44640 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44648 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44660 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44662 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44668 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44684 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44696 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44698 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44702 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44718 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44740 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44754 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44780 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44794 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44768 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44814 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44816 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44840 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44884 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44898 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44910 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44916 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44926 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44928 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44934 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44946 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44956 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44972 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44984 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44988 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44992 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45000 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45016 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44944 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45030 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45038 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45040 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45042 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45052 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45062 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45064 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45078 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45084 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45100 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45110 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45114 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45122 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45138 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45152 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45168 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45180 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45192 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45200 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45210 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45222 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45224 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45240 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45242 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45244 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45250 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45252 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45254 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45266 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45270 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56398 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56408 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56410 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56420 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56428 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56442 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56458 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56472 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56476 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56484 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56498 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56504 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56512 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56518 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56522 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56538 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56540 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56550 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56566 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56580 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56600 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56614 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56628 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56638 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56656 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56660 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56670 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56678 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56704 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56714 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56722 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56744 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56756 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56762 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56778 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56796 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56808 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56816 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56818 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56824 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56828 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56844 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56856 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56862 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56878 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56882 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56888 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56902 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56904 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56908 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56912 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56914 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56920 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56930 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56942 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56958 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56972 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56988 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56994 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56998 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57004 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57016 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57032 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57038 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57040 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57042 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57048 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57064 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57074 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57078 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57100 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57090 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57116 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57118 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57134 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34384 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34400 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34402 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34420 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34414 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34432 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34446 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34454 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34468 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34472 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34480 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34494 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34500 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34514 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34520 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34524 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34528 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34530 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34538 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34542 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34550 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34558 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34572 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34580 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34584 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34596 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34612 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34622 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34650 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34660 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34662 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34666 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34674 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34686 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34700 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34712 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34716 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34736 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34742 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34750 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34756 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34770 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34780 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34792 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34812 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34798 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34822 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34830 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34836 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34852 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34856 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34864 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34880 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34890 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34894 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34898 - "POST /v1/completions HTTP/1.1" 200 OK
+2026-11-11 15:49:20,729 INFO dli.server shutdown requested: draining (new requests get 503)
+INFO:     Shutting down
+INFO:     Shutting down
+INFO:     Finished server process [547598]
+INFO:     Finished server process [547598]

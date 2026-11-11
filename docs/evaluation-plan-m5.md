@@ -1,6 +1,6 @@
 # M5 evaluation plan: numerical fidelity and output quality of reduced-precision serving
 
-Status: **plan** (written during M4, executed in M5). It responds to the M3 bf16 result, which stays recorded as a
+Status: **executed** 2026-11-11; results and verdicts: `benchmarks/results/2026-11-11-GPU-A16x1-vultr-m5-precision/ANALYSIS.md`. It responds to the M3 bf16 result, which stays recorded as a
 **failed** criterion (`benchmarks/results/2026-11-10-GPU-A16x1-vultr-m3-engine-parity-bfloat16/`). Nothing here
 redefines that criterion as passed. It replaces an exact-match check that cannot be meaningful for bf16 with measurements
 that can.

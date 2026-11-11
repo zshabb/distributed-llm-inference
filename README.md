@@ -3,12 +3,13 @@
 **An LLM inference engine built from first principles (paged KV cache, continuous batching, custom kernels, tensor
 parallelism) plus a workload-aware router, measured against established baselines.**
 
-> **Status: active development (milestones M0–M4).** What exists today: a verified native Llama-family model, a paged
+> **Status: active development (milestones M0–M5).** What exists today: a verified native Llama-family model, a paged
 > KV-cache with prefix caching, a continuous-batching engine (chunked prefill, preemption, fairness, sampling) that
-> reproduces the unbatched path token-for-token in fp32 on the tested configurations, and an OpenAI-compatible async
-> HTTP server in front of it. **Nothing has been benchmarked yet** (M5): there are no latency or throughput claims for the
-> server. The features listed under *Planned capabilities* do **not** exist. This README only claims what the tests and
-> labeled result files show.
+> reproduces the unbatched path token-for-token in fp32, an OpenAI-compatible async HTTP server, and a benchmark and
+> evaluation harness. **Measured on one A16 GPU, the engine is correct but slow:** vLLM is 1.7–9.2× faster and plain
+> `transformers` static batching ~2–3× faster in throughput, because attention runs as a per-sequence loop (profiled;
+> the M6 kernel addresses it). The features listed under *Planned capabilities* do **not** exist. This README only
+> claims what the tests and labeled result files show.
 
 ## The engineering problem
 
@@ -32,12 +33,13 @@ that address those problems itself, so each one can be studied, modified, and me
 | Cancellation and overload: client-disconnect abort (streaming, non-streaming, queued), deadline/capacity admission with 429 + `Retry-After`, request timeouts, graceful SIGTERM drain | `src/dli/server/` | Real-HTTP tests check KV blocks return to 0 and generation stops; real-process drain test |
 | Security controls: API keys (Argon2id hashes, checked before parsing), body limit, loopback defaults, sandboxed templates, separate admin listener | `src/dli/server/auth.py`, `limits.py`, `__main__.py` | Auth/limit/refusal tests; `SECURITY.md` |
 | Prometheus metrics (requests, errors, rejections, tokens, TTFT/ITL/latency histograms, queue depth, KV usage, process/GPU memory) and admin state/drain | `src/dli/server/metrics.py`, `admin.py` | Counters asserted against exact traffic |
+| Benchmark harness: open-loop (Poisson, latency from scheduled arrival) and closed-loop load, shared-prefix and multi-turn (OASST1) workloads, vLLM and HF static-batching baselines, NVML/metrics monitoring, campaign runner and reports; bf16 precision study (teacher-forced fidelity, perplexity, ARC) | `src/dli/bench/` | Harness tests (load accounting, coordinated omission, baseline correctness, fp32 identities of the precision paths); results below |
 | Reproducible GPU host tooling | `scripts/gpu/`, `docs/operations.md` | Environment validation results in `benchmarks/results/` |
 
 ## Planned capabilities (not implemented)
 
-Benchmark harness vs HF and vLLM, latency percentiles under load (M5) ·
-Triton paged-attention kernel (M6) · tensor parallelism (M7) · Go prefix/KV-aware router (M8) · Kubernetes deployment
+Batched GQA-aware paged-attention kernel and CUDA graphs (M6) ·
+tensor parallelism (M7) · Go prefix/KV-aware router (M8) · Kubernetes deployment
 (M9). See `docs/implementation-plan.md`.
 
 ## Architecture
@@ -154,6 +156,34 @@ not benchmarks.
 Behaviour verified over real HTTP on a tiny model (63 tests): disconnect cancellation (KV returns to 0), overload
 (429 + `Retry-After`), deadline misses, timeouts (504 / in-band), malformed input, auth, body limits, metrics accuracy,
 SIGTERM drain on the real process, contract C1 conformance, and the official `openai` SDK.
+
+### M5: benchmarks on one A16 GPU (performance) and bf16 quality
+
+Methodology fixed before the runs (`benchmarks/methodology.md`, ADR-0004): same HTTP client for every backend, open-loop
+latency from scheduled arrival, equal KV capacity in tokens, vLLM in its normal optimized configuration, 3 repetitions
+with rotated order. `[GPU:A16x1@vultr]` unless noted.
+
+| Output tok/s, closed loop c=16 (in 256 / out 128) | native engine | vLLM 0.32.0 | HF static batching |
+|---|---|---|---|
+| Qwen2.5-0.5B | 224.6 | 1,278.5 | 676.5 |
+| Qwen2.5-1.5B | 171.9 | 517.1 | 424.3 |
+| SmolLM2-1.7B | 216.0 | 359.8 | – |
+
+| Acceptance criterion (spec 01) | Result |
+|---|---|
+| AC3: ≥ 2× HF static batching at c=16 on CPU / ≥ 5× on GPU | **Failed**: 0.73× `[CPU-LAPTOP]`, 0.33× (GPU) |
+| AC4: vLLM comparison on identical GPU, model, workload | Published (≤ 2B bf16 ladder; Qwen2.5-7B-AWQ vLLM-only); vLLM 1.7–9.2× faster |
+| AC5: at ≥ 2× saturation, no crash; rejections < 50 ms; admitted TTFT P99 ≤ 2 s | **Failed** on rejection latency (P99 2.01 s); no crash ✔; admitted TTFT P99 1.98 s vs 90 s without admission ✔ |
+| bf16 quality (pre-registered tolerances) | Perplexity +0.05–0.09%, ARC-Easy +0.04 pts [−0.38, +0.46] ✔; margin-conditional agreement 99.85% vs ≥ 99.9% target **missed** (also by unbatched bf16) |
+
+Why the engine is slow, measured: each decode step loops over every sequence in every layer (page gather, GQA head
+copy, one attention call): 11,888 kernel launches per step at batch 64, ~35× the memory-bandwidth floor, GPU ~49% busy.
+What it does well: sub-second TTFT under load where static batching queues 10–30 s; prefix caching cuts TTFT 2.6× on
+shared prefixes; the fp32 engine matches the fp32 reference at 100% of steps through 47 preemptions; bf16 batching adds
+no material error. Evidence: [`campaign`](benchmarks/results/2026-11-11-GPU-A16x1-vultr-m5-gpu/) · [`AC5 rerun`](benchmarks/results/2026-11-11-GPU-A16x1-vultr-m5-gpu-ac5/) ·
+[`precision`](benchmarks/results/2026-11-11-GPU-A16x1-vultr-m5-precision/) · [`profile`](benchmarks/results/2026-11-11-GPU-A16x1-vultr-m5-engine-profile/) · [`CPU`](benchmarks/results/2026-11-11-CPU-LAPTOP-m5-cpu/), each with an `ANALYSIS.md`.
+Two harness/engine defects found in this data (biased saturation rule; over-predicting admission model) are fixed and
+documented; original results are kept.
 
 ### GPU host environment `[GPU:A16x1@vultr]`
 
