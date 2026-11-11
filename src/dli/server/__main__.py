@@ -75,6 +75,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     kv.add_argument("--num-blocks", type=int, default=None)
     kv.add_argument("--kv-cache-gb", type=float, default=None, help="KV pool size in GiB")
     p.add_argument("--block-size", type=int, default=16)
+    p.add_argument(
+        "--no-prefix-caching",
+        action="store_true",
+        help="disable KV prefix reuse across requests (for ablations)",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -136,6 +141,7 @@ def build(args: argparse.Namespace) -> ServerBundle:
         ),
         auth=None if args.no_auth else ApiKeyAuth.from_file(args.api_keys_file),
         admin_token=os.environ.get(args.admin_token_env) or None,
+        enable_prefix_caching=not args.no_prefix_caching,
     )
     return build_server(model_dir, opts)
 
