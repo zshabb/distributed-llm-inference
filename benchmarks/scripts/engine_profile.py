@@ -32,23 +32,33 @@ from dli.sampling import SamplingParams
 
 
 def run(
-    model_id: str, batch: int, steps: int, bandwidth_gbs: float, attention: str = "batched"
+    model_id: str,
+    batch: int,
+    steps: int,
+    bandwidth_gbs: float,
+    attention: str = "batched",
+    *,
+    cuda_graph: bool = False,
+    input_len: int = 256,
+    num_blocks: int | None = None,
 ) -> dict[str, object]:
     path = hub.download(model_id)
     model = load_model(path, dtype=torch.bfloat16, device="cuda")
     cfg = model.config
     eng = LLMEngine.for_model(
         model,
-        num_blocks=batch * 30,
+        num_blocks=num_blocks or batch * 30,
         block_size=16,
         config=SchedulerConfig(max_num_seqs=batch, max_num_batched_tokens=2048),
         batched_decode=attention == "batched",
+        cuda_graph=(16, 16) if cuda_graph else None,  # the M6 proof-of-concept shape
     )
     g = torch.Generator().manual_seed(0)
     for i in range(batch):
-        ids = torch.randint(1000, cfg.vocab_size, (256,), generator=g).tolist()
+        ids = torch.randint(1000, cfg.vocab_size, (input_len,), generator=g).tolist()
         eng.add_request(f"r{i}", ids, SamplingParams(max_tokens=128, ignore_eos=True))
-    # warm-up: finish every prefill and a few decode steps (allocator, kernels)
+    # warm-up: finish every prefill and a few decode steps (allocator, kernels, graph capture)
+    torch.cuda.reset_peak_memory_stats()
     for _ in range(40):
         eng.step()
     torch.cuda.synchronize()
@@ -90,7 +100,27 @@ def run(
     kv = batch * ctx * PagedKVStore.bytes_per_block(cfg, 16, torch.bfloat16) / 16
     floor_ms = (weights + kv) / (bandwidth_gbs * 1e9) * 1e3
     step_ms = statistics.mean(s.total_s for s in st) * 1e3
+    graph = getattr(eng.runner, "decode_graph", None)
+    graph_stats = None
+    if graph is not None:
+        gs = graph.stats
+        graph_stats = {
+            "status": gs.status,
+            "batch": gs.batch,
+            "width_blocks": gs.width,
+            "capture_s": round(gs.capture_s, 3),
+            "free_before_capture_mib": gs.free_before >> 20,
+            "eager_peak_mib": round(gs.eager_peak / 2**20, 1),
+            "graph_pool_mib": round(gs.graph_pool / 2**20, 1),
+            "replays": gs.replays,
+            "fallbacks": gs.fallbacks,
+        }
     return {
+        "cuda_graph": graph_stats,
+        "input_len": input_len,
+        "num_blocks": num_blocks or batch * 30,
+        "max_memory_allocated_mib": torch.cuda.max_memory_allocated() >> 20,
+        "memory_reserved_mib": torch.cuda.memory_reserved() >> 20,
         "model": model_id,
         "attention": attention,
         "batch": batch,
@@ -135,6 +165,14 @@ def main() -> None:
     )
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument(
+        "--cuda-graph", action="store_true", help="enable the batch-16 x 16-block decode graph"
+    )
+    ap.add_argument("--input-len", type=int, default=256)
+    ap.add_argument(
+        "--num-blocks", type=int, default=None, help="KV pool blocks (default: batch x 30)"
+    )
+    ap.add_argument("--tag", default="", help="suffix for the output file name")
+    ap.add_argument(
         "--attention",
         choices=["batched", "reference"],
         default="batched",
@@ -145,9 +183,19 @@ def main() -> None:
     a.out.mkdir(parents=True, exist_ok=True)
     envinfo.main([str(a.out / "env.json")], revision=revision)
     res = [
-        run(a.model, int(b), a.steps, a.bandwidth_gbs, a.attention) for b in a.batches.split(",")
+        run(
+            a.model,
+            int(b),
+            a.steps,
+            a.bandwidth_gbs,
+            a.attention,
+            cuda_graph=a.cuda_graph,
+            input_len=a.input_len,
+            num_blocks=a.num_blocks,
+        )
+        for b in a.batches.split(",")
     ]
-    (a.out / f"{a.model.split('/')[-1]}-{a.attention}.json").write_text(
+    (a.out / f"{a.model.split('/')[-1]}-{a.attention}{a.tag}.json").write_text(
         json.dumps({"code_revision": revision, "runs": res}, indent=1) + "\n"
     )
     for r in res:
