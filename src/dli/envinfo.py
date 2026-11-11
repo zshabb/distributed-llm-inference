@@ -126,6 +126,59 @@ def _torch_info() -> dict[str, Any] | None:
     return info
 
 
+# Provider metadata worth recording for reproducibility. An allowlist, so addresses and ports
+# (e.g. RUNPOD_PUBLIC_IP, RUNPOD_TCP_PORT_*) and anything secret can never end up in a result.
+_PROVIDER_KEYS = (
+    "RUNPOD_POD_ID",
+    "RUNPOD_DC_ID",
+    "RUNPOD_GPU_COUNT",
+    "RUNPOD_CPU_COUNT",
+    "RUNPOD_MEM_GB",
+    "RUNPOD_VOLUME_ID",
+)
+
+
+def _read(path: Path) -> str | None:
+    try:
+        return path.read_text().strip()
+    except OSError:
+        return None
+
+
+def _container_info(cgroup_root: Path = Path("/sys/fs/cgroup")) -> dict[str, Any]:
+    """CPU quota and memory limit of this container (cgroup v2 or v1) and allowlisted provider data.
+
+    Containers often see every host CPU while being limited by a quota; benchmarks depend on the
+    quota, so it is recorded next to the visible core count.
+    """
+    quota: float | None = None
+    v2 = _read(cgroup_root / "cpu.max")
+    if v2 and not v2.startswith("max"):
+        q, per = v2.split()[:2]
+        quota = int(q) / int(per)
+    else:
+        q1, per1 = (
+            _read(cgroup_root / "cpu/cpu.cfs_quota_us"),
+            _read(cgroup_root / "cpu/cpu.cfs_period_us"),
+        )
+        if q1 and per1 and int(q1) > 0:
+            quota = int(q1) / int(per1)
+    mem = _read(cgroup_root / "memory.max") or _read(cgroup_root / "memory/memory.limit_in_bytes")
+    mem_gib = round(int(mem) / 2**30, 2) if mem and mem.isdigit() and int(mem) < 2**60 else None
+    env = dict(os.environ)
+    pid1 = _read(Path("/proc/1/environ"))  # pod variables are not inherited by SSH sessions
+    if pid1:
+        for item in pid1.split("\0"):
+            k, _, v = item.partition("=")
+            env.setdefault(k, v)
+    return {
+        "cpu_quota": round(quota, 2) if quota is not None else None,
+        "memory_limit_gib": mem_gib,
+        "omp_num_threads": os.environ.get("OMP_NUM_THREADS"),
+        "provider": {k: env[k] for k in _PROVIDER_KEYS if k in env} or None,
+    }
+
+
 def current_revision() -> str | None:
     """Return the code revision of this checkout *now*.
 
@@ -167,6 +220,7 @@ def collect(revision: str | None = None) -> dict[str, Any]:
         "hostname": platform.node(),
         "os": {"platform": platform.platform(), "kernel": platform.release()},
         "cpu": {"model": _cpu_model(), "logical_cores": os.cpu_count()},
+        "container": _container_info(),
         "memory_gib": _mem_total_gib(),
         "python": sys.version.split()[0],
         "torch": _torch_info(),
