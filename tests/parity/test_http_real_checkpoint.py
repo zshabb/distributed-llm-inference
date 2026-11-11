@@ -20,6 +20,8 @@ GPU: ``DLI_PARITY_DEVICE=cuda DLI_PARITY_DTYPE=bfloat16 DLI_EVIDENCE_LABEL=GPU-A
 
 ``DLI_PARITY_CUDA_GRAPHS=1`` serves through the decode CUDA graphs (captured before start, as the
 server's ``--cuda-graphs`` does) and records their usage; at least one replay is then required.
+``DLI_PARITY_ENGINE=process`` runs the engine in its own process (the server default); the reference
+model is then a separate copy loaded by the test.
 ``DLI_PARITY_TAG`` names the result directory (default ``m4-http-parity``): every distinct run
 needs its own tag, or it overwrites the earlier run's evidence of the same day and dtype.
 """
@@ -42,7 +44,7 @@ import torch
 from dli import envinfo
 from dli.engine import SchedulerConfig
 from dli.engine.cuda_graph import BENCHMARK_SHAPES
-from dli.model import hub
+from dli.model import hub, load_model
 from dli.server.__main__ import warm_up
 from dli.server.factory import BuildOptions, build_server
 from dli.server.text import ChatMessage
@@ -59,6 +61,7 @@ DTYPE = getattr(torch, os.environ.get("DLI_PARITY_DTYPE", "float32"))
 LABEL = os.environ.get("DLI_EVIDENCE_LABEL", "CPU-LAPTOP")
 NEAR_TIE = 1e-3 if DTYPE is torch.float32 else 1.0
 CUDA_GRAPHS = os.environ.get("DLI_PARITY_CUDA_GRAPHS", "0") == "1"
+ENGINE_PROCESS = os.environ.get("DLI_PARITY_ENGINE", "thread") == "process"
 TAG = os.environ.get("DLI_PARITY_TAG", "m4-http-parity")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RUN_REVISION = envinfo.current_revision()
@@ -83,9 +86,12 @@ def live(request: pytest.FixtureRequest) -> Iterator[tuple[str, LiveServer, Any]
         dtype=DTYPE,
         scheduler=SchedulerConfig(max_num_seqs=32, max_num_batched_tokens=512),
         cuda_graphs=BENCHMARK_SHAPES if CUDA_GRAPHS else None,
+        engine_process=ENGINE_PROCESS,
     )
     bundle = build_server(path, opts)
     warm_up(bundle)  # as the server process does: captures the graphs if configured
+    if bundle.model is None:  # engine in a child process: the reference needs its own copy
+        bundle.model = load_model(path, dtype=DTYPE, device=DEVICE)
     server = start_server(bundle)
     try:
         yield repo_id, server, AutoTokenizer.from_pretrained(path)
@@ -178,7 +184,8 @@ def test_http_generation_matches_reference(live: tuple[str, LiveServer, Any]) ->
             record["ref_top2_gap_at_divergence"] = gaps[k]
         records.append(record)
 
-    graphs = server.bundle.engine.decode_graphs
+    graphs = getattr(server.bundle.engine, "decode_graphs", None)
+    startup = getattr(server.bundle.engine, "startup_info", {}) or {}
     summary = {
         "model": repo_id,
         "revision": hub.PINNED_REVISIONS[repo_id],
@@ -196,7 +203,9 @@ def test_http_generation_matches_reference(live: tuple[str, LiveServer, Any]) ->
             r["identical"] and r["finish_ok"] and r["completion_tokens_ok"] for r in records
         ),
         "wall_seconds_http": round(t_http, 1),
-        "cuda_graphs": graphs.summary() if graphs is not None else None,
+        "cuda_graphs": graphs.summary() if graphs is not None else startup.get("cuda_graphs"),
+        "engine": "process" if ENGINE_PROCESS else "thread",
+        "graph_replays_from_snapshot": server.bundle.engine.snapshot.cuda_graph_replays,
         "note": "Correctness run; requests are concurrent and wall time is not a benchmark.",
     }
     out = (
@@ -213,8 +222,7 @@ def test_http_generation_matches_reference(live: tuple[str, LiveServer, Any]) ->
     print(json.dumps(summary, indent=2))
 
     if CUDA_GRAPHS:
-        assert graphs is not None
-        assert summary["cuda_graphs"]["replays"] > 0, summary["cuda_graphs"]  # type: ignore[index]
+        assert summary["graph_replays_from_snapshot"] > 0, summary
     for r in records:
         if DTYPE is torch.float32:
             assert r["stream_equals_non_stream"], r
