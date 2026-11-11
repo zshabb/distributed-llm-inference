@@ -94,6 +94,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="run the engine in its own process, so its Python work never waits for the HTTP "
         "event loop's GIL (the API process then does not load the weights)",
     )
+    p.add_argument(
+        "--gil-switch-interval",
+        type=float,
+        default=None,
+        help="sys.setswitchinterval for this process in seconds (Python default 0.005); a thread "
+        "waiting for the GIL waits up to this long while another thread runs Python",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -185,7 +192,13 @@ def warm_up(bundle: ServerBundle) -> None:
 
 async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:
     api = _ManagedServer(
-        uvicorn.Config(bundle.app, host=args.host, port=args.port, log_level="info", lifespan="off")
+        uvicorn.Config(
+            bundle.app,
+            host=args.host,
+            port=args.port,
+            log_level="info",
+            lifespan="off",
+        )
     )
     # uvicorn's loggers are process-wide and every Config reconfigures them (level, and access_log
     # =False removes the access handler for BOTH servers). So both use the same settings, and
@@ -223,6 +236,8 @@ async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     args = parse_args(sys.argv[1:] if argv is None else argv)
+    if args.gil_switch_interval is not None:
+        sys.setswitchinterval(args.gil_switch_interval)
     bundle = build(args)
     warm_up(bundle)
     bundle.engine.start()
