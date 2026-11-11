@@ -1,0 +1,285 @@
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347] 
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347]        █     █     █▄   ▄█
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347]  ▄▄ ▄█ █     █     █ ▀▄▀ █  version 0.32.0
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347]   █▄█▀ █     █     █     █  model   /root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347]    ▀▀  ▀▀▀▀▀ ▀▀▀▀▀ ▀     ▀
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:347] 
+(APIServer pid=1) INFO 11-11 01:11:17 [api_utils.py:286] non-default args: {'model_tag': '/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775', 'model': '/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775', 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['qwen2.5-0.5b'], 'gpu_memory_utilization': 0.85, 'enable_prefix_caching': True, 'max_num_batched_tokens': 2048, 'max_num_seqs': 128}
+(APIServer pid=1) INFO 11-11 01:11:25 [model.py:733] Resolved architecture: Qwen2ForCausalLM
+(APIServer pid=1) INFO 11-11 01:11:25 [model.py:2152] Using max model len 4096
+(APIServer pid=1) INFO 11-11 01:11:25 [kernel.py:467] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native'])
+(EngineCore pid=88) INFO 11-11 01:11:34 [core.py:133] Initializing a V1 LLM engine (v0.32.0) with config: model='/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775', speculative_config=None, tokenizer='/root/.cache/huggingface/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=qwen2.5-0.5b, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::qwen4_exp_qsa_prepare_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 256, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=True, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=88) INFO 11-11 01:11:36 [parallel_state.py:1906] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///tmp/vllm_dist_c314dc1371f24daa9c1f2466876035b2 backend=nccl
+(EngineCore pid=88) INFO 11-11 01:11:36 [parallel_state.py:2350] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=88) INFO 11-11 01:11:36 [gpu_worker.py:518] Using V2 Model Runner
+(EngineCore pid=88) INFO 11-11 01:11:36 [model_runner.py:392] Loading model from scratch...
+(EngineCore pid=88) INFO 11-11 01:11:37 [cuda.py:506] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=88) INFO 11-11 01:11:37 [flash_attn.py:1117] Using FlashAttention version 2
+(EngineCore pid=88) INFO 11-11 01:11:38 [base_loader.py:82] Initializing model took 1.280215 seconds
+(EngineCore pid=88) INFO 11-11 01:11:38 [weight_utils.py:1108] Filesystem type for checkpoints: EXT4. Checkpoint size: 0.92 GiB. Available RAM: 54.40 GiB.
+(EngineCore pid=88) INFO 11-11 01:11:38 [weight_utils.py:1131] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=88) INFO 11-11 01:11:38 [default_loader.py:501] Loading weights took 0.22 seconds
+(EngineCore pid=88) INFO 11-11 01:11:39 [model_runner.py:424] Model loading took 0.93 GiB memory and 2.863608 seconds
+(EngineCore pid=88) WARNING 11-11 01:11:39 [topk_topp_sampler.py:131] FlashInfer top-p/top-k sampling unavailable: top-k masking requires more than 16 SMs; device has 10; falling back. Set VLLM_USE_FLASHINFER_SAMPLER=0 to silence.
+(EngineCore pid=88) INFO 11-11 01:11:39 [torch_utils.py:295] Reducing Torch threads from 3 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(EngineCore pid=88) INFO 11-11 01:11:39 [utils.py:347] Using LBNHC KV cache layout.
+(EngineCore pid=88) INFO 11-11 01:11:41 [monitor.py:40] [backbone] Starting torch.compile
+(EngineCore pid=88) INFO 11-11 01:11:44 [backends.py:1104] [backbone] Using cache directory: /root/.cache/vllm/torch_compile_cache/d145eead40/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=88) INFO 11-11 01:11:44 [backends.py:1166] [backbone] Dynamo bytecode transform time: 3.66 s
+(EngineCore pid=88) INFO 11-11 01:11:51 [backends.py:398] [backbone] Compiling a graph for compile range (1, 2048) takes 6.23 s
+(EngineCore pid=88) INFO 11-11 01:11:53 [backends.py:927] collected artifacts: 25 entries, 3 artifacts, 4992033 bytes total
+(EngineCore pid=88) INFO 11-11 01:11:53 [decorators.py:743] [backbone] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/8592cda20fb887b4af28d6b76a6ff97b8a390d0745916199befe28a7a9cf3959/rank_0_0/model
+(EngineCore pid=88) INFO 11-11 01:11:53 [monitor.py:62] [backbone] torch.compile took 12.43 s in total
+(EngineCore pid=88) INFO 11-11 01:11:53 [monitor.py:91] [backbone] Initial profiling/warmup run took 0.12 s
+(EngineCore pid=88) INFO 11-11 01:11:57 [model_runner.py:1127] Graph capturing finished in 3 secs, took 0.18 GiB
+(EngineCore pid=88) INFO 11-11 01:11:58 [gpu_worker.py:759] Available KV cache memory: 10.84 GiB
+(EngineCore pid=88) INFO 11-11 01:11:58 [gpu_worker.py:774] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.8500 is equivalent to --gpu-memory-utilization=0.8366 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.8634. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=88) INFO 11-11 01:11:58 [kv_cache_utils.py:2327] GPU KV cache size: 946,960 tokens, Maximum concurrency for 4,096 tokens per request: 231.19x
+(EngineCore pid=88) INFO 11-11 01:11:58 [kernel_warmup.py:176] JIT kernel warmup starting.
+(EngineCore pid=88) INFO 11-11 01:11:58 [kernel_warmup.py:189] JIT kernel warmup finished in 0.00s.
+(EngineCore pid=88) INFO 11-11 01:12:17 [model_runner.py:1127] Graph capturing finished in 3 secs, took 0.11 GiB
+(EngineCore pid=88) INFO 11-11 01:12:17 [gpu_worker.py:971] CUDA graph pool memory: 0.11 GiB (actual), 0.2 GiB (estimated), difference: 0.08 GiB (75.4%).
+(EngineCore pid=88) INFO 11-11 01:12:17 [gpu_worker.py:1034] Free memory on device (14.55/14.61 GiB) on startup. Desired GPU memory utilization is (0.85, 12.42 GiB). Actual usage is 1.13 GiB for consumed memory (weights + non-torch), 0.45 GiB for peak activation, and 0.11 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=11359472640` (10.58 GiB) to fit into requested memory, or `--kv-cache-memory=13647858688` (12.71 GiB) to fully utilize gpu memory. Current kv cache memory in use is 10.84 GiB.
+(EngineCore pid=88) INFO 11-11 01:12:17 [jit_monitor.py:84] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=88) INFO 11-11 01:12:17 [core.py:395] init engine (profile, create kv cache, warmup model) took 38.36 s (compilation: 12.43 s)
+(EngineCore pid=88) INFO 11-11 01:12:18 [kernel.py:467] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native'])
+(APIServer pid=1) INFO 11-11 01:12:18 [entry.py:136] Supported tasks: ['generate']
+(APIServer pid=1) INFO 11-11 01:12:18 [factories.py:89] Scale-out endpoints are disabled. Restart vllm serve with --enable-scale-out to enable them.
+(APIServer pid=1) INFO 11-11 01:12:18 [hf.py:648] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+(APIServer pid=1) WARNING 11-11 01:12:18 [model.py:1893] Default vLLM sampling parameters have been overridden by the model's `generation_config.json`: `{'repetition_penalty': 1.1, 'temperature': 0.7, 'top_k': 20, 'top_p': 0.8}`. If this is not intended, please relaunch vLLM instance with `--generation-config vllm`.
+(APIServer pid=1) INFO 11-11 01:12:18 [entry.py:140] Starting vLLM server on http://0.0.0.0:8000
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:186] Available routes are:
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /openapi.json, Methods: HEAD, GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /docs, Methods: HEAD, GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /docs/oauth2-redirect, Methods: HEAD, GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /redoc, Methods: HEAD, GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /load, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /version, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /kv_event_sources, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /health, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /metrics, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /tokenize, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /detokenize, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/models, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/systemone, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /ping, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /ping, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /invocations, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/chat/completions, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/chat/completions/batch, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/responses, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/responses/{response_id}, Methods: GET
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/responses/{response_id}/cancel, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/completions, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/messages, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/messages/count_tokens, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /generative_scoring, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /scale_elastic_ep, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /is_scaling_elastic_ep, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/chat/completions/render, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/messages/render, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/completions/render, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/responses/render, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/chat/completions/derender, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /v1/completions/derender, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /inference/v1/generate, Methods: POST
+(APIServer pid=1) INFO 11-11 01:12:18 [launcher.py:195] Route: /inference/v1/abort_requests, Methods: POST
+INFO:     172.17.0.1:49258 - "GET /v1/models HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49270 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49280 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49298 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49296 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49314 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49320 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49324 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49334 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49346 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49356 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49368 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49372 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49388 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49396 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49408 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49410 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49414 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49416 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49432 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49438 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49434 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49446 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49456 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49472 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49486 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49488 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49502 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49524 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49532 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49514 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49522 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49546 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49552 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49578 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49594 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49560 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49574 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49598 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49608 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49338 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49616 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49622 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49632 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49646 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49670 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49674 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49676 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49692 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49708 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49714 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49730 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49742 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49758 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49766 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49782 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49788 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49792 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49796 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49802 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49814 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49826 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49834 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49842 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49848 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49864 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49868 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49878 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49888 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49900 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49906 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49912 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49920 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49926 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49928 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49944 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49948 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49962 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49972 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49992 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50008 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49984 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50016 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50014 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50026 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50036 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50040 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50056 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50066 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50068 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50082 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50070 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50098 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50106 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50118 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50128 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50138 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50144 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50150 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50162 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50172 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50176 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50192 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50208 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50224 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50226 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50238 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50254 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50270 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50272 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50274 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50282 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50298 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50330 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50338 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50304 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50318 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50354 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50364 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50380 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50382 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50386 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50390 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50392 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50408 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50422 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50434 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50450 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50456 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50472 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50474 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50488 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50496 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50508 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50518 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50530 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50532 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50536 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50540 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50544 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50546 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50560 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50562 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50568 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50612 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50620 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50626 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50634 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50576 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50582 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50596 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50650 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50652 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50674 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50690 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50654 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50658 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50660 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50702 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50714 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50728 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50730 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50746 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50754 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50768 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50774 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:50788 - "POST /v1/completions HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+INFO:     172.17.0.1:49610 - "GET /metrics HTTP/1.1" 200 OK
+With `vllm serve`, you should provide the model as a positional argument or in a config file instead of via the `--model` option. The `--model` option will be removed in a future version.
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.84it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  4.84it/s]
+
+[rank0]:W1111 01:11:49.215000 88 torch/_inductor/utils.py:1953] Not enough SMs to use max_autotune_gemm mode
+Capturing CUDA graphs (PIECEWISE):   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graphs (PIECEWISE):   6%|▌         | 2/35 [00:00<00:02, 11.54it/s]Capturing CUDA graphs (PIECEWISE):  11%|█▏        | 4/35 [00:00<00:02, 11.87it/s]Capturing CUDA graphs (PIECEWISE):  17%|█▋        | 6/35 [00:00<00:02, 11.99it/s]Capturing CUDA graphs (PIECEWISE):  23%|██▎       | 8/35 [00:00<00:02, 11.85it/s]Capturing CUDA graphs (PIECEWISE):  29%|██▊       | 10/35 [00:00<00:02, 11.90it/s]Capturing CUDA graphs (PIECEWISE):  34%|███▍      | 12/35 [00:01<00:01, 11.96it/s]Capturing CUDA graphs (PIECEWISE):  40%|████      | 14/35 [00:01<00:01, 11.75it/s]Capturing CUDA graphs (PIECEWISE):  46%|████▌     | 16/35 [00:01<00:01, 11.79it/s]Capturing CUDA graphs (PIECEWISE):  57%|█████▋    | 20/35 [00:01<00:00, 17.13it/s]Capturing CUDA graphs (PIECEWISE):  69%|██████▊   | 24/35 [00:01<00:00, 21.65it/s]Capturing CUDA graphs (PIECEWISE):  80%|████████  | 28/35 [00:01<00:00, 25.61it/s]Capturing CUDA graphs (PIECEWISE):  91%|█████████▏| 32/35 [00:01<00:00, 28.59it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 35/35 [00:01<00:00, 18.46it/s]
+Capturing CUDA graphs (FULL):   0%|          | 0/2 [00:00<?, ?it/s]Capturing CUDA graphs (FULL): 100%|██████████| 2/2 [00:00<00:00, 45.07it/s]
+Capturing CUDA graphs (PIECEWISE):   0%|          | 0/35 [00:00<?, ?it/s]Capturing CUDA graphs (PIECEWISE):   6%|▌         | 2/35 [00:00<00:02, 11.64it/s]Capturing CUDA graphs (PIECEWISE):  11%|█▏        | 4/35 [00:00<00:02, 11.59it/s]Capturing CUDA graphs (PIECEWISE):  17%|█▋        | 6/35 [00:00<00:02, 11.84it/s]Capturing CUDA graphs (PIECEWISE):  23%|██▎       | 8/35 [00:00<00:02, 11.75it/s]Capturing CUDA graphs (PIECEWISE):  29%|██▊       | 10/35 [00:00<00:02, 11.84it/s]Capturing CUDA graphs (PIECEWISE):  34%|███▍      | 12/35 [00:01<00:01, 11.93it/s]Capturing CUDA graphs (PIECEWISE):  40%|████      | 14/35 [00:01<00:01, 11.93it/s]Capturing CUDA graphs (PIECEWISE):  46%|████▌     | 16/35 [00:01<00:01, 11.95it/s]Capturing CUDA graphs (PIECEWISE):  57%|█████▋    | 20/35 [00:01<00:00, 17.49it/s]Capturing CUDA graphs (PIECEWISE):  69%|██████▊   | 24/35 [00:01<00:00, 22.11it/s]Capturing CUDA graphs (PIECEWISE):  80%|████████  | 28/35 [00:01<00:00, 26.08it/s]Capturing CUDA graphs (PIECEWISE):  91%|█████████▏| 32/35 [00:01<00:00, 29.11it/s]Capturing CUDA graphs (PIECEWISE): 100%|██████████| 35/35 [00:01<00:00, 18.78it/s]
+Capturing CUDA graphs (FULL):   0%|          | 0/19 [00:00<?, ?it/s]Capturing CUDA graphs (FULL):  26%|██▋       | 5/19 [00:00<00:00, 47.72it/s]Capturing CUDA graphs (FULL):  53%|█████▎    | 10/19 [00:00<00:00, 47.90it/s]Capturing CUDA graphs (FULL):  79%|███████▉  | 15/19 [00:00<00:00, 48.50it/s]Capturing CUDA graphs (FULL): 100%|██████████| 19/19 [00:00<00:00, 47.94it/s]
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
