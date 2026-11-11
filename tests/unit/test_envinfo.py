@@ -53,3 +53,26 @@ def test_untracked_files_mark_the_revision_dirty(monkeypatch: pytest.MonkeyPatch
     assert envinfo.current_revision() == "abc123-dirty"
     outputs["status"] = ""
     assert envinfo.current_revision() == "abc123"
+
+
+def _cgroup_v1(root: Path, quota: int, period: int) -> None:
+    (root / "cpu").mkdir(parents=True)
+    (root / "cpu" / "cpu.cfs_quota_us").write_text(f"{quota}\n")
+    (root / "cpu" / "cpu.cfs_period_us").write_text(f"{period}\n")
+
+
+def test_env_records_container_limits_but_never_addresses(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _cgroup_v1(tmp_path, 765000, 100000)
+    (tmp_path / "memory").mkdir()
+    (tmp_path / "memory" / "memory.limit_in_bytes").write_text(str(50 * 2**30))
+    monkeypatch.setenv("RUNPOD_DC_ID", "EU-SE-1")
+    monkeypatch.setenv("RUNPOD_PUBLIC_IP", "203.0.113.7")
+    monkeypatch.setenv("RUNPOD_TCP_PORT_22", "22124")
+    info = envinfo._container_info(tmp_path)
+    assert info["cpu_quota"] == 7.65
+    assert info["memory_limit_gib"] == 50.0
+    assert info["provider"]["RUNPOD_DC_ID"] == "EU-SE-1"
+    assert "203.0.113.7" not in repr(info)
+    assert "22124" not in repr(info)

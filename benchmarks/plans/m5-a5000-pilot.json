@@ -1,0 +1,89 @@
+{
+  "name": "m5-a5000-pilot",
+  "description": "CALIBRATION ONLY, not evidence: RTX A5000 (RunPod). One repetition per backend and model: (1) every backend starts, incl. vLLM from the pinned venv (no Docker in a pod); (2) vLLM KV-cache capacity at --gpu-memory-utilization 0.85 on 24 GB, to size the native pool to the same number of tokens; (3) throughput ranges for the baseline rate grids. vLLM runs with VLLM_USE_FLASHINFER_SAMPLER=0: the sampler it used on the A16 (where FlashInfer sampling is unavailable below 17 SMs); see benchmarks/baselines/vllm/README.md.",
+  "label": "GPU-A5000x1-runpod",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "reps": 1,
+  "port": 8300,
+  "max_num_seqs": 128,
+  "max_num_batched_tokens": 2048,
+  "saturation_ttft_s": 10.0,
+  "request_timeout_s": 900,
+  "backends": {
+    "dli": {
+      "kv_cache_gb": 10.0,
+      "block_size": 16
+    },
+    "vllm": {
+      "gpu_memory_utilization": 0.85,
+      "max_model_len": 4096,
+      "extra_args": [
+        "--enable-prefix-caching"
+      ],
+      "env": {
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      }
+    },
+    "hf": {
+      "max_batch": 16,
+      "max_wait_ms": 20
+    }
+  },
+  "models": [
+    {
+      "name": "qwen2.5-0.5b",
+      "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+      "backends": [
+        "dli",
+        "vllm",
+        "hf"
+      ],
+      "experiments": [
+        "closed-fixed"
+      ]
+    },
+    {
+      "name": "qwen2.5-1.5b",
+      "repo": "Qwen/Qwen2.5-1.5B-Instruct",
+      "backends": [
+        "dli",
+        "vllm",
+        "hf"
+      ],
+      "experiments": [
+        "closed-fixed"
+      ]
+    },
+    {
+      "name": "smollm2-1.7b",
+      "repo": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "backends": [
+        "dli",
+        "vllm"
+      ],
+      "experiments": [
+        "closed-fixed"
+      ]
+    }
+  ],
+  "experiments": {
+    "closed-fixed": {
+      "workload": {
+        "type": "synthetic",
+        "input": {
+          "fixed": 256
+        },
+        "output": {
+          "fixed": 128
+        }
+      },
+      "mode": "closed",
+      "points": [
+        16,
+        64
+      ],
+      "n_per_concurrency": 2
+    }
+  }
+}

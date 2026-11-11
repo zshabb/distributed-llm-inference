@@ -1,8 +1,9 @@
 """Start and stop the servers under test, one at a time, with their exact command lines recorded.
 
 * ``dli``  : this project's server (``python -m dli.server``), auth off, loopback only.
-* ``vllm`` : vLLM's OpenAI server in its official Docker image, pinned by digest, published on
-  127.0.0.1 only. The Hugging Face cache is mounted read-only so both engines load identical files.
+* ``vllm`` : vLLM's OpenAI server, v0.32.0: the official Docker image pinned by digest (port
+  published on 127.0.0.1, Hugging Face cache mounted read-only so both engines load identical
+  files), or, on hosts without Docker, the same release from a hash-pinned venv on 127.0.0.1.
 * ``hf``   : the static-batching ``transformers`` baseline (:mod:`dli.bench.hf_server`).
 
 Every backend is configured from the same campaign-level settings (model, dtype, max sequences,
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -75,6 +77,46 @@ class Running:
             "startup_s": round(self.startup_s, 1),
             **self.info,
         }
+
+
+def vllm_launcher(settings: dict[str, Any]) -> str:
+    """``docker`` where a Docker daemon is usable, else ``venv`` (hosts that are containers).
+
+    A plan can force either with ``"launcher"``. Both run the same vLLM release (see
+    benchmarks/baselines/vllm/README.md); the launcher is recorded with every server.
+    """
+    choice = str(settings.get("launcher", "auto"))
+    if choice in ("docker", "venv"):
+        return choice
+    return "docker" if shutil.which("docker") else "venv"
+
+
+def vllm_args(
+    *,
+    model_name: str,
+    dtype: str,
+    max_num_seqs: int,
+    max_num_batched_tokens: int,
+    settings: dict[str, Any],
+) -> list[str]:
+    """Engine arguments shared by both launchers, so the two configurations cannot drift apart."""
+    return [
+        "--served-model-name",
+        model_name,
+        "--dtype",
+        dtype,
+        "--max-num-seqs",
+        str(max_num_seqs),
+        "--max-num-batched-tokens",
+        str(max_num_batched_tokens),
+        "--gpu-memory-utilization",
+        str(settings["gpu_memory_utilization"]),
+        "--max-model-len",
+        str(settings.get("max_model_len", 4096)),
+        "--seed",
+        "0",
+        *settings.get("extra_args", []),
+    ]
 
 
 def _wait_ready(r: Running, timeout_s: float) -> None:
@@ -185,56 +227,94 @@ def start(
         r = Running(name, base, model_name, cmd, log_path=log_path)
         r.proc = subprocess.Popen(cmd, stdout=log_path.open("wb"), stderr=subprocess.STDOUT)
     elif name == "vllm":
-        container = f"dli-bench-vllm-{port}"
-        hf_home = Path(settings.get("hf_cache", Path.home() / ".cache" / "huggingface"))
-        inner = Path("/root/.cache/huggingface") / model_dir.relative_to(hf_home)
-        cmd = [
-            "docker",
-            "run",
-            "--rm",
-            "-d",
-            "--name",
-            container,
-            "--gpus",
-            "all",
-            "--ipc=host",
-            "-p",
-            f"127.0.0.1:{port}:8000",
-            "-v",
-            f"{hf_home}:/root/.cache/huggingface:ro",
-            "-e",
-            "HF_HUB_OFFLINE=1",
-            settings.get("image", VLLM_IMAGE),
-            "--model",
-            str(inner),
-            "--served-model-name",
-            model_name,
-            "--dtype",
-            dtype,
-            "--max-num-seqs",
-            str(max_num_seqs),
-            "--max-num-batched-tokens",
-            str(max_num_batched_tokens),
-            "--gpu-memory-utilization",
-            str(settings["gpu_memory_utilization"]),
-            "--max-model-len",
-            str(settings.get("max_model_len", 4096)),
-            "--seed",
-            "0",
-            *settings.get("extra_args", []),
-        ]
-        subprocess.run(["docker", "rm", "-f", container], capture_output=True, check=False)
-        subprocess.run(cmd, check=True, capture_output=True)
-        r = Running(
-            name,
-            base,
-            model_name,
-            cmd,
-            container=container,
-            metrics_url=f"{base}/metrics",
-            metric_names=VLLM_METRICS,
-            log_path=log_path,
+        launcher = vllm_launcher(settings)
+        args = vllm_args(
+            model_name=model_name,
+            dtype=dtype,
+            max_num_seqs=max_num_seqs,
+            max_num_batched_tokens=max_num_batched_tokens,
+            settings=settings,
         )
+        hf_home = Path(
+            settings.get(
+                "hf_cache", os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")
+            )
+        )
+        # Environment for the vLLM process (both launchers), recorded with the server.
+        venv_env = {str(k): str(v) for k, v in settings.get("env", {}).items()}
+        if launcher == "docker":
+            container = f"dli-bench-vllm-{port}"
+            inner = Path("/root/.cache/huggingface") / model_dir.relative_to(hf_home)
+            cmd = [
+                "docker",
+                "run",
+                "--rm",
+                "-d",
+                "--name",
+                container,
+                "--gpus",
+                "all",
+                "--ipc=host",
+                "-p",
+                f"127.0.0.1:{port}:8000",
+                "-v",
+                f"{hf_home}:/root/.cache/huggingface:ro",
+                "-e",
+                "HF_HUB_OFFLINE=1",
+                *[a for k, v in venv_env.items() for a in ("-e", f"{k}={v}")],
+                settings.get("image", VLLM_IMAGE),
+                "--model",
+                str(inner),
+                *args,
+            ]
+            subprocess.run(["docker", "rm", "-f", container], capture_output=True, check=False)
+            subprocess.run(cmd, check=True, capture_output=True)
+            r = Running(
+                name,
+                base,
+                model_name,
+                cmd,
+                container=container,
+                metrics_url=f"{base}/metrics",
+                metric_names=VLLM_METRICS,
+                log_path=log_path,
+            )
+        else:
+            python = str(
+                settings.get(
+                    "venv_python",
+                    os.environ.get("DLI_VLLM_PYTHON", Path.home() / "vllm-venv/bin/python"),
+                )
+            )
+            cmd = [
+                python,
+                "-m",
+                "vllm.entrypoints.openai.api_server",
+                "--host",
+                "127.0.0.1",
+                "--port",
+                str(port),
+                "--model",
+                str(model_dir),
+                *args,
+            ]
+            r = Running(
+                name,
+                base,
+                model_name,
+                cmd,
+                metrics_url=f"{base}/metrics",
+                metric_names=VLLM_METRICS,
+                log_path=log_path,
+            )
+            r.proc = subprocess.Popen(
+                cmd,
+                stdout=log_path.open("wb"),
+                stderr=subprocess.STDOUT,
+                env={**os.environ, "HF_HUB_OFFLINE": "1", "PYTHONUNBUFFERED": "1", **venv_env},
+            )
+        r.info["launcher"] = launcher
+        r.info["env"] = venv_env
     else:
         raise ValueError(f"unknown backend {name!r}")
     try:

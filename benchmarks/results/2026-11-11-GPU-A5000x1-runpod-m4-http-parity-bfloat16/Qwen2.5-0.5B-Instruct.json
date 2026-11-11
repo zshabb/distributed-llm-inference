@@ -1,0 +1,101 @@
+{
+ "summary": {
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "code_revision": "9ce8c27db8ab",
+  "evidence_label": "GPU-A5000x1-runpod",
+  "device": "cuda",
+  "dtype": "torch.bfloat16",
+  "prompts": 8,
+  "concurrent_requests": 16,
+  "max_new_tokens": 48,
+  "identical_texts": 7,
+  "stream_equals_non_stream": 3,
+  "reference_hit_eos": 0,
+  "finish_and_usage_correct": 7,
+  "wall_seconds_http": 5.6,
+  "note": "Correctness run; requests are concurrent and wall time is not a benchmark."
+ },
+ "records": [
+  {
+   "id": 0,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 1,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 2,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 3,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 4,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 5,
+   "kind": "completion",
+   "identical": false,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "first_divergence": 13,
+   "ref_top2_gap_at_divergence": 0.125
+  },
+  {
+   "id": 6,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 7,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  }
+ ]
+}

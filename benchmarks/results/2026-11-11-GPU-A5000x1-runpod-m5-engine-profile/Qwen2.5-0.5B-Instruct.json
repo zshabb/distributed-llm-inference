@@ -1,0 +1,303 @@
+{
+ "code_revision": "b07963dc1c44",
+ "runs": [
+  {
+   "model": "Qwen/Qwen2.5-0.5B-Instruct",
+   "batch": 16,
+   "profiled_steps": 20,
+   "step_ms_mean": 164.45876684738323,
+   "schedule_ms_mean": 0.16107124974951148,
+   "forward_ms_mean": 163.85861110175028,
+   "postprocess_ms_mean": 0.439084495883435,
+   "decode_tokens_per_step": 16,
+   "tokens_per_s": 97.2888238597089,
+   "cuda_kernels_per_step": 4113.0,
+   "op_calls_per_step": {
+    "aten::copy_": 930.0,
+    "aten::index_select": 770.0,
+    "aten::cat": 73.0,
+    "aten::linear": 169.0,
+    "aten::scaled_dot_product_attention": 384.0,
+    "aten::mm": 97.0
+   },
+   "bandwidth_floor_ms": 1.3670396666666669,
+   "floor_inputs": {
+    "weight_bytes": 988065536,
+    "kv_bytes_read": 61820928.0,
+    "mean_context": 314.4375,
+    "assumed_bandwidth_gbs": 768.0
+   },
+   "top_ops_by_device_time": [
+    {
+     "op": "aten::scaled_dot_product_attention",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 4.490823699999415,
+     "self_cpu_ms_per_step": 4.4999204000024005
+    },
+    {
+     "op": "aten::_scaled_dot_product_flash_attention",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 4.490823699999415,
+     "self_cpu_ms_per_step": 2.3755037999987723
+    },
+    {
+     "op": "aten::_flash_attention_forward",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 4.490823699999415,
+     "self_cpu_ms_per_step": 6.46976029999806
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 3.0613871500000776,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::copy_",
+     "calls_per_step": 930.0,
+     "device_ms_per_step": 2.9461482500004914,
+     "self_cpu_ms_per_step": 5.192129699999503
+    },
+    {
+     "op": "aten::clone",
+     "calls_per_step": 792.0,
+     "device_ms_per_step": 2.6698865999999057,
+     "self_cpu_ms_per_step": 1.7771018000035093
+    },
+    {
+     "op": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1})",
+     "calls_per_step": 792.0,
+     "device_ms_per_step": 2.6698865999999057,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::repeat_interleave",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 2.6103729000001636,
+     "self_cpu_ms_per_step": 3.5497248499986993
+    },
+    {
+     "op": "aten::linear",
+     "calls_per_step": 169.0,
+     "device_ms_per_step": 2.5673191000000517,
+     "self_cpu_ms_per_step": 0.4581447500003802
+    },
+    {
+     "op": "aten::matmul",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 1.9352964499999097,
+     "self_cpu_ms_per_step": 0.15507770000002474
+    },
+    {
+     "op": "aten::mm",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 1.9352964499999097,
+     "self_cpu_ms_per_step": 2.2440538000003984
+    },
+    {
+     "op": "aten::index_copy_",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.5197001499993381,
+     "self_cpu_ms_per_step": 6.876391749998248
+    },
+    {
+     "op": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1}>(long, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1})",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.5197001499993381,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::index_select",
+     "calls_per_step": 770.0,
+     "device_ms_per_step": 1.4999459499992485,
+     "self_cpu_ms_per_step": 7.235185649996204
+    },
+    {
+     "op": "aten::gather",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.4819157499993154,
+     "self_cpu_ms_per_step": 6.794531549997631
+    },
+    {
+     "op": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "calls_per_step": 768.0,
+     "device_ms_per_step": 1.4819157499993154,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::bfloat16_t> >, 8, 1, true>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 384.0,
+     "device_ms_per_step": 1.429436549999337,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8::Params)",
+     "calls_per_step": 48.0,
+     "device_ms_per_step": 0.8408055999998842,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::addmm",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.6320226500001423,
+     "self_cpu_ms_per_step": 1.3928620499998376
+    },
+    {
+     "op": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.6320226500001423,
+     "self_cpu_ms_per_step": 0.0
+    }
+   ]
+  },
+  {
+   "model": "Qwen/Qwen2.5-0.5B-Instruct",
+   "batch": 64,
+   "profiled_steps": 20,
+   "step_ms_mean": 594.5529057295062,
+   "schedule_ms_mean": 0.45560168800875545,
+   "forward_ms_mean": 593.5944076743908,
+   "postprocess_ms_mean": 0.5028963671065867,
+   "decode_tokens_per_step": 64,
+   "tokens_per_s": 107.64391088371372,
+   "cuda_kernels_per_step": 13497.0,
+   "op_calls_per_step": {
+    "aten::copy_": 3330.0,
+    "aten::index_select": 3074.0,
+    "aten::cat": 73.0,
+    "aten::linear": 169.0,
+    "aten::scaled_dot_product_attention": 1536.0,
+    "aten::mm": 97.0
+   },
+   "bandwidth_floor_ms": 1.6054076666666666,
+   "floor_inputs": {
+    "weight_bytes": 988065536,
+    "kv_bytes_read": 244887552.0,
+    "mean_context": 311.390625,
+    "assumed_bandwidth_gbs": 768.0
+   },
+   "top_ops_by_device_time": [
+    {
+     "op": "aten::scaled_dot_product_attention",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 17.827404599991276,
+     "self_cpu_ms_per_step": 17.76562444998243
+    },
+    {
+     "op": "aten::_scaled_dot_product_flash_attention",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 17.827404599991276,
+     "self_cpu_ms_per_step": 9.753282000022915
+    },
+    {
+     "op": "aten::_flash_attention_forward",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 17.827404599991276,
+     "self_cpu_ms_per_step": 26.51716620000179
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_splitkv_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::bfloat16_t> >, false, false, false, false, true, false, true, false>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 12.084183399998505,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::copy_",
+     "calls_per_step": 3330.0,
+     "device_ms_per_step": 10.819466499984191,
+     "self_cpu_ms_per_step": 19.264808750017416
+    },
+    {
+     "op": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1}>(at::TensorIteratorBase&, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#12}::operator()() const::{lambda(c10::BFloat16)#1} const&)::{lambda(int)#1})",
+     "calls_per_step": 3096.0,
+     "device_ms_per_step": 10.42150339998727,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::clone",
+     "calls_per_step": 3096.0,
+     "device_ms_per_step": 10.421338599987271,
+     "self_cpu_ms_per_step": 7.045074949982082
+    },
+    {
+     "op": "aten::repeat_interleave",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 10.358931699987552,
+     "self_cpu_ms_per_step": 14.488424300004686
+    },
+    {
+     "op": "aten::index_copy_",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 6.33407025000996,
+     "self_cpu_ms_per_step": 28.418432900002948
+    },
+    {
+     "op": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1}>(long, at::native::index_copy_kernel_impl<at::native::OpaqueType<2> >(at::TensorIterator&, long, long, long)::{lambda(int)#1})",
+     "calls_per_step": 3072.0,
+     "device_ms_per_step": 6.33407025000996,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::index_select",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 5.973488899999263,
+     "self_cpu_ms_per_step": 29.96477025001177
+    },
+    {
+     "op": "aten::gather",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 5.973488899999263,
+     "self_cpu_ms_per_step": 28.55236975001239
+    },
+    {
+     "op": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "calls_per_step": 3074.0,
+     "device_ms_per_step": 5.973488899999263,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "void pytorch_flash::flash_fwd_splitkv_combine_kernel<Flash_fwd_kernel_traits<64, 64, 256, 4, false, false, cutlass::bfloat16_t, Flash_kernel_traits<64, 64, 256, 4, cutlass::bfloat16_t> >, 8, 1, true>(pytorch_flash::Flash_fwd_params)",
+     "calls_per_step": 1536.0,
+     "device_ms_per_step": 5.743221199992769,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::linear",
+     "calls_per_step": 169.0,
+     "device_ms_per_step": 2.6951887999999937,
+     "self_cpu_ms_per_step": 0.5107791999987934
+    },
+    {
+     "op": "aten::matmul",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 2.17066935000097,
+     "self_cpu_ms_per_step": 0.1708562499999258
+    },
+    {
+     "op": "aten::mm",
+     "calls_per_step": 97.0,
+     "device_ms_per_step": 2.17066935000097,
+     "self_cpu_ms_per_step": 2.848797250002487
+    },
+    {
+     "op": "ampere_bf16_s16816gemm_bf16_128x64_ldg8_f2f_stages_64x3_tn",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 1.350892799999866,
+     "self_cpu_ms_per_step": 0.0
+    },
+    {
+     "op": "aten::mul",
+     "calls_per_step": 219.0,
+     "device_ms_per_step": 0.5849521000015514,
+     "self_cpu_ms_per_step": 2.031145500000829
+    },
+    {
+     "op": "aten::addmm",
+     "calls_per_step": 72.0,
+     "device_ms_per_step": 0.5245194499990234,
+     "self_cpu_ms_per_step": 1.847585550001071
+    }
+   ]
+  }
+ ]
+}

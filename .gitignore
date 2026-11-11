@@ -34,3 +34,6 @@ benchmarks/results/**/inspect.txt
 # API key records (Argon2 hashes) for dli-serve
 keys.json
 *.keys.json
+
+# GPU host profiles: real ones hold addresses (examples are committed)
+scripts/gpu/hosts/*.env

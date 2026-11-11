@@ -1,0 +1,3 @@
+# vLLM baseline for hosts without Docker (e.g. RunPod pods). Same release as the pinned Docker image
+# (v0.32.0, torch 2.13.0+cu130). Locked with hashes by scripts/gpu/lock_vllm.sh.
+vllm==0.32.0

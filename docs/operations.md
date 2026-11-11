@@ -1,6 +1,7 @@
 # Operations
 
-This runbook covers the **inference server** (M4, section 0) and the **remote GPU development host** (sections 1-5).
+This runbook covers the **inference server** (M4, section 0), the **Vultr A16 GPU host** (sections 1-5) and
+**provider-independent GPU host profiles, including the RunPod A5000** (section 6).
 Router, deployment, alerting, and incident runbooks are added as those components land (M8, M9).
 
 ## 0. Running the inference server
@@ -121,3 +122,44 @@ images. Support for this GPU plan has not been confirmed, and no snapshot is cre
 
 - ~$0.471/hour while the instance **exists** (running or stopped). Only destroying the instance stops billing (Vultr docs).
 - Destruction is recommended only with: idle days × $11.30/day saved vs rebuild time + re-download vs data at risk.
+
+## 6. GPU hosts by profile (provider-independent)
+
+Scripts in `scripts/gpu/` take the host from a **profile**: `GPU_PROFILE=<name>` loads
+`scripts/gpu/hosts/<name>.env` (untracked and git-ignored; copy a committed `*.env.example`). Without `GPU_PROFILE`
+the original `scripts/gpu/host.env` (the Vultr A16) is used. A profile sets how to reach the host, the remote repo
+directory, where results live, the evidence label (`GPU_LABEL`, path-safe `GPU_RESULT_LABEL`), the hourly price,
+and environment exports. Scripts branch on capabilities (is Docker available, is there persistent storage), never on
+the provider. Adding a provider = one profile + `bootstrap_host.sh` + `validate_host.sh`.
+
+| Concern | Vultr A16 (`host.env`) | RunPod A5000 (`GPU_PROFILE=runpod-a5000`) |
+|---|---|---|
+| Reach | `user@address` + public key of the agent identity | ssh_config alias `runpod-a5000`: address, port, key and pinned host key live in `~/.ssh/config` and `~/.ssh/known_hosts_runpod` (outside the repo) |
+| Repo + Python env | `~/work/...` on the VM disk | `~/work/...` on local container disk (fast; wiped on pod restart, rebuilt by `bootstrap_host.sh`) |
+| Results, logs, HF cache | VM disk | `/workspace/dli/{results,logs,hf}` on the persistent network volume (`DLI_PERSIST_DIR`, `HF_HOME`); `benchmarks/results` is a symlink |
+| vLLM baseline | Docker image pinned by digest | same release from the hash-pinned venv (`bootstrap_vllm.sh`); no Docker daemon in a pod |
+| CPU threads | VM cores | capped to the cgroup quota (7.65 CPUs of 96 visible) by `cpu_threads.sh` |
+| Evidence label | `[GPU:A16x1@vultr]` | `[GPU:A5000x1@runpod]` |
+
+### Connecting to a RunPod pod (owner steps, once per pod)
+1. Create a dedicated key (`ssh-keygen -t ed25519 -f ~/.ssh/runpod_gpu`), load it into the agent, add the public key
+   under RunPod **Settings → SSH Public Keys** (applied when a pod starts; for a running pod append it to
+   `/root/.ssh/authorized_keys` from the web terminal).
+2. Add a `Host runpod-a5000` block to `~/.ssh/config` with the pod's *SSH over exposed TCP* address and port,
+   `IdentityFile ~/.ssh/runpod_gpu`, `IdentitiesOnly yes`, `ForwardAgent no`, `StrictHostKeyChecking yes`,
+   `UserKnownHostsFile ~/.ssh/known_hosts_runpod`, `HashKnownHosts yes`. Do not use the `ssh.runpod.io` proxy
+   (no rsync).
+3. Read the host-key fingerprint in the pod's web terminal (`ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub`),
+   compare it with `ssh-keyscan` of the exposed port, and only then pin it. A pod restart can change the address and
+   host key: repeat 2–3.
+
+### Procedure on a fresh or restarted pod
+```bash
+export GPU_PROFILE=runpod-a5000
+SYNC_FROM=head scripts/gpu/sync.sh
+GPU_TIMEOUT=1800 scripts/gpu/remote.sh bash scripts/gpu/bootstrap_host.sh   # uv, Python, locked env, /workspace links
+GPU_TIMEOUT=1800 scripts/gpu/remote.sh bash scripts/gpu/bootstrap_vllm.sh   # vLLM baseline venv (hash-pinned)
+scripts/gpu/remote.sh bash scripts/gpu/validate_host.sh                     # -> <date>-GPU-A5000x1-runpod-env-validation/
+```
+Billing (owner-provided, 2026-11-11): ~$0.28/h while running (compute $0.27 + container disk $0.007); the 50 GB
+volume is billed separately and persists when the pod is stopped. Pods are never restarted or recreated by automation.

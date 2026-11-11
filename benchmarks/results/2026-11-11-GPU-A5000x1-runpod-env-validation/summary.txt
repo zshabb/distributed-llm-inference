@@ -1,0 +1,4 @@
+revision: 9ce8c27db8ab
+smoke ok: True
+container GPU access: SKIPPED (docker or nvidia-container-toolkit not installed)
+overall exit status: 0
