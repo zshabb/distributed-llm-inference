@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import statistics
+import time
 from pathlib import Path
 
 import torch
@@ -30,7 +31,9 @@ from dli.model import hub, load_model
 from dli.sampling import SamplingParams
 
 
-def run(model_id: str, batch: int, steps: int, bandwidth_gbs: float) -> dict[str, object]:
+def run(
+    model_id: str, batch: int, steps: int, bandwidth_gbs: float, attention: str = "batched"
+) -> dict[str, object]:
     path = hub.download(model_id)
     model = load_model(path, dtype=torch.bfloat16, device="cuda")
     cfg = model.config
@@ -39,6 +42,7 @@ def run(model_id: str, batch: int, steps: int, bandwidth_gbs: float) -> dict[str
         num_blocks=batch * 30,
         block_size=16,
         config=SchedulerConfig(max_num_seqs=batch, max_num_batched_tokens=2048),
+        batched_decode=attention == "batched",
     )
     g = torch.Generator().manual_seed(0)
     for i in range(batch):
@@ -48,6 +52,12 @@ def run(model_id: str, batch: int, steps: int, bandwidth_gbs: float) -> dict[str
     for _ in range(40):
         eng.step()
     torch.cuda.synchronize()
+    # Unprofiled timing first: the profiler itself adds per-launch overhead (~2x on this engine).
+    t0 = time.perf_counter()
+    for _ in range(steps):
+        eng.step()
+    torch.cuda.synchronize()
+    unprofiled_ms = (time.perf_counter() - t0) / steps * 1e3
     first = len(eng.stats.steps)
     with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA]) as prof:
         for _ in range(steps):
@@ -82,7 +92,10 @@ def run(model_id: str, batch: int, steps: int, bandwidth_gbs: float) -> dict[str
     step_ms = statistics.mean(s.total_s for s in st) * 1e3
     return {
         "model": model_id,
+        "attention": attention,
         "batch": batch,
+        "unprofiled_step_ms": unprofiled_ms,
+        "unprofiled_tokens_per_s": batch / unprofiled_ms * 1e3,
         "profiled_steps": steps,
         "step_ms_mean": step_ms,
         "schedule_ms_mean": statistics.mean(s.schedule_s for s in st) * 1e3,
@@ -121,12 +134,20 @@ def main() -> None:
         "--bandwidth-gbs", type=float, default=200.0, help="GA107/A16 per-GPU peak: 200 GB/s"
     )
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument(
+        "--attention",
+        choices=["batched", "reference"],
+        default="batched",
+        help="decode attention path: batched (M6) or the per-sequence reference",
+    )
     a = ap.parse_args()
     revision = envinfo.current_revision()
     a.out.mkdir(parents=True, exist_ok=True)
     envinfo.main([str(a.out / "env.json")], revision=revision)
-    res = [run(a.model, int(b), a.steps, a.bandwidth_gbs) for b in a.batches.split(",")]
-    (a.out / f"{a.model.split('/')[-1]}.json").write_text(
+    res = [
+        run(a.model, int(b), a.steps, a.bandwidth_gbs, a.attention) for b in a.batches.split(",")
+    ]
+    (a.out / f"{a.model.split('/')[-1]}-{a.attention}.json").write_text(
         json.dumps({"code_revision": revision, "runs": res}, indent=1) + "\n"
     )
     for r in res:

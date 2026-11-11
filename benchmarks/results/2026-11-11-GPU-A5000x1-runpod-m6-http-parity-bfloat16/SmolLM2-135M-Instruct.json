@@ -1,0 +1,101 @@
+{
+ "summary": {
+  "model": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "code_revision": "870d809fbe9d",
+  "evidence_label": "GPU-A5000x1-runpod",
+  "device": "cuda",
+  "dtype": "torch.bfloat16",
+  "prompts": 8,
+  "concurrent_requests": 16,
+  "max_new_tokens": 48,
+  "identical_texts": 5,
+  "stream_equals_non_stream": 4,
+  "reference_hit_eos": 1,
+  "finish_and_usage_correct": 5,
+  "wall_seconds_http": 4.2,
+  "note": "Correctness run; requests are concurrent and wall time is not a benchmark."
+ },
+ "records": [
+  {
+   "id": 0,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 1,
+   "kind": "completion",
+   "identical": false,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "first_divergence": 6,
+   "ref_top2_gap_at_divergence": 0.125
+  },
+  {
+   "id": 2,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 3,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 4,
+   "kind": "completion",
+   "identical": false,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "first_divergence": 22,
+   "ref_top2_gap_at_divergence": 0.0
+  },
+  {
+   "id": 5,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": true,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  },
+  {
+   "id": 6,
+   "kind": "completion",
+   "identical": false,
+   "stream_equals_non_stream": false,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "first_divergence": 38,
+   "ref_top2_gap_at_divergence": 0.125
+  },
+  {
+   "id": 7,
+   "kind": "completion",
+   "identical": true,
+   "stream_equals_non_stream": true,
+   "prompt_tokens_ok": true,
+   "reference_hit_eos": false,
+   "finish_ok": true,
+   "completion_tokens_ok": true
+  }
+ ]
+}

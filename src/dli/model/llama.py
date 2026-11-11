@@ -19,7 +19,7 @@ import torch.nn.functional as F
 from torch import nn
 
 from dli.model.config import ModelConfig
-from dli.model.kv_cache import BatchedKV, KVCacheView, Segment
+from dli.model.kv_cache import BatchedDecodeKV, BatchedKV, KVCacheView, Segment
 from dli.model.rope import apply_rope, inverse_frequencies, rope_cos_sin
 
 
@@ -62,7 +62,7 @@ class Attention(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        segments: Sequence[Segment],
+        segments: Sequence[Segment] | BatchedDecodeKV,
     ) -> torch.Tensor:
         n = x.shape[0]
         # Projections and RoPE run once over the whole flattened batch (one large matmul instead of
@@ -74,7 +74,9 @@ class Attention(nn.Module):
         q = apply_rope(q, cos, sin)
         k = apply_rope(k, cos, sin)
 
-        if len(segments) == 1:
+        if isinstance(segments, BatchedDecodeKV):
+            out = self._attend_decode_batch(q, k, v, segments)
+        elif len(segments) == 1:
             out = self._attend(q, k, v, segments[0].cache)
         else:
             # Per-segment loop: correct reference for varlen attention. The M6 kernel processes all
@@ -94,6 +96,34 @@ class Attention(nn.Module):
         merged = out.transpose(0, 1).reshape(n, self.num_heads * self.head_dim)
         projected: torch.Tensor = self.o_proj(merged)
         return projected
+
+    def _attend_decode_batch(
+        self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, dec: BatchedDecodeKV
+    ) -> torch.Tensor:
+        """One new token for each of B sequences, attended in one call against paged KV.
+
+        ``q`` is ``[heads, B, d]``; ``k``/``v`` are ``[kv_heads, B, d]``. Returns ``[heads, B, d]``.
+        Launches a fixed number of kernels per layer whatever B is; the per-sequence path issued
+        about eight per sequence (M5 profile: write, gather and GQA expansion of K and V, and
+        attention).
+        """
+        bsz = dec.batch_size
+        k_pool, v_pool = dec.k_pool[self.layer_idx], dec.v_pool[self.layer_idx]
+        kv_heads, dim = k_pool.shape[2], k_pool.shape[3]
+        # Write all new K/V rows at once (keys post-RoPE, as in the reference path).
+        k_pool.view(-1, kv_heads, dim).index_copy_(0, dec.slots, k.transpose(0, 1))
+        v_pool.view(-1, kv_heads, dim).index_copy_(0, dec.slots, v.transpose(0, 1))
+        # Gather every sequence's blocks, padded: [B, max_blocks * block, kv_heads, d].
+        keys = k_pool[dec.block_tables].view(bsz, -1, kv_heads, dim).transpose(1, 2)
+        values = v_pool[dec.block_tables].view(bsz, -1, kv_heads, dim).transpose(1, 2)
+        out = F.scaled_dot_product_attention(
+            q.transpose(0, 1).unsqueeze(2),  # [B, heads, 1, d]
+            keys,
+            values,
+            attn_mask=dec.key_mask,
+            enable_gqa=self.num_heads != self.num_kv_heads,
+        )
+        return out.squeeze(2).transpose(0, 1)
 
     def _attend(
         self, q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, kv_cache: KVCacheView | None
@@ -157,7 +187,7 @@ class DecoderLayer(nn.Module):
         x: torch.Tensor,
         cos: torch.Tensor,
         sin: torch.Tensor,
-        segments: Sequence[Segment],
+        segments: Sequence[Segment] | BatchedDecodeKV,
     ) -> torch.Tensor:
         x = x + self.self_attn(self.input_layernorm(x), cos, sin, segments)
         out: torch.Tensor = x + self.mlp(self.post_attention_layernorm(x))
@@ -201,7 +231,7 @@ class LlamaForCausalLM(nn.Module):
         self,
         input_ids: torch.Tensor,
         positions: torch.Tensor,
-        kv_cache: KVCacheView | BatchedKV | None = None,
+        kv_cache: KVCacheView | BatchedKV | BatchedDecodeKV | None = None,
         *,
         last_token_only: bool = False,
         logits_indices: torch.Tensor | None = None,
@@ -211,8 +241,9 @@ class LlamaForCausalLM(nn.Module):
         Args:
             input_ids: ``[num_tokens]`` token ids (flattened across sequences for a batch).
             positions: ``[num_tokens]`` absolute positions (each continues its sequence's cache).
-            kv_cache: One sequence's cache, or a :class:`BatchedKV` describing several sequences'
-                segments. Caches are written for all layers and advanced before returning.
+            kv_cache: One sequence's cache, a :class:`BatchedKV` describing several sequences'
+                segments, or a :class:`BatchedDecodeKV` (one new token per sequence, batched
+                attention). Caches are written for all layers and advanced before returning.
             last_token_only: Return logits only for the final token. The LM head is the single
                 largest matmul for small models, so skipping it during prefill matters.
             logits_indices: Flattened-batch indices whose logits are needed (e.g. the last token of
@@ -224,16 +255,21 @@ class LlamaForCausalLM(nn.Module):
         if input_ids.dim() != 1 or input_ids.shape != positions.shape:
             raise ValueError("input_ids and positions must be 1-D tensors of equal length")
         n = input_ids.shape[0]
-        if isinstance(kv_cache, BatchedKV):
+        segments: Sequence[Segment] | BatchedDecodeKV
+        if isinstance(kv_cache, BatchedDecodeKV):
+            if n != kv_cache.batch_size:
+                raise ValueError("batched decode takes exactly one token per sequence")
+            segments = kv_cache
+        elif isinstance(kv_cache, BatchedKV):
             kv_cache.validate(n)
-            segments: Sequence[Segment] = kv_cache.segments
+            segments = kv_cache.segments
         else:
             segments = (Segment(0, n, kv_cache),)
         h = self.model.embed_tokens(input_ids)
         cos, sin = rope_cos_sin(self.inv_freq, positions, h.dtype)
         for layer in self.model.layers:
             h = layer(h, cos, sin, segments)
-        if isinstance(kv_cache, BatchedKV):
+        if isinstance(kv_cache, BatchedKV | BatchedDecodeKV):
             kv_cache.advance()
         elif kv_cache is not None:
             kv_cache.advance(n)

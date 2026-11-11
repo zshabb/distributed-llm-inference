@@ -97,6 +97,7 @@ class LLMEngine:
         config: SchedulerConfig | None = None,
         eviction_policy: str = "lru",
         enable_prefix_caching: bool = True,
+        batched_decode: bool = True,
         eos_token_ids: Collection[int] = (),
         seed: int = 0,
     ) -> LLMEngine:
@@ -112,7 +113,7 @@ class LLMEngine:
             model.config, num_blocks, block_size, dtype=dtype, device=device
         )
         return cls(
-            ModelRunner(model, bm, store),
+            ModelRunner(model, bm, store, batched_decode=batched_decode),
             bm,
             config,
             eos_token_ids=eos_token_ids,
