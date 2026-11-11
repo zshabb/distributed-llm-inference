@@ -101,6 +101,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="sys.setswitchinterval for this process in seconds (Python default 0.005); a thread "
         "waiting for the GIL waits up to this long while another thread runs Python",
     )
+    p.add_argument(
+        "--http",
+        choices=["h11", "httptools"],
+        default="h11",
+        help="HTTP/1.1 protocol implementation: h11 (pure Python) or httptools (C parser)",
+    )
+    p.add_argument(
+        "--event-loop",
+        choices=["asyncio", "uvloop"],
+        default="asyncio",
+        help="event loop of the API process: the standard asyncio loop or uvloop (libuv)",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -198,6 +210,7 @@ async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:
             port=args.port,
             log_level="info",
             lifespan="off",
+            http=args.http,
         )
     )
     # uvicorn's loggers are process-wide and every Config reconfigures them (level, and access_log
@@ -210,6 +223,7 @@ async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:
             port=args.admin_port,
             log_level="info",
             lifespan="off",
+            http=args.http,
         )
     )
     logging.getLogger("uvicorn.access").addFilter(_DropScrapes())
@@ -254,7 +268,12 @@ def main(argv: list[str] | None = None) -> int:
         bundle.config.kv_capacity_tokens // args.block_size,
         args.block_size,
     )
-    asyncio.run(serve(bundle, args))
+    if args.event_loop == "uvloop":
+        import uvloop
+
+        uvloop.run(serve(bundle, args))
+    else:
+        asyncio.run(serve(bundle, args))
     return 0
 
 
