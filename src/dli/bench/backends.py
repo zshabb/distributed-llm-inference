@@ -131,8 +131,11 @@ def start(
             str(max_num_seqs),
             "--max-num-batched-tokens",
             str(max_num_batched_tokens),
-            "--kv-cache-gb",
-            str(settings["kv_cache_gb"]),
+            *(
+                ["--num-blocks", str(settings["num_blocks"])]
+                if "num_blocks" in settings  # exact pool, e.g. equal to vLLM's KV capacity
+                else ["--kv-cache-gb", str(settings["kv_cache_gb"])]
+            ),
             "--block-size",
             str(settings.get("block_size", 16)),
             "--max-queued-requests",
