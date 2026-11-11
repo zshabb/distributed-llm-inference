@@ -15,6 +15,13 @@ from huggingface_hub import snapshot_download
 PINNED_REVISIONS: dict[str, str] = {
     "HuggingFaceTB/SmolLM2-135M-Instruct": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
     "Qwen/Qwen2.5-0.5B-Instruct": "7ae557604adf67be50417f59c2c2f167def9a775",
+    # M5 benchmark ladder (verified 2026-11-11, Apache-2.0, ungated). Qwen2.5-3B-Instruct, named
+    # in the spec, is excluded: its license is the non-Apache "Qwen Research" license.
+    # SmolLM2-1.7B takes its place (no GQA: ~7x the KV bytes per token of Qwen2.5-1.5B).
+    "Qwen/Qwen2.5-1.5B-Instruct": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+    "HuggingFaceTB/SmolLM2-1.7B-Instruct": "31b70e2e869a7173562077fd711b654946d38674",
+    # Baseline-only (vLLM): AWQ 4-bit weights. The native engine has no quantized path yet.
+    "Qwen/Qwen2.5-7B-Instruct-AWQ": "b25037543e9394b818fdfca67ab2a00ecc7dd641",
 }
 
 # Only what inference needs. Excluding *.bin guarantees no pickle checkpoint is ever downloaded.
