@@ -1,0 +1,71 @@
+{
+ "name": "m6-a5000-cuda-graph-http-ab",
+ "description": "Short owner-approved A/B (2026-11-11), not a campaign: the native server over HTTP with eager batched decode vs --cuda-graphs (buckets 16/64 rows x 24 blocks), identical settings otherwise. closed-fixed at concurrency 16 and 64, one repetition. Settings match the focused M6 baseline (m5-a5000-baseline.json): bf16, block 16, KV pool 100,416 blocks, max_num_seqs 128, max_num_batched_tokens 2048, same workload seeds.",
+ "label": "GPU-A5000x1-runpod",
+ "device": "cuda",
+ "dtype": "bfloat16",
+ "reps": 1,
+ "port": 8300,
+ "max_num_seqs": 128,
+ "max_num_batched_tokens": 2048,
+ "saturation_ttft_s": 10.0,
+ "request_timeout_s": 900,
+ "backends": {
+  "dli": {
+   "kind": "dli",
+   "block_size": 16
+  },
+  "dli-graphs": {
+   "kind": "dli",
+   "block_size": 16,
+   "extra_args": [
+    "--cuda-graphs"
+   ]
+  }
+ },
+ "models": [
+  {
+   "name": "qwen2.5-0.5b",
+   "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+   "backends": [
+    "dli",
+    "dli-graphs"
+   ],
+   "experiments": [
+    "closed-fixed"
+   ],
+   "overrides": {
+    "dli": {
+     "num_blocks": 100416
+    },
+    "dli-graphs": {
+     "num_blocks": 100416
+    }
+   }
+  }
+ ],
+ "experiments": {
+  "closed-fixed": {
+   "description": "input 256, output 128 (exact); concurrency 16 and 64.",
+   "workload": {
+    "type": "synthetic",
+    "input": {
+     "fixed": 256
+    },
+    "output": {
+     "fixed": 128
+    }
+   },
+   "mode": "closed",
+   "points": [
+    16,
+    64
+   ],
+   "n_per_concurrency": 4,
+   "backends": [
+    "dli",
+    "dli-graphs"
+   ]
+  }
+ }
+}
