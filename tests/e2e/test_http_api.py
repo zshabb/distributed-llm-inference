@@ -3,15 +3,17 @@
 from __future__ import annotations
 
 import json
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import httpx
 import pytest
 
+from dli.engine import SchedulerConfig
 from dli.generate import greedy_generate
 
-from .conftest import MODEL, LiveServer, wait_for
+from .conftest import MODEL, LiveServer, ServerFactory, wait_for
 
 
 def reference_text(server: LiveServer, prompt_ids: list[int], max_tokens: int) -> str:
@@ -232,3 +234,39 @@ def test_malformed_json_and_bad_headers(server: LiveServer) -> None:
         assert r.status_code == 400
         assert r.json()["error"]["code"] == "invalid_header"
         assert c.get("/v1/nope").status_code == 404
+
+
+def _abandon(live: LiveServer, payload: dict[str, Any]) -> None:
+    """Send a request and drop the TCP connection before any response byte arrives."""
+    with (
+        httpx.Client(base_url=live.url, timeout=httpx.Timeout(30.0, read=0.3)) as c,
+        pytest.raises(httpx.ReadTimeout),
+    ):
+        c.post("/v1/completions", json=payload)
+
+
+def test_client_disconnect_during_non_streaming_request_aborts(make_server: ServerFactory) -> None:
+    server = make_server(num_blocks=1024)  # room for 3000 tokens
+    engine = server.bundle.engine
+    _abandon(server, {"model": MODEL, "prompt": "go", "max_tokens": 3000, "ignore_eos": True})
+    wait_for(lambda: engine.snapshot.num_running == 0 and engine.snapshot.kv_used_blocks == 0)
+    assert engine.snapshot.total_generated_tokens < 3000, "generation continued after disconnect"
+    assert server.bundle.app.state.admission.inflight == 0
+
+
+def test_client_disconnect_while_queued_aborts_before_running(make_server: ServerFactory) -> None:
+    live = make_server(
+        scheduler=SchedulerConfig(max_num_seqs=1, max_num_batched_tokens=64), num_blocks=1024
+    )
+    engine = live.bundle.engine
+    holder = threading.Thread(
+        target=_abandon,
+        args=(live, {"model": MODEL, "prompt": "hold", "max_tokens": 1500, "ignore_eos": True}),
+    )
+    holder.start()
+    wait_for(lambda: engine.snapshot.num_running == 1)
+    _abandon(live, {"model": MODEL, "prompt": "queued", "max_tokens": 1500, "ignore_eos": True})
+    holder.join()
+    wait_for(lambda: engine.snapshot.num_running == 0 and engine.snapshot.num_waiting == 0)
+    wait_for(lambda: engine.snapshot.kv_used_blocks == 0)
+    assert engine.snapshot.total_generated_tokens < 1500, "abandoned requests kept generating"

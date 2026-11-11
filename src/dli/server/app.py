@@ -14,10 +14,11 @@ which aborts the engine request immediately instead of letting it generate token
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import time
 import uuid
-from collections.abc import AsyncGenerator, AsyncIterator
+from collections.abc import AsyncGenerator, AsyncIterator, Coroutine
 from contextlib import aclosing
 from dataclasses import dataclass
 from typing import Any
@@ -257,7 +258,12 @@ def create_app(
             raw = _text_stream(rid, prompt_ids, params, body.stop_list, priority, tenant, timing)
             # Wait for the first event BEFORE sending headers: errors and deadline misses up to the
             # first token are real HTTP statuses (429/4xx/5xx), not in-band events in a 200 stream.
-            first = await _first_event(raw, deadline_ms)
+            # The client may vanish while the request is queued or (non-streaming) generating;
+            # nothing would notice until the response is written, so watch the connection.
+            try:
+                first = await _unless_disconnected(request, _first_event(raw, deadline_ms))
+            except _ClientGoneError:
+                return _gone(request)
             stream = _chain(first, raw)
             if body.stream:
                 handed_off = True  # the SSE generator now owns the in-flight slot
@@ -266,19 +272,10 @@ def create_app(
                     media_type="text/event-stream",
                     headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
                 )
-            parts: list[str] = []
-            finish = _Finish("length", 0)
             try:
-                async with aclosing(stream) as events:
-                    async for ev in events:
-                        if isinstance(ev, _Delta):
-                            parts.append(ev.text)
-                        else:
-                            finish = ev
-            except TimeoutError as exc:
-                raise APIError(
-                    504, f"request exceeded {config.request_timeout_s:.0f}s", "timeout", "timeout"
-                ) from exc
+                parts, finish = await _unless_disconnected(request, _collect(stream))
+            except _ClientGoneError:
+                return _gone(request)
         finally:
             if not handed_off:
                 gate.inflight -= 1
@@ -301,6 +298,29 @@ def create_app(
                 "x_timing": timing.as_dict(),
             }
         )
+
+    async def _collect(
+        stream: AsyncGenerator[_Delta | _Finish, None],
+    ) -> tuple[list[str], _Finish]:
+        parts: list[str] = []
+        finish = _Finish("length", 0)
+        try:
+            async with aclosing(stream) as events:
+                async for ev in events:
+                    if isinstance(ev, _Delta):
+                        parts.append(ev.text)
+                    else:
+                        finish = ev
+        except TimeoutError as exc:
+            raise APIError(
+                504, f"request exceeded {config.request_timeout_s:.0f}s", "timeout", "timeout"
+            ) from exc
+        return parts, finish
+
+    def _gone(request: Request) -> Response:
+        # Nobody receives this; 499 (client closed request) is for logs and metrics only.
+        _count(request, 499, "client_disconnected")
+        return Response(status_code=499)
 
     def _validate(body: CompletionRequest | ChatCompletionRequest, prompt_ids: list[int]) -> None:
         if body.model != config.model_name:
@@ -501,6 +521,33 @@ def create_app(
         yield "data: [DONE]\n\n"
 
     return app
+
+
+class _ClientGoneError(Exception):
+    """The client closed the connection before the response was sent."""
+
+
+async def _wait_for_disconnect(request: Request) -> None:
+    # The body is already consumed, so the next ASGI message is the disconnect notification.
+    while (await request.receive())["type"] != "http.disconnect":
+        await asyncio.sleep(0.05)  # defensive: never spin if a server sends other messages
+
+
+async def _unless_disconnected[T](request: Request, work: Coroutine[Any, Any, T]) -> T:
+    """Await work, cancelling it (which aborts the engine request) if the client leaves."""
+    task = asyncio.ensure_future(work)
+    watcher = asyncio.ensure_future(_wait_for_disconnect(request))
+    try:
+        await asyncio.wait({task, watcher}, return_when=asyncio.FIRST_COMPLETED)
+        if task.done():
+            return task.result()
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError, Exception):
+            await task  # let the generator unwind and send the abort
+        raise _ClientGoneError
+    finally:
+        watcher.cancel()
+        task.cancel()  # no-op when done; covers cancellation of this coroutine itself
 
 
 async def _chain(
