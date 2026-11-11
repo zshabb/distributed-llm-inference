@@ -1,6 +1,7 @@
 """Public evaluation and workload datasets, fetched at pinned revisions (never redistributed).
 
-* OpenAssistant/oasst1, validation split (Apache-2.0): real multi-turn user prompts.
+* OpenAssistant/oasst1, train split (Apache-2.0): real multi-turn user prompts. (The validation
+  split has only 130 conversations with 2+ user turns; the train split has 283 with 3.)
 * allenai/ai2_arc, ARC-Easy test (CC BY-SA 4.0): task accuracy in the bf16 quality study.
 * Salesforce/wikitext, wikitext-103-raw-v1 test (CC BY-SA 3.0): held-out perplexity.
 """
@@ -25,7 +26,7 @@ class DatasetFile:
 OASST1 = DatasetFile(
     "OpenAssistant/oasst1",
     "fdf72ae0827c1cda404aff25b6603abec9e3399b",
-    "data/validation-00000-of-00001-134b8fd0c89408b6.parquet",
+    "data/train-00000-of-00001-b42a775f407cee45.parquet",
 )
 ARC_EASY_TEST = DatasetFile(
     "allenai/ai2_arc",
