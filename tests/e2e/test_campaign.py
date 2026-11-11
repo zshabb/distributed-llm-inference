@@ -98,3 +98,4 @@ def test_campaign_runs_backends_and_reports(tiny_dir: Path, tmp_path: Path) -> N
     native = next(s for s in servers if s["name"] == "dli-np")
     assert "--no-auth" in native["cmd"]
     assert "--no-prefix-caching" in native["cmd"]
+    assert str(Path.home()) not in (out / "campaign_log.jsonl").read_text()  # no personal paths

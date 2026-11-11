@@ -68,9 +68,10 @@ class Running:
         return self.proc.pid if self.proc else None
 
     def describe(self) -> dict[str, Any]:
+        # Results are published: never record the operator's home directory (personal paths).
         return {
             "name": self.name,
-            "cmd": shlex.join(self.cmd),
+            "cmd": shlex.join(self.cmd).replace(str(Path.home()), "~"),
             "startup_s": round(self.startup_s, 1),
             **self.info,
         }
