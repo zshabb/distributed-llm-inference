@@ -27,7 +27,9 @@ import queue
 import threading
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Protocol
+
+import torch
 
 from dli.engine import FinishReason, LLMEngine, Priority, RequestOutput
 from dli.engine.cuda_graph import DecodeGraphs
@@ -74,8 +76,17 @@ class EngineSnapshot:
     cuda_graph_replays: int = 0  # decode steps served by a graph replay
     cuda_graph_fallbacks: tuple[tuple[str, int], ...] = ()  # eager decode steps, by reason
     cuda_graph_memory_bytes: int = 0  # reserved by capture (static buffers + shared pool)
+    # GPU memory of the process that runs the engine (0 on CPU). Published with the snapshot so the
+    # API process can report it when the engine runs in another process.
+    gpu_memory_allocated_bytes: int = 0
+    gpu_memory_reserved_bytes: int = 0
     healthy: bool = True
     error: str | None = None
+
+
+def _put_all(items: list[tuple[asyncio.Queue[EngineEvent], EngineEvent]]) -> None:
+    for events, event in items:
+        events.put_nowait(event)
 
 
 @dataclass
@@ -119,6 +130,33 @@ class EngineDeadError(RuntimeError):
     """The engine loop has stopped (crashed or shut down) and cannot accept work."""
 
 
+class EngineClient(Protocol):
+    """What the API layer needs from an engine: :class:`AsyncEngine` (a thread of this process)
+    or :class:`~dli.server.engine_process.ProcessEngine` (a separate process)."""
+
+    @property
+    def snapshot(self) -> EngineSnapshot: ...
+
+    @property
+    def healthy(self) -> bool: ...
+
+    def start(self) -> None: ...
+
+    def stop(self, timeout: float = 10.0) -> None: ...
+
+    def generate(
+        self,
+        request_id: str,
+        prompt_ids: list[int],
+        params: SamplingParams,
+        *,
+        priority: Priority = Priority.INTERACTIVE,
+        tenant: str = "default",
+    ) -> AsyncGenerator[EngineEvent, None]: ...
+
+    def abort(self, request_id: str) -> None: ...
+
+
 class AsyncEngine:
     """Runs an :class:`LLMEngine` on a background thread and exposes async streaming generation."""
 
@@ -128,6 +166,8 @@ class AsyncEngine:
         self._engine = engine
         # Decode CUDA graphs of the wrapped engine, if configured (captured before start()).
         self.decode_graphs: DecodeGraphs | None = getattr(engine.runner, "decode_graphs", None)
+        device = getattr(engine.runner, "device", None)
+        self._cuda = isinstance(device, torch.device) and device.type == "cuda"
         self._cmds: queue.Queue[_Command] = queue.Queue()
         self._pending: dict[str, _Pending] = {}
         self._idle_poll_s = idle_poll_s
@@ -212,8 +252,7 @@ class AsyncEngine:
                 if eng.has_unfinished():
                     outputs = eng.step()
                     self._account(eng)
-                    for out in outputs:
-                        self._dispatch(out)
+                    self._deliver(outputs)
                 self._publish(eng)
         except Exception as exc:  # crash: fail everyone loudly, never hang clients
             self._dead = f"{type(exc).__name__}: {exc}"
@@ -250,12 +289,28 @@ class AsyncEngine:
             except queue.Empty:
                 return True
 
-    def _dispatch(self, out: RequestOutput) -> None:
-        self._c.generated += len(out.new_token_ids)
-        self._send(
-            out.request_id,
-            EngineEvent(tuple(out.new_token_ids), out.finished, out.finish_reason),
-        )
+    def _deliver(self, outputs: list[RequestOutput]) -> None:
+        """Hand one step's outputs to the event loop(s) in ONE wake-up per loop.
+
+        A wake-up (``call_soon_threadsafe``) writes to the loop's self-pipe, a system call that
+        releases the GIL; re-acquiring it can wait for the loop thread's switch interval. Done per
+        token, this cost ~74 us per token of engine-thread time at concurrency 64 on the A5000
+        (2.4 s of a 12.6 s run); per step it is one call for up to 64 tokens.
+        """
+        batches: dict[
+            asyncio.AbstractEventLoop, list[tuple[asyncio.Queue[EngineEvent], EngineEvent]]
+        ]
+        batches = {}
+        for out in outputs:
+            self._c.generated += len(out.new_token_ids)
+            pending = self._pending.get(out.request_id)
+            if pending is None:
+                continue  # client already gone (aborted); nothing to deliver
+            event = EngineEvent(tuple(out.new_token_ids), out.finished, out.finish_reason)
+            batches.setdefault(pending.loop, []).append((pending.events, event))
+        for loop, items in batches.items():
+            with contextlib.suppress(RuntimeError):  # event loop closed during shutdown
+                loop.call_soon_threadsafe(_put_all, items)
 
     def _send(self, request_id: str, event: EngineEvent) -> None:
         pending = self._pending.get(request_id)
@@ -296,6 +351,9 @@ class AsyncEngine:
                 "cuda_graph_fallbacks": tuple(sorted(graphs.stats.fallbacks.items())),
                 "cuda_graph_memory_bytes": graphs.stats.memory_overhead,
             }
+        if self._cuda:
+            graph_fields["gpu_memory_allocated_bytes"] = torch.cuda.memory_allocated()
+            graph_fields["gpu_memory_reserved_bytes"] = torch.cuda.memory_reserved()
         self._snapshot = EngineSnapshot(
             num_waiting=len(sched.waiting),
             num_running=len(sched.running),

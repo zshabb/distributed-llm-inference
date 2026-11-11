@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import httpx
+import pytest
 
 from .conftest import _free_port
 
@@ -73,8 +74,9 @@ def test_requires_keys_by_default(tiny_dir: Path) -> None:
     assert "--api-keys-file" in out
 
 
-def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path) -> None:
-    proc, port, admin_port = _launch(tiny_dir, "--no-auth")
+@pytest.mark.parametrize("engine", ["process", "thread"])
+def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path, engine: str) -> None:
+    proc, port, admin_port = _launch(tiny_dir, "--no-auth", "--engine", engine)
     try:
         _wait_ready(port, proc)
         assert httpx.get(f"http://127.0.0.1:{admin_port}/metrics", timeout=10).status_code == 200
@@ -114,3 +116,10 @@ def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path) -> No
     finally:
         if proc.poll() is None:
             proc.kill()
+
+
+def test_the_engine_runs_in_its_own_process_by_default() -> None:
+    from dli.server.__main__ import parse_args
+
+    assert parse_args(["--model", "m"]).engine == "process"
+    assert parse_args(["--model", "m", "--engine", "thread"]).engine == "thread"

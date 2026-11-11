@@ -11,7 +11,7 @@
   "saturation_ttft_s": 5.0,
   "request_timeout_s": 600,
   "backends": {
-    "dli": {"kv_cache_gb": 0.5, "block_size": 16},
+    "dli": {"kv_cache_gb": 0.5, "block_size": 16, "extra_args": ["--engine", "thread"]},
     "hf": {"max_batch": 16, "max_wait_ms": 20}
   },
   "models": [

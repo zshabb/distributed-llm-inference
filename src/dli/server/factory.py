@@ -10,11 +10,11 @@ from fastapi import FastAPI
 
 from dli.engine import LLMEngine, SchedulerConfig
 from dli.engine.cuda_graph import Shape
-from dli.model import LlamaForCausalLM, load_model
+from dli.model import LlamaForCausalLM, load_config, load_model
 from dli.server.admin import create_admin_app
 from dli.server.admission import AdmissionConfig
 from dli.server.app import ServerConfig, create_app
-from dli.server.async_engine import AsyncEngine
+from dli.server.async_engine import AsyncEngine, EngineClient
 from dli.server.auth import ApiKeyAuth
 from dli.server.metrics import ServerMetrics
 from dli.server.text import TextCodec
@@ -24,9 +24,9 @@ from dli.server.text import TextCodec
 class ServerBundle:
     app: FastAPI
     admin_app: FastAPI
-    engine: AsyncEngine
+    engine: EngineClient
     codec: TextCodec
-    model: LlamaForCausalLM
+    model: LlamaForCausalLM | None  # None when the engine (and the weights) live in a child process
     config: ServerConfig
 
 
@@ -47,6 +47,7 @@ class BuildOptions:
     admin_token: str | None = None
     enable_prefix_caching: bool = True
     cuda_graphs: tuple[Shape, ...] | None = None  # decode CUDA graph buckets (None: eager only)
+    engine_process: bool = False  # run the engine in a child process (no GIL shared with HTTP)
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -54,23 +55,45 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
 
     The engine is constructed here (caller's thread) and handed to the AsyncEngine thread on start.
     """
-    model = load_model(model_dir, dtype=opts.dtype, device=opts.device)
     codec = TextCodec(model_dir)
-    engine = LLMEngine.for_model(
-        model,
-        num_blocks=opts.num_blocks,
-        block_size=opts.block_size,
-        config=opts.scheduler,
-        eos_token_ids=codec.eos_token_ids,
-        enable_prefix_caching=opts.enable_prefix_caching,
-        cuda_graphs=opts.cuda_graphs,
-    )
-    aengine = AsyncEngine(engine)
+    model: LlamaForCausalLM | None = None
+    aengine: EngineClient
+    if opts.engine_process:
+        from dli.server.engine_process import EngineSpec, ProcessEngine
+
+        cfg = load_config(model_dir)
+        aengine = ProcessEngine(
+            EngineSpec(
+                model_dir=str(model_dir),
+                num_blocks=opts.num_blocks,
+                block_size=opts.block_size,
+                device=opts.device,
+                dtype=opts.dtype,
+                scheduler=opts.scheduler,
+                eos_token_ids=tuple(codec.eos_token_ids),
+                enable_prefix_caching=opts.enable_prefix_caching,
+                cuda_graphs=opts.cuda_graphs,
+            ),
+            kv_total_blocks=opts.num_blocks,
+        )
+    else:
+        model = load_model(model_dir, dtype=opts.dtype, device=opts.device)
+        cfg = model.config
+        engine = LLMEngine.for_model(
+            model,
+            num_blocks=opts.num_blocks,
+            block_size=opts.block_size,
+            config=opts.scheduler,
+            eos_token_ids=codec.eos_token_ids,
+            enable_prefix_caching=opts.enable_prefix_caching,
+            cuda_graphs=opts.cuda_graphs,
+        )
+        aengine = AsyncEngine(engine)
     config = ServerConfig(
         model_name=opts.model_name,
-        max_model_len=model.config.max_position_embeddings,
+        max_model_len=cfg.max_position_embeddings,
         kv_capacity_tokens=opts.num_blocks * opts.block_size,
-        vocab_size=model.config.vocab_size,
+        vocab_size=cfg.vocab_size,
         default_max_tokens=opts.default_max_tokens,
         max_tokens_limit=opts.max_tokens_limit,
         request_timeout_s=opts.request_timeout_s,
