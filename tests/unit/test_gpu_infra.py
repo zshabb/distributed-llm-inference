@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -124,3 +125,47 @@ def test_scripts_are_committed_executable() -> None:
     for line in out.stdout.splitlines():
         mode, *_, path = line.split()
         assert mode == "100755", path
+
+
+def _git(repo: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True)
+
+
+@pytest.mark.skipif(shutil.which("rsync") is None, reason="needs rsync")
+def test_pulling_results_never_overwrites_committed_evidence(tmp_path: Path) -> None:
+    """A stale host copy of a committed result must not replace it (it happened twice in M6)."""
+    repo, host = tmp_path / "repo", tmp_path / "host"
+    res = repo / "benchmarks" / "results"
+    (res / "run-a").mkdir(parents=True)
+    (res / "run-a" / "summary.json").write_text("committed\n")
+    (res / "run-a" / "same.json").write_text("same\n")
+    _git(repo, "init", "-q")
+    _git(repo, "add", ".")
+    _git(repo, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-qm", "r")
+    (res / "run-b").mkdir()
+    (res / "run-b" / "partial.json").write_text("in progress\n")  # untracked: a running campaign
+    for rel, text in {
+        "run-a/summary.json": "stale host copy\n",  # differs from the committed file
+        "run-a/same.json": "same\n",
+        "run-b/partial.json": "finished\n",
+        "run-c/new.json": "new result\n",
+    }.items():
+        (host / rel).parent.mkdir(parents=True, exist_ok=True)
+        (host / rel).write_text(text)
+
+    out = subprocess.run(
+        [str(GPU / "pull_results.sh"), str(host), str(repo)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert out.returncode == 0, out.stderr
+    assert (res / "run-a" / "summary.json").read_text() == "committed\n"
+    assert (res / "run-b" / "partial.json").read_text() == "finished\n"
+    assert (res / "run-c" / "new.json").read_text() == "new result\n"
+    kept = res / ".pod-conflicts" / "run-a" / "summary.json"
+    assert kept.read_text() == "stale host copy\n"  # unique host data is preserved, not dropped
+    assert not (res / ".pod-conflicts" / "run-a" / "same.json").exists()
+    assert "1 committed result file(s) differ" in out.stderr
+    assert "run-a/summary.json" in out.stderr
+    assert (host / "run-a" / "summary.json").read_text() == "stale host copy\n"  # host untouched

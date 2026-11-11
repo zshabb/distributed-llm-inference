@@ -114,6 +114,14 @@ only our user-level bootstrap on a host whose image already had the NVIDIA drive
 `remote.sh` pulls `benchmarks/results/` after every command, so measurements are not lost. Host-security inspection
 output (`inspect.txt`) is kept locally but ignored by Git, so it never appears in a public repository.
 
+**Pulled results never overwrite committed ones** (`scripts/gpu/pull_results.sh`, called by `remote.sh`). The host keeps
+every result directory it ever wrote, so it can hold stale copies of files that were since renamed or committed in another
+form (this overwrote the committed M4 HTTP parity results twice during M6). Files tracked by Git under `benchmarks/results/`
+are therefore never written by a pull; if the host's copy differs, it is saved under `benchmarks/results/.pod-conflicts/`
+(ignored by Git) and listed as a warning, for the owner to compare and decide. New and untracked files are pulled as
+before, and nothing is deleted on either side. Runs that write fixed directory names (the HTTP parity test) take a tag
+(`DLI_PARITY_TAG`) so a later run gets its own directory instead of rewriting an earlier one.
+
 ### Snapshots (optional, not used)
 Vultr charges $0.05/GB-month of compressed snapshot size. A snapshot would mainly save re-downloading wheels, weights, and
 images. Support for this GPU plan has not been confirmed, and no snapshot is created without owner approval.
