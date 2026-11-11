@@ -89,10 +89,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "default",
     )
     p.add_argument(
-        "--engine-process",
-        action="store_true",
-        help="run the engine in its own process, so its Python work never waits for the HTTP "
-        "event loop's GIL (the API process then does not load the weights)",
+        "--engine",
+        choices=["process", "thread"],
+        default="process",
+        help="where the engine runs: its own process (default; its Python work never waits for "
+        "the HTTP event loop's GIL, and the API process does not load the weights) or a thread "
+        "of the API process (the original design)",
     )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
@@ -159,7 +161,7 @@ def build(args: argparse.Namespace) -> ServerBundle:
         admin_token=os.environ.get(args.admin_token_env) or None,
         enable_prefix_caching=not args.no_prefix_caching,
         cuda_graphs=BENCHMARK_SHAPES if args.cuda_graphs else None,
-        engine_process=args.engine_process,
+        engine_process=args.engine == "process",
     )
     return build_server(model_dir, opts)
 

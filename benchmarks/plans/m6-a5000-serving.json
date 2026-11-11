@@ -1,6 +1,6 @@
 {
   "name": "m6-a5000-serving",
-  "description": "HTTP serving-overhead work (M6, owner-approved 2026-11-11): the native server with --cuda-graphs, closed-fixed 256/128 at concurrency 16 and 64, 3 repetitions (server restarted per repetition), M6 baseline settings. Variants are added as server flags so they run in the same session.",
+  "description": "HTTP serving-overhead work (M6, owner-approved 2026-11-11): the native server with --cuda-graphs, closed-fixed 256/128 at concurrency 16 and 64, 3 repetitions (server restarted per repetition), M6 baseline settings. Variants are added as server flags so they run in the same session. dli-graphs pins the threaded engine, dli-graphs-proc the engine process (the server default since this work). The GIL/httptools/uvloop variants measured in ...-m6-serving-CE-stack-variants/ were dropped (no gain).",
   "label": "GPU-A5000x1-runpod",
   "device": "cuda",
   "dtype": "bfloat16",
@@ -15,7 +15,9 @@
       "kind": "dli",
       "block_size": 16,
       "extra_args": [
-        "--cuda-graphs"
+        "--cuda-graphs",
+        "--engine",
+        "thread"
       ]
     },
     "dli-graphs-proc": {
@@ -23,39 +25,8 @@
       "block_size": 16,
       "extra_args": [
         "--cuda-graphs",
-        "--engine-process"
-      ]
-    },
-    "dli-proc-gil": {
-      "kind": "dli",
-      "block_size": 16,
-      "extra_args": [
-        "--cuda-graphs",
-        "--engine-process",
-        "--gil-switch-interval",
-        "0.0005"
-      ]
-    },
-    "dli-proc-httptools": {
-      "kind": "dli",
-      "block_size": 16,
-      "extra_args": [
-        "--cuda-graphs",
-        "--engine-process",
-        "--http",
-        "httptools"
-      ]
-    },
-    "dli-proc-uvloop": {
-      "kind": "dli",
-      "block_size": 16,
-      "extra_args": [
-        "--cuda-graphs",
-        "--engine-process",
-        "--http",
-        "httptools",
-        "--event-loop",
-        "uvloop"
+        "--engine",
+        "process"
       ]
     }
   },
@@ -65,10 +36,7 @@
       "repo": "Qwen/Qwen2.5-0.5B-Instruct",
       "backends": [
         "dli-graphs",
-        "dli-graphs-proc",
-        "dli-proc-gil",
-        "dli-proc-httptools",
-        "dli-proc-uvloop"
+        "dli-graphs-proc"
       ],
       "experiments": [
         "closed-fixed"
@@ -78,15 +46,6 @@
           "num_blocks": 100416
         },
         "dli-graphs-proc": {
-          "num_blocks": 100416
-        },
-        "dli-proc-gil": {
-          "num_blocks": 100416
-        },
-        "dli-proc-httptools": {
-          "num_blocks": 100416
-        },
-        "dli-proc-uvloop": {
           "num_blocks": 100416
         }
       }
@@ -112,10 +71,7 @@
       "n_per_concurrency": 4,
       "backends": [
         "dli-graphs",
-        "dli-graphs-proc",
-        "dli-proc-gil",
-        "dli-proc-httptools",
-        "dli-proc-uvloop"
+        "dli-graphs-proc"
       ]
     }
   }

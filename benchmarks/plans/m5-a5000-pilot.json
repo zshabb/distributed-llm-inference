@@ -13,7 +13,11 @@
   "backends": {
     "dli": {
       "kv_cache_gb": 10.0,
-      "block_size": 16
+      "block_size": 16,
+      "extra_args": [
+        "--engine",
+        "thread"
+      ]
     },
     "vllm": {
       "gpu_memory_utilization": 0.85,

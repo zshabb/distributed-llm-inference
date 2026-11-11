@@ -1,4 +1,4 @@
-"""The engine in a child process (`--engine-process`): the whole HTTP API suite, plus process life.
+"""The engine in a child process (`--engine process`): the whole HTTP API suite, plus process life.
 
 Every test of ``test_http_api`` and ``test_metrics_admin`` runs again here with the engine in a
 spawned child process instead of a thread (the ``server``/``make_server`` fixtures below
@@ -151,7 +151,7 @@ def test_stop_ends_the_engine_process(make_server: ServerFactory) -> None:
 
 
 def test_sigterm_drains_and_leaves_no_engine_process_behind(tiny_dir: Path) -> None:
-    proc, port, admin_port = _launch(tiny_dir, "--no-auth", "--engine-process")
+    proc, port, admin_port = _launch(tiny_dir, "--no-auth", "--engine", "process")
     try:
         _wait_ready(port, proc)
         state = httpx.get(f"http://127.0.0.1:{admin_port}/admin/state", timeout=10).json()

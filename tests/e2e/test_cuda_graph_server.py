@@ -117,7 +117,7 @@ def test_graph_server_matches_eager_and_reports_usage(tiny_dir: Path) -> None:
 @pytest.mark.gpu
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a CUDA device")
 def test_engine_process_with_graphs_matches_the_threaded_server(tiny_dir: Path) -> None:
-    """--engine-process --cuda-graphs: graphs captured in the child, same greedy text, usage
+    """--engine process --cuda-graphs: graphs captured in the child, same greedy text, usage
     and GPU memory reported through the snapshot."""
     threaded = _cuda_server(tiny_dir, True)
     opts = BuildOptions(

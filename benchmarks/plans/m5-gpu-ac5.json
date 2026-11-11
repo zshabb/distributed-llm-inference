@@ -10,7 +10,7 @@
   "max_num_batched_tokens": 2048,
   "saturation_ttft_s": 10.0,
   "request_timeout_s": 900,
-  "backends": {"dli": {"kind": "dli", "block_size": 16, "num_blocks": 59185}},
+  "backends": {"dli": {"kind": "dli", "block_size": 16, "num_blocks": 59185, "extra_args": ["--engine", "thread"]}},
   "models": [
     {"name": "qwen2.5-0.5b", "repo": "Qwen/Qwen2.5-0.5B-Instruct", "backends": ["dli"],
      "experiments": ["open-lognormal", "overload"]}

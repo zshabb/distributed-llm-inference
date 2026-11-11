@@ -51,9 +51,14 @@ scheduler never touches tensors.
  admin port ──► /metrics (reads published EngineSnapshot), /admin/state|drain|undrain
 ```
 
-- **One engine thread, one event loop.** The engine and its `BlockManager` are single-threaded (thread-confined since
-  M2). `AsyncEngine` owns a dedicated thread that runs `step()` and receives typed commands (add, abort, stop) through
-  a queue; results return to the loop with `call_soon_threadsafe`. Nothing on the event loop touches engine state.
+- **One engine loop, one event loop.** The engine and its `BlockManager` are single-threaded (thread-confined since
+  M2). By default (M6, `--engine process`) the engine runs in its own spawned process (`ProcessEngine`): commands
+  (add, abort, stop) go over a pipe, and each step returns as one message with every request's new tokens and the
+  `EngineSnapshot`; a reader thread hands it to the event loop with one `call_soon_threadsafe` per step. The API
+  process never loads the weights, and the engine's Python work never waits for the event loop's GIL (+20-22% HTTP
+  throughput at c=16/64 on the A5000). `--engine thread` keeps the original design: `AsyncEngine` runs `step()` on a
+  thread of the API process, fed through a queue, with the same one-wake-up-per-step delivery. Nothing on the event
+  loop touches engine state.
 - **Snapshot, not locks.** After each step the engine thread publishes an immutable `EngineSnapshot` (queue depths,
   KV usage, prefill-rate and step-time EWMAs, counters, health). Admission control, `/readyz`, `/admin/state` and
   Prometheus scrapes read it without synchronizing with the engine.

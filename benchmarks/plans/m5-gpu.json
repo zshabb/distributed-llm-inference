@@ -11,8 +11,8 @@
   "saturation_ttft_s": 10.0,
   "request_timeout_s": 900,
   "backends": {
-    "dli": {"kind": "dli", "block_size": 16},
-    "dli-noprefix": {"kind": "dli", "block_size": 16, "extra_args": ["--no-prefix-caching"]},
+    "dli": {"kind": "dli", "block_size": 16, "extra_args": ["--engine", "thread"]},
+    "dli-noprefix": {"kind": "dli", "block_size": 16, "extra_args": ["--no-prefix-caching", "--engine", "thread"]},
     "vllm": {"kind": "vllm", "gpu_memory_utilization": 0.85, "max_model_len": 4096, "extra_args": ["--enable-prefix-caching"]},
     "hf": {"kind": "hf", "max_batch": 16, "max_wait_ms": 20}
   },

@@ -13,7 +13,11 @@
   "backends": {
     "dli": {
       "kind": "dli",
-      "block_size": 16
+      "block_size": 16,
+      "extra_args": [
+        "--engine",
+        "thread"
+      ]
     },
     "vllm": {
       "kind": "vllm",
