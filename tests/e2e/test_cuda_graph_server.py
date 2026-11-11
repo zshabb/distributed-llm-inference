@@ -112,3 +112,36 @@ def test_graph_server_matches_eager_and_reports_usage(tiny_dir: Path) -> None:
     finally:
         stop_server(eager)
         stop_server(graphed)
+
+
+@pytest.mark.gpu
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="needs a CUDA device")
+def test_engine_process_with_graphs_matches_the_threaded_server(tiny_dir: Path) -> None:
+    """--engine-process --cuda-graphs: graphs captured in the child, same greedy text, usage
+    and GPU memory reported through the snapshot."""
+    threaded = _cuda_server(tiny_dir, True)
+    opts = BuildOptions(
+        model_name=MODEL,
+        num_blocks=1024,
+        block_size=4,
+        device="cuda",
+        scheduler=SchedulerConfig(max_num_seqs=64, max_num_batched_tokens=512),
+        cuda_graphs=BENCHMARK_SHAPES,
+        engine_process=True,
+    )
+    proc = start_server(build_server(tiny_dir, opts))
+    try:
+        assert proc.bundle.model is None
+        prompts = [f"z{i} " * (1 + i % 4) for i in range(5)]
+        assert [_complete(proc, p, 20) for p in prompts] == [
+            _complete(threaded, p, 20) for p in prompts
+        ]
+        with concurrent.futures.ThreadPoolExecutor(40) as pool:
+            assert all(pool.map(lambda i: _complete(proc, f"c{i}", 8 + i % 9), range(40)))
+        m = scrape(proc)
+        assert m["dli_cuda_graph_captured{}"] == 1
+        assert m["dli_cuda_graph_replays_total{}"] > 20
+        assert m["dli_gpu_memory_reserved_bytes{}"] > 0
+    finally:
+        stop_server(proc)
+        stop_server(threaded)

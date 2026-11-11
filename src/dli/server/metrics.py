@@ -18,14 +18,14 @@ from prometheus_client.core import CounterMetricFamily, GaugeMetricFamily, Metri
 from prometheus_client.process_collector import ProcessCollector
 from prometheus_client.registry import Collector
 
-from dli.server.async_engine import AsyncEngine
+from dli.server.async_engine import EngineClient
 
 # Latency buckets span sub-millisecond CPU decode steps up to multi-second queued prefills.
 _LATENCY = (0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30, 60, 120)
 
 
 class _EngineCollector(Collector):
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: EngineClient) -> None:
         self._engine = engine
 
     def collect(self) -> Iterator[Metric]:
@@ -88,23 +88,27 @@ class _EngineCollector(Collector):
                 "GPU memory reserved by decode CUDA graph capture (buffers + pool)",
                 value=float(s.cuda_graph_memory_bytes),
             )
-        if torch.cuda.is_available():
+        # The engine's process publishes its GPU memory with the snapshot (it may not be this one).
+        allocated, reserved = s.gpu_memory_allocated_bytes, s.gpu_memory_reserved_bytes
+        if not reserved and torch.cuda.is_available() and torch.cuda.is_initialized():  # type: ignore[no-untyped-call]
+            allocated, reserved = torch.cuda.memory_allocated(), torch.cuda.memory_reserved()
+        if reserved:
             yield GaugeMetricFamily(
                 "dli_gpu_memory_allocated_bytes",
-                "PyTorch-allocated GPU memory",
-                value=float(torch.cuda.memory_allocated()),
+                "PyTorch-allocated GPU memory of the engine",
+                value=float(allocated),
             )
             yield GaugeMetricFamily(
                 "dli_gpu_memory_reserved_bytes",
-                "PyTorch-reserved GPU memory (allocator cache included)",
-                value=float(torch.cuda.memory_reserved()),
+                "PyTorch-reserved GPU memory of the engine (allocator cache included)",
+                value=float(reserved),
             )
 
 
 class ServerMetrics:
     """All metrics for one server instance."""
 
-    def __init__(self, engine: AsyncEngine) -> None:
+    def __init__(self, engine: EngineClient) -> None:
         r = CollectorRegistry()
         self.registry = r
         self.requests = Counter(

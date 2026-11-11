@@ -88,6 +88,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "captured at start-up); steps that fit no bucket run eagerly. CUDA devices only. Off by "
         "default",
     )
+    p.add_argument(
+        "--engine-process",
+        action="store_true",
+        help="run the engine in its own process, so its Python work never waits for the HTTP "
+        "event loop's GIL (the API process then does not load the weights)",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -153,6 +159,7 @@ def build(args: argparse.Namespace) -> ServerBundle:
         admin_token=os.environ.get(args.admin_token_env) or None,
         enable_prefix_caching=not args.no_prefix_caching,
         cuda_graphs=BENCHMARK_SHAPES if args.cuda_graphs else None,
+        engine_process=args.engine_process,
     )
     return build_server(model_dir, opts)
 
@@ -164,10 +171,12 @@ def warm_up(bundle: ServerBundle) -> None:
     (so the capture neither delays the first request nor runs next to other GPU work). A bucket
     that fails its memory check or capture is logged and its steps run eagerly.
     """
+    if bundle.model is None:
+        return  # the engine process loads, warms up and captures on its own before it is ready
     with torch.inference_mode():
         ids = torch.tensor([1, 2, 3], device=bundle.model.inv_freq.device)
         bundle.model(ids, torch.arange(3, device=ids.device), last_token_only=True)
-    graphs = bundle.engine.decode_graphs
+    graphs = getattr(bundle.engine, "decode_graphs", None)
     if graphs is not None:
         with torch.inference_mode():
             graphs.capture()
@@ -217,6 +226,9 @@ def main(argv: list[str] | None = None) -> int:
     bundle = build(args)
     warm_up(bundle)
     bundle.engine.start()
+    info = getattr(bundle.engine, "startup_info", None)
+    if info:
+        log.info("engine process ready: %s", info)
     log.info(
         "serving %s on http://%s:%d (admin http://%s:%d), KV pool %d blocks x %d",
         bundle.config.model_name,

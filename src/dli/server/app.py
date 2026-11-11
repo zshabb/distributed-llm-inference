@@ -31,7 +31,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from dli.engine import FinishReason, Priority
 from dli.sampling import SamplingParams
 from dli.server.admission import AdmissionConfig, AdmissionController
-from dli.server.async_engine import AsyncEngine, EngineDeadError
+from dli.server.async_engine import EngineClient, EngineDeadError
 from dli.server.auth import ApiKeyAuth, AuthMiddleware
 from dli.server.limits import BodySizeLimit
 from dli.server.metrics import ServerMetrics
@@ -130,7 +130,7 @@ _FINISH = {
 
 
 def create_app(
-    engine: AsyncEngine,
+    engine: EngineClient,
     codec: TextCodec,
     config: ServerConfig,
     admission: AdmissionConfig | None = None,

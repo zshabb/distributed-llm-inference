@@ -17,6 +17,14 @@
       "extra_args": [
         "--cuda-graphs"
       ]
+    },
+    "dli-graphs-proc": {
+      "kind": "dli",
+      "block_size": 16,
+      "extra_args": [
+        "--cuda-graphs",
+        "--engine-process"
+      ]
     }
   },
   "models": [
@@ -24,13 +32,17 @@
       "name": "qwen2.5-0.5b",
       "repo": "Qwen/Qwen2.5-0.5B-Instruct",
       "backends": [
-        "dli-graphs"
+        "dli-graphs",
+        "dli-graphs-proc"
       ],
       "experiments": [
         "closed-fixed"
       ],
       "overrides": {
         "dli-graphs": {
+          "num_blocks": 100416
+        },
+        "dli-graphs-proc": {
           "num_blocks": 100416
         }
       }
@@ -55,7 +67,8 @@
       ],
       "n_per_concurrency": 4,
       "backends": [
-        "dli-graphs"
+        "dli-graphs",
+        "dli-graphs-proc"
       ]
     }
   }

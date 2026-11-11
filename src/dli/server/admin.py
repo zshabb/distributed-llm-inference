@@ -16,12 +16,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
-from dli.server.async_engine import AsyncEngine
+from dli.server.async_engine import EngineClient
 from dli.server.metrics import ServerMetrics
 
 
 def create_admin_app(
-    api_app: FastAPI, engine: AsyncEngine, metrics: ServerMetrics, token: str | None = None
+    api_app: FastAPI, engine: EngineClient, metrics: ServerMetrics, token: str | None = None
 ) -> FastAPI:
     admin = FastAPI(title="dli-admin", docs_url=None, redoc_url=None)
 
