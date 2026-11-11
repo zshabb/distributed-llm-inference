@@ -23,9 +23,11 @@ from typing import Any
 
 import httpx
 
-# vLLM v0.32.0 (2026-10-18), x86_64 CUDA 12.9 build: runs on the host driver (CUDA <= 13.0).
+# vLLM v0.32.0 (2026-10-18), x86_64 default build: torch 2.13.0+cu130 (CUDA 13.0), which the
+# host driver (580, CUDA 13.0) supports. The CUDA 12.9 variant of the same release was tried first
+# and cannot start: its torchcodec needs libnvrtc.so.13, which that image does not ship.
 VLLM_IMAGE = (
-    "vllm/vllm-openai@sha256:be7326dd2f0731b3c49bd7c09975b46323733dcac74757aa5d5ada60acdee217"
+    "vllm/vllm-openai@sha256:6ee133356d49ed24cee03dd0cda3d3980279a11c107ce3e752c89e76540f41c9"
 )
 
 DLI_METRICS = (
