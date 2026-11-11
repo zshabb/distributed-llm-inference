@@ -26,6 +26,7 @@ from torch.profiler import ProfilerActivity, profile
 
 from dli import envinfo
 from dli.engine import LLMEngine, SchedulerConfig
+from dli.engine.cuda_graph import BENCHMARK_SHAPES
 from dli.kv.paged_store import PagedKVStore
 from dli.model import hub, load_model
 from dli.sampling import SamplingParams
@@ -51,7 +52,7 @@ def run(
         block_size=16,
         config=SchedulerConfig(max_num_seqs=batch, max_num_batched_tokens=2048),
         batched_decode=attention == "batched",
-        cuda_graph=(16, 16) if cuda_graph else None,  # the M6 proof-of-concept shape
+        cuda_graphs=BENCHMARK_SHAPES if cuda_graph else None,
     )
     g = torch.Generator().manual_seed(0)
     for i in range(batch):
@@ -100,21 +101,8 @@ def run(
     kv = batch * ctx * PagedKVStore.bytes_per_block(cfg, 16, torch.bfloat16) / 16
     floor_ms = (weights + kv) / (bandwidth_gbs * 1e9) * 1e3
     step_ms = statistics.mean(s.total_s for s in st) * 1e3
-    graph = getattr(eng.runner, "decode_graph", None)
-    graph_stats = None
-    if graph is not None:
-        gs = graph.stats
-        graph_stats = {
-            "status": gs.status,
-            "batch": gs.batch,
-            "width_blocks": gs.width,
-            "capture_s": round(gs.capture_s, 3),
-            "free_before_capture_mib": gs.free_before >> 20,
-            "eager_peak_mib": round(gs.eager_peak / 2**20, 1),
-            "graph_pool_mib": round(gs.graph_pool / 2**20, 1),
-            "replays": gs.replays,
-            "fallbacks": gs.fallbacks,
-        }
+    graphs = getattr(eng.runner, "decode_graphs", None)
+    graph_stats = graphs.summary() if graphs is not None else None
     return {
         "cuda_graph": graph_stats,
         "input_len": input_len,
@@ -165,7 +153,9 @@ def main() -> None:
     )
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument(
-        "--cuda-graph", action="store_true", help="enable the batch-16 x 16-block decode graph"
+        "--cuda-graph",
+        action="store_true",
+        help="enable the decode CUDA graph buckets (BENCHMARK_SHAPES)",
     )
     ap.add_argument("--input-len", type=int, default=256)
     ap.add_argument(

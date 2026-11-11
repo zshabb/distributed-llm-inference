@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 
 import torch
 
-from dli.engine.cuda_graph import DecodeGraph
+from dli.engine.cuda_graph import DecodeGraphs, Shape
 from dli.engine.request import FinishReason, Priority, Request
 from dli.engine.runner import ModelRunner, Runner
 from dli.engine.scheduler import Scheduler, SchedulerConfig
@@ -99,7 +99,7 @@ class LLMEngine:
         eviction_policy: str = "lru",
         enable_prefix_caching: bool = True,
         batched_decode: bool = True,
-        cuda_graph: tuple[int, int] | None = None,
+        cuda_graphs: Sequence[Shape] | None = None,
         eos_token_ids: Collection[int] = (),
         seed: int = 0,
     ) -> LLMEngine:
@@ -111,21 +111,19 @@ class LLMEngine:
             eviction_policy=eviction_policy,
             enable_prefix_caching=enable_prefix_caching,
         )
-        # With a decode CUDA graph the store holds one extra block, invisible to the block manager
+        # With decode CUDA graphs the store holds one extra block, invisible to the block manager
         # (ids 0..num_blocks-1): padded graph rows write there, never into real KV.
-        extra = 1 if cuda_graph is not None else 0
+        extra = 1 if cuda_graphs else 0
         store = PagedKVStore.for_model(
             model.config, num_blocks + extra, block_size, dtype=dtype, device=device
         )
-        graph = None
-        if cuda_graph is not None:
+        graphs = None
+        if cuda_graphs:
             if not batched_decode:
-                raise ValueError("cuda_graph requires batched_decode")
-            graph = DecodeGraph(
-                model, store, batch=cuda_graph[0], width=cuda_graph[1], scratch_block=num_blocks
-            )
+                raise ValueError("cuda_graphs require batched_decode")
+            graphs = DecodeGraphs(model, store, shapes=cuda_graphs, scratch_block=num_blocks)
         return cls(
-            ModelRunner(model, bm, store, batched_decode=batched_decode, decode_graph=graph),
+            ModelRunner(model, bm, store, batched_decode=batched_decode, decode_graphs=graphs),
             bm,
             config,
             eos_token_ids=eos_token_ids,
