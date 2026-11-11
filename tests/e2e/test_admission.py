@@ -122,6 +122,9 @@ def test_deadline_exceeded_while_queued_aborts_the_request(make_server: ServerFa
     holder.start()
     try:
         assert started.wait(10)
+        # Simulate an optimistic prediction (it is an estimate): the request is admitted, and the
+        # deadline must still be enforced while it waits for the busy slot.
+        live.bundle.app.state.admission.predicted_ttft_s = lambda snap, n: None
         with live.client() as c:
             t0 = time.perf_counter()
             req = {"model": MODEL, "prompt": "q", "max_tokens": 5, "stream": True}
@@ -133,6 +136,27 @@ def test_deadline_exceeded_while_queued_aborts_the_request(make_server: ServerFa
         assert 0.3 <= dt < 1.5
         engine = live.bundle.engine
         wait_for(lambda: engine.snapshot.num_waiting == 0)  # aborted, not left queued
+    finally:
+        stop.set()
+        holder.join(30)
+
+
+def test_busy_slot_is_predicted_and_rejected_up_front(make_server: ServerFactory) -> None:
+    """The step model sees that the only sequence slot is held by a long request."""
+    live = make_server(scheduler=ONE_SLOT, num_blocks=BIG_POOL)
+    started, stop = threading.Event(), threading.Event()
+    holder = threading.Thread(target=_hold_slot, args=(live, started, stop))
+    holder.start()
+    try:
+        assert started.wait(10)
+        with live.client() as c:
+            t0 = time.perf_counter()
+            req = {"model": MODEL, "prompt": "q", "max_tokens": 5}
+            r = c.post("/v1/completions", headers={"X-Deadline-Ms": "300"}, json=req)
+            dt = time.perf_counter() - t0
+        assert r.status_code == 429, r.text
+        assert r.json()["error"]["code"] == "deadline_unattainable"
+        assert dt < 0.25  # decided at admission, without waiting for the deadline
     finally:
         stop.set()
         holder.join(30)

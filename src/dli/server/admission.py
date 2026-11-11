@@ -5,14 +5,18 @@ Checks, in order, each returning a fast rejection (no engine work done):
 1. **Draining** (shutdown in progress) -> 503 ``draining``.
 2. **In-flight cap** (HTTP-level concurrency, the backpressure bound) -> 429 ``server_busy``.
 3. **Queue cap** (requests waiting in the engine) -> 429 ``queue_full``.
-4. **Deadline** (``X-Deadline-Ms``): predicted time-to-first-token =
-   (prefill tokens queued ahead + this prompt) / measured prefill rate + one step. If that exceeds
-   the deadline, the request is rejected now (429 ``deadline_unattainable``) instead of failing
-   after waiting. Without rate data yet (cold start) the request is admitted, and the deadline is
-   still enforced while it waits (see ``create_app``: abort + 429 ``deadline_exceeded``).
+4. **Deadline** (``X-Deadline-Ms``): predicted time-to-first-token, in engine steps times the
+   measured step time (see :meth:`AdmissionController.predicted_ttft_s`). If that exceeds the
+   deadline, the request is rejected now (429 ``deadline_unattainable``) instead of failing after
+   waiting. Without a measured step time yet (cold start) the request is admitted, and the deadline
+   is still enforced while it waits (see ``create_app``: abort + 429 ``deadline_exceeded``).
 
 ``Retry-After`` is an honest estimate of when capacity frees up (rounded up, at least 1 s).
-The prediction is a queueing approximation, not a guarantee. Its accuracy is measured in M5.
+The prediction is a queueing approximation, not a guarantee. M5 measured the first version
+(queued prefill tokens / an EWMA of prefill tokens per forward second) over-predicting by 10-50x
+on a decode-heavy GPU engine: a step that admits one short prompt next to 60 decoding sequences
+takes as long as the decode work, so it "measured" ~200 prefill tokens/s and rejected about half
+of the requests whose real TTFT was ~0.1 s. The step model below follows how the scheduler works.
 """
 
 from __future__ import annotations
@@ -49,11 +53,27 @@ class AdmissionController:
         self.inflight = 0
 
     def predicted_ttft_s(self, snap: EngineSnapshot, prompt_tokens: int) -> float | None:
-        if snap.prefill_tokens_per_s <= 0:
+        """Steps until this prompt can produce its first token, times the measured step time.
+
+        * Prefill: each step has ``max_num_batched_tokens`` of budget, of which running requests
+          take one decode token each; queued prompt tokens (including this one's) drain through
+          the rest.
+        * Slots: with ``k`` requests waiting and ``free`` sequence slots, this request also needs
+          ``k + 1 - free`` running requests to finish; the ``j``-th soonest finishes after at most
+          its remaining tokens (one per step).
+        * Plus the step that produces the first token.
+        """
+        if snap.step_seconds <= 0 or snap.max_num_batched_tokens <= 0:
             return None
-        return (snap.waiting_prefill_tokens + prompt_tokens) / snap.prefill_tokens_per_s + (
-            snap.step_seconds
-        )
+        capacity = max(1, snap.max_num_batched_tokens - snap.num_running)
+        prefill_steps = math.ceil((snap.waiting_prefill_tokens + prompt_tokens) / capacity)
+        slot_steps = 0
+        need = snap.num_waiting + 1 - max(0, snap.max_num_seqs - snap.num_running)
+        remaining = snap.running_remaining_tokens
+        if need > 0 and remaining:
+            rounds, idx = divmod(need - 1, len(remaining))  # more waiters than running: queue again
+            slot_steps = remaining[idx] + rounds * remaining[-1]
+        return (max(prefill_steps, slot_steps) + 1) * snap.step_seconds
 
     def check(
         self,
