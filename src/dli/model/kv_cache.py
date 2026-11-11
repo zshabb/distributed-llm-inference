@@ -169,3 +169,36 @@ class BatchedDecodeKV:
         """``[B, 1, 1, max_keys]`` boolean mask of valid key positions."""
         keys = torch.arange(max_keys, device=seq_lens.device)
         return (keys[None, :] < seq_lens[:, None])[:, None, None, :]
+
+
+@dataclass(frozen=True, slots=True)
+class MixedKV:
+    """A step that mixes single-token rows with multi-token prefill chunks (M6).
+
+    The flattened batch holds the single-token rows first, attended in one batched call exactly as
+    in a pure decode step (``decode``), then the prefill ``segments``, attended per sequence as in
+    :class:`BatchedKV`, at offsets starting from ``decode.batch_size``. Dense layers run once over
+    everything.
+
+    Without this, one prefill chunk in a step sent every decode row of that step through the
+    per-sequence path: at concurrency 64 on the A5000 such mixed steps took ~206 ms (vs 53 ms for a
+    pure 2,048-token prefill) and 61% of closed-loop wall time.
+    """
+
+    decode: BatchedDecodeKV
+    segments: tuple[Segment, ...]
+
+    def validate(self, num_tokens: int) -> None:
+        expected = self.decode.batch_size
+        for seg in self.segments:
+            if seg.offset != expected or seg.length <= 0:
+                raise ValueError("prefill segments must follow the decode rows contiguously")
+            expected += seg.length
+        if expected != num_tokens:
+            raise ValueError(f"mixed batch covers {expected} tokens, batch has {num_tokens}")
+
+    def advance(self) -> None:
+        self.decode.advance()
+        for seg in self.segments:
+            if seg.cache is not None:
+                seg.cache.advance(seg.length)
