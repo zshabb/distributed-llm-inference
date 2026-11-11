@@ -1,0 +1,62 @@
+{
+  "name": "m6-a5000-serving",
+  "description": "HTTP serving-overhead work (M6, owner-approved 2026-11-11): the native server with --cuda-graphs, closed-fixed 256/128 at concurrency 16 and 64, 3 repetitions (server restarted per repetition), M6 baseline settings. Variants are added as server flags so they run in the same session.",
+  "label": "GPU-A5000x1-runpod",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "reps": 3,
+  "port": 8300,
+  "max_num_seqs": 128,
+  "max_num_batched_tokens": 2048,
+  "saturation_ttft_s": 10.0,
+  "request_timeout_s": 900,
+  "backends": {
+    "dli-graphs": {
+      "kind": "dli",
+      "block_size": 16,
+      "extra_args": [
+        "--cuda-graphs"
+      ]
+    }
+  },
+  "models": [
+    {
+      "name": "qwen2.5-0.5b",
+      "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+      "backends": [
+        "dli-graphs"
+      ],
+      "experiments": [
+        "closed-fixed"
+      ],
+      "overrides": {
+        "dli-graphs": {
+          "num_blocks": 100416
+        }
+      }
+    }
+  ],
+  "experiments": {
+    "closed-fixed": {
+      "description": "input 256, output 128 (exact); concurrency 16 and 64.",
+      "workload": {
+        "type": "synthetic",
+        "input": {
+          "fixed": 256
+        },
+        "output": {
+          "fixed": 128
+        }
+      },
+      "mode": "closed",
+      "points": [
+        16,
+        64
+      ],
+      "n_per_concurrency": 4,
+      "backends": [
+        "dli-graphs"
+      ]
+    }
+  }
+}

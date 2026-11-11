@@ -128,3 +128,31 @@ def test_snapshot_tracks_progress(aengine: AsyncEngine) -> None:
     assert snap.total_steps > 0
     assert snap.prefill_tokens_per_s > 0
     assert snap.kv_total_blocks == 128
+
+
+def test_one_event_loop_wakeup_per_step_not_per_token(aengine: AsyncEngine) -> None:
+    """Outputs of a step reach the loop in one call_soon_threadsafe, whatever the batch size."""
+
+    async def main() -> tuple[list[tuple[list[int], object]], int]:
+        loop = asyncio.get_running_loop()
+        calls = {"n": 0}
+        real = loop.call_soon_threadsafe
+
+        def counting(*a: object, **k: object) -> object:
+            calls["n"] += 1
+            return real(*a, **k)  # type: ignore[arg-type]
+
+        loop.call_soon_threadsafe = counting  # type: ignore[method-assign]
+        results = await asyncio.gather(
+            *(_collect(aengine, f"w{i}", [i, i + 1], 20) for i in range(8))
+        )
+        return results, calls["n"]
+
+    steps_before = aengine.snapshot.total_steps
+    results, wakeups = asyncio.run(main())
+    steps = aengine.snapshot.total_steps - steps_before
+    for i, (toks, _) in enumerate(results):
+        assert toks == reference([i, i + 1], 20)
+    tokens = 8 * 20
+    assert wakeups <= steps + 1, (wakeups, steps)  # one per step (+ the final publish race)
+    assert wakeups < tokens // 4, (wakeups, tokens)

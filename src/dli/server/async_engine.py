@@ -78,6 +78,11 @@ class EngineSnapshot:
     error: str | None = None
 
 
+def _put_all(items: list[tuple[asyncio.Queue[EngineEvent], EngineEvent]]) -> None:
+    for events, event in items:
+        events.put_nowait(event)
+
+
 @dataclass
 class _Pending:
     loop: asyncio.AbstractEventLoop
@@ -212,8 +217,7 @@ class AsyncEngine:
                 if eng.has_unfinished():
                     outputs = eng.step()
                     self._account(eng)
-                    for out in outputs:
-                        self._dispatch(out)
+                    self._deliver(outputs)
                 self._publish(eng)
         except Exception as exc:  # crash: fail everyone loudly, never hang clients
             self._dead = f"{type(exc).__name__}: {exc}"
@@ -250,12 +254,28 @@ class AsyncEngine:
             except queue.Empty:
                 return True
 
-    def _dispatch(self, out: RequestOutput) -> None:
-        self._c.generated += len(out.new_token_ids)
-        self._send(
-            out.request_id,
-            EngineEvent(tuple(out.new_token_ids), out.finished, out.finish_reason),
-        )
+    def _deliver(self, outputs: list[RequestOutput]) -> None:
+        """Hand one step's outputs to the event loop(s) in ONE wake-up per loop.
+
+        A wake-up (``call_soon_threadsafe``) writes to the loop's self-pipe, a system call that
+        releases the GIL; re-acquiring it can wait for the loop thread's switch interval. Done per
+        token, this cost ~74 us per token of engine-thread time at concurrency 64 on the A5000
+        (2.4 s of a 12.6 s run); per step it is one call for up to 64 tokens.
+        """
+        batches: dict[
+            asyncio.AbstractEventLoop, list[tuple[asyncio.Queue[EngineEvent], EngineEvent]]
+        ]
+        batches = {}
+        for out in outputs:
+            self._c.generated += len(out.new_token_ids)
+            pending = self._pending.get(out.request_id)
+            if pending is None:
+                continue  # client already gone (aborted); nothing to deliver
+            event = EngineEvent(tuple(out.new_token_ids), out.finished, out.finish_reason)
+            batches.setdefault(pending.loop, []).append((pending.events, event))
+        for loop, items in batches.items():
+            with contextlib.suppress(RuntimeError):  # event loop closed during shutdown
+                loop.call_soon_threadsafe(_put_all, items)
 
     def _send(self, request_id: str, event: EngineEvent) -> None:
         pending = self._pending.get(request_id)
