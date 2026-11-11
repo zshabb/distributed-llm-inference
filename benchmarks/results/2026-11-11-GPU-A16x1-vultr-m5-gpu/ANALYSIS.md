@@ -28,7 +28,7 @@ TPOT 17 ms native, 7 ms vLLM.
 |---|---|
 | **AC3 (GPU)**: native ≥ 5× HF static batching at c=16 `[TARGET]` | **Failed: 0.33×** (Qwen2.5-0.5B), 0.41× (1.5B) |
 | **AC4**: vLLM comparison on identical GPU/model/workload, whatever the gap | **Done** for the ≤ 2B bf16 ladder (Qwen2.5-3B replaced by SmolLM2-1.7B for licensing) and Qwen2.5-7B-AWQ on vLLM; the 80 GB part needs a rental (out of scope). vLLM is 1.7–9.2× faster |
-| **AC5**: at 2× saturation, no crash, rejections < 50 ms, admitted TTFT P99 ≤ 2 s | See §5: this run did **not** meet the 2× condition; re-run in `2026-11-11-GPU-A16x1-vultr-m5-gpu-ac5/` |
+| **AC5**: at 2× saturation, no crash, rejections < 50 ms, admitted TTFT P99 ≤ 2 s | This run did **not** meet the 2× condition (§5). Re-run at ~4× saturation (`../2026-11-11-GPU-A16x1-vultr-m5-gpu-ac5/`): no crash ✔, admitted TTFT P99 1.98 s ✔, rejection latency P99 2.01 s ✘ → **failed** |
 
 ## 1. Why the native engine is slow (profiled)
 `2026-11-11-GPU-A16x1-vultr-m5-engine-profile/` (torch.profiler, Qwen2.5-0.5B, steady-state decode, profiler
