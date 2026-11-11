@@ -23,8 +23,9 @@ gpu_ssh "$remote_cmd"
 rc=$?
 set -e
 
-mkdir -p "$REPO_ROOT/benchmarks/results"
-gpu_rsync -az "$GPU_HOST:$GPU_RESULTS_DIR/" "$REPO_ROOT/benchmarks/results/" 2>/dev/null || true
+# Committed results are never overwritten by the host's copies (see pull_results.sh).
+RSYNC_RSH="ssh ${SSH_OPTS[*]}" "$GPU_SCRIPT_DIR/pull_results.sh" \
+  "$GPU_HOST:$GPU_RESULTS_DIR" "$REPO_ROOT" || echo "warning: pulling results failed" >&2
 
 end_epoch=$(date -u +%s)
 dur=$((end_epoch - start_epoch))

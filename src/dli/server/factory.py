@@ -9,6 +9,7 @@ import torch
 from fastapi import FastAPI
 
 from dli.engine import LLMEngine, SchedulerConfig
+from dli.engine.cuda_graph import Shape
 from dli.model import LlamaForCausalLM, load_model
 from dli.server.admin import create_admin_app
 from dli.server.admission import AdmissionConfig
@@ -45,6 +46,7 @@ class BuildOptions:
     max_body_bytes: int = 2 * 1024 * 1024
     admin_token: str | None = None
     enable_prefix_caching: bool = True
+    cuda_graphs: tuple[Shape, ...] | None = None  # decode CUDA graph buckets (None: eager only)
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -61,6 +63,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
         config=opts.scheduler,
         eos_token_ids=codec.eos_token_ids,
         enable_prefix_caching=opts.enable_prefix_caching,
+        cuda_graphs=opts.cuda_graphs,
     )
     aengine = AsyncEngine(engine)
     config = ServerConfig(

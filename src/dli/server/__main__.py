@@ -23,6 +23,7 @@ import torch
 import uvicorn
 
 from dli.engine import SchedulerConfig
+from dli.engine.cuda_graph import BENCHMARK_SHAPES
 from dli.kv.paged_store import PagedKVStore
 from dli.model import hub, load_config
 from dli.server.admission import AdmissionConfig
@@ -80,6 +81,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         action="store_true",
         help="disable KV prefix reuse across requests (for ablations)",
     )
+    p.add_argument(
+        "--cuda-graphs",
+        action="store_true",
+        help="replay decode steps through CUDA graphs (buckets of 16/64 sequences x 24 KV blocks, "
+        "captured at start-up); steps that fit no bucket run eagerly. CUDA devices only. Off by "
+        "default",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -109,6 +117,8 @@ def build(args: argparse.Namespace) -> ServerBundle:
             "authentication is on by default: pass --api-keys-file (or --no-auth "
             "for local development on a loopback host)"
         )
+    if args.cuda_graphs and not args.device.startswith("cuda"):
+        raise SystemExit("--cuda-graphs needs a CUDA --device")
     model_dir = Path(args.model)
     if not model_dir.is_dir():
         model_dir = hub.download(args.model)  # pinned revisions only (KeyError if unknown)
@@ -142,15 +152,26 @@ def build(args: argparse.Namespace) -> ServerBundle:
         auth=None if args.no_auth else ApiKeyAuth.from_file(args.api_keys_file),
         admin_token=os.environ.get(args.admin_token_env) or None,
         enable_prefix_caching=not args.no_prefix_caching,
+        cuda_graphs=BENCHMARK_SHAPES if args.cuda_graphs else None,
     )
     return build_server(model_dir, opts)
 
 
 def warm_up(bundle: ServerBundle) -> None:
-    """One short forward before accepting traffic: warms kernels, surfaces load failures early."""
+    """One short forward before accepting traffic: warms kernels, surfaces load failures early.
+
+    With ``--cuda-graphs`` the decode graphs are captured here too, before the engine thread starts
+    (so the capture neither delays the first request nor runs next to other GPU work). A bucket
+    that fails its memory check or capture is logged and its steps run eagerly.
+    """
     with torch.inference_mode():
         ids = torch.tensor([1, 2, 3], device=bundle.model.inv_freq.device)
         bundle.model(ids, torch.arange(3, device=ids.device), last_token_only=True)
+    graphs = bundle.engine.decode_graphs
+    if graphs is not None:
+        with torch.inference_mode():
+            graphs.capture()
+        log.info("decode CUDA graphs: %s", graphs.summary())
 
 
 async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:

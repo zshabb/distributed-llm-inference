@@ -39,6 +39,10 @@ DLI_METRICS = (
     "dli_engine_waiting_requests",
     "dli_prefix_cache_hit_ratio",
     "dli_engine_preemptions_total",
+    "dli_engine_steps_total",
+    "dli_cuda_graph_replays_total",
+    "dli_cuda_graph_fallbacks_total",
+    "dli_cuda_graph_memory_bytes",
 )
 VLLM_METRICS = (
     "vllm:kv_cache_usage_perc",

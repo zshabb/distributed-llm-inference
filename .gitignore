@@ -27,6 +27,8 @@ models/
 
 # Raw benchmark scratch output (summaries and small raw data under benchmarks/results/ ARE committed)
 benchmarks/results/**/scratch/
+# Host copies of committed results that differ from them (scripts/gpu/pull_results.sh): for review
+benchmarks/results/.pod-conflicts/
 
 # Host security posture (sshd/firewall/listening sockets) stays local: never in a public repository.
 benchmarks/results/**/inspect.txt
