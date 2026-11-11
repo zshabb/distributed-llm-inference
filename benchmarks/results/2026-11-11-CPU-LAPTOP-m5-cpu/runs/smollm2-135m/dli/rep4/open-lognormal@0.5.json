@@ -1,0 +1,106 @@
+{
+ "mode": "open",
+ "rate": 0.5,
+ "seed": 4050,
+ "n": 22,
+ "requests": 22,
+ "ok": 22,
+ "rejected": 0,
+ "error": 0,
+ "timeout": 0,
+ "completion_rate": 1.0,
+ "span_s": 43.145021723001264,
+ "output_tokens": 1512,
+ "output_tok_per_s": 35.04459934467781,
+ "completed_req_per_s": 0.5099081915230899,
+ "ttft_s": {
+  "n": 22,
+  "mean": 0.6017629582941338,
+  "p50": 0.5907558999720233,
+  "p90": 0.9209958781862974,
+  "p95": 0.9755493270234132,
+  "p99": 0.9931345375760121,
+  "max": 0.9971583171451748
+ },
+ "e2e_s": {
+  "n": 22,
+  "mean": 12.846359467521665,
+  "p50": 13.816722030451606,
+  "p90": 18.07490855477798,
+  "p95": 18.47833857650801,
+  "p99": 19.722925629719786,
+  "max": 20.048654824986166
+ },
+ "tpot_s": {
+  "n": 22,
+  "mean": 0.18253764273741444,
+  "p50": 0.17787940886963455,
+  "p90": 0.2398785886333921,
+  "p95": 0.24117350487844497,
+  "p99": 0.24235752652238868,
+  "max": 0.24265675219049582
+ },
+ "itl_s": {
+  "n": 1488,
+  "mean": 0.18101992916196052,
+  "p50": 0.1497898104989872,
+  "p90": 0.24683231819872153,
+  "p95": 0.43077447859977835,
+  "p99": 0.8559640563876746,
+  "max": 0.9184251189981296
+ },
+ "rejection_latency_s": null,
+ "client_lag_s": {
+  "n": 22,
+  "mean": 0.0010953919306656264,
+  "p50": 0.0011259117437205646,
+  "p90": 0.0018257817503759995,
+  "p95": 0.0018835931545922336,
+  "p99": 0.0021340066675573153,
+  "max": 0.00220023419181814
+ },
+ "experiment": "open-lognormal",
+ "point": 0.5,
+ "tag": "",
+ "rep": 4,
+ "backend": "dli",
+ "model": "smollm2-135m",
+ "workload": {
+  "n": 22,
+  "input_len": {
+   "kind": "lognormal",
+   "value": 128,
+   "sigma": 0.6,
+   "lo": 16,
+   "hi": 512
+  },
+  "output_len": {
+   "kind": "lognormal",
+   "value": 64,
+   "sigma": 0.6,
+   "lo": 8,
+   "hi": 256
+  },
+  "vocab": 49152,
+  "seed": 4050
+ },
+ "resources": {
+  "dli_engine_preemptions_total_max": 0.0,
+  "dli_engine_preemptions_total_mean": 0.0,
+  "dli_engine_running_requests_max": 12.0,
+  "dli_engine_running_requests_mean": 6.235294117647059,
+  "dli_engine_waiting_requests_max": 0.0,
+  "dli_engine_waiting_requests_mean": 0.0,
+  "dli_kv_blocks_total_max": 728.0,
+  "dli_kv_blocks_total_mean": 728.0,
+  "dli_kv_blocks_used_max": 158.0,
+  "dli_kv_blocks_used_mean": 79.36470588235294,
+  "dli_prefix_cache_hit_ratio_max": 0.0,
+  "dli_prefix_cache_hit_ratio_mean": 0.0,
+  "rss_max": 1475137536.0,
+  "rss_mean": 1475089685.0823529,
+  "samples": 85
+ },
+ "started_unix": 1794361200.4046776,
+ "headers": {}
+}

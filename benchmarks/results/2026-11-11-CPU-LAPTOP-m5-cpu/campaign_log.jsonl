@@ -1,0 +1,45 @@
+{"event": "start", "unix": 1794359340.4891772, "revision": "d6ffccc31386"}
+{"event": "server", "rep": 0, "model": "smollm2-135m", "name": "dli", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --admin-port 8301 --no-auth --device cpu --dtype float32 --max-num-seqs 32 --max-num-batched-tokens 512 --kv-cache-gb 0.5 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 3.1}
+{"event": "point", "file": "smollm2-135m/dli/rep0/closed-fixed@1", "wall_s": 46.718336247999105}
+{"event": "point", "file": "smollm2-135m/dli/rep0/closed-fixed@16", "wall_s": 84.60918246100118}
+{"event": "point", "file": "smollm2-135m/dli/rep0/open-lognormal@0.5", "wall_s": 52.51193369699831}
+{"event": "server", "rep": 0, "model": "smollm2-135m", "name": "hf", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --device cpu --dtype float32 --max-batch 16 --max-wait-ms 20", "startup_s": 6.1}
+{"event": "point", "file": "smollm2-135m/hf/rep0/closed-fixed@1", "wall_s": 40.97015485299926}
+{"event": "point", "file": "smollm2-135m/hf/rep0/closed-fixed@16", "wall_s": 58.75999325999874}
+{"event": "point", "file": "smollm2-135m/hf/rep0/open-lognormal@0.5", "wall_s": 80.70214870999916}
+{"event": "server", "rep": 1, "model": "smollm2-135m", "name": "hf", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --device cpu --dtype float32 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "smollm2-135m/hf/rep1/closed-fixed@1", "wall_s": 40.53220072900149}
+{"event": "point", "file": "smollm2-135m/hf/rep1/closed-fixed@16", "wall_s": 70.19893344799857}
+{"event": "point", "file": "smollm2-135m/hf/rep1/open-lognormal@0.5", "wall_s": 120.51619107399893}
+{"event": "server", "rep": 1, "model": "smollm2-135m", "name": "dli", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --admin-port 8301 --no-auth --device cpu --dtype float32 --max-num-seqs 32 --max-num-batched-tokens 512 --kv-cache-gb 0.5 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 5.1}
+{"event": "point", "file": "smollm2-135m/dli/rep1/closed-fixed@1", "wall_s": 43.02444904500226}
+{"event": "point", "file": "smollm2-135m/dli/rep1/closed-fixed@16", "wall_s": 80.40696614599801}
+{"event": "point", "file": "smollm2-135m/dli/rep1/open-lognormal@0.5", "wall_s": 57.37240601300073}
+{"event": "server", "rep": 2, "model": "smollm2-135m", "name": "dli", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --admin-port 8301 --no-auth --device cpu --dtype float32 --max-num-seqs 32 --max-num-batched-tokens 512 --kv-cache-gb 0.5 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 3.0}
+{"event": "point", "file": "smollm2-135m/dli/rep2/closed-fixed@1", "wall_s": 43.53179203899708}
+{"event": "point", "file": "smollm2-135m/dli/rep2/closed-fixed@16", "wall_s": 89.59938448700268}
+{"event": "point", "file": "smollm2-135m/dli/rep2/open-lognormal@0.5", "wall_s": 48.59596891399997}
+{"event": "point", "file": "smollm2-135m/dli/rep2/open-lognormal@1", "wall_s": 79.73413991800044}
+{"event": "server", "rep": 2, "model": "smollm2-135m", "name": "hf", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --device cpu --dtype float32 --max-batch 16 --max-wait-ms 20", "startup_s": 5.1}
+{"event": "point", "file": "smollm2-135m/hf/rep2/closed-fixed@1", "wall_s": 44.08479816900217}
+{"event": "point", "file": "smollm2-135m/hf/rep2/closed-fixed@16", "wall_s": 66.9993710939998}
+{"event": "point", "file": "smollm2-135m/hf/rep2/open-lognormal@0.5", "wall_s": 69.71438908700293}
+{"event": "server", "rep": 3, "model": "smollm2-135m", "name": "hf", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --device cpu --dtype float32 --max-batch 16 --max-wait-ms 20", "startup_s": 5.0}
+{"event": "point", "file": "smollm2-135m/hf/rep3/closed-fixed@1", "wall_s": 41.17477423500168}
+{"event": "point", "file": "smollm2-135m/hf/rep3/closed-fixed@16", "wall_s": 61.91337759599992}
+{"event": "point", "file": "smollm2-135m/hf/rep3/open-lognormal@0.5", "wall_s": 87.85441722299947}
+{"event": "server", "rep": 3, "model": "smollm2-135m", "name": "dli", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --admin-port 8301 --no-auth --device cpu --dtype float32 --max-num-seqs 32 --max-num-batched-tokens 512 --kv-cache-gb 0.5 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 3.0}
+{"event": "point", "file": "smollm2-135m/dli/rep3/closed-fixed@1", "wall_s": 43.44012970900076}
+{"event": "point", "file": "smollm2-135m/dli/rep3/closed-fixed@16", "wall_s": 79.70422826599679}
+{"event": "point", "file": "smollm2-135m/dli/rep3/open-lognormal@0.5", "wall_s": 48.36712643300052}
+{"event": "point", "file": "smollm2-135m/dli/rep3/open-lognormal@1", "wall_s": 71.57949129299959}
+{"event": "server", "rep": 4, "model": "smollm2-135m", "name": "dli", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --admin-port 8301 --no-auth --device cpu --dtype float32 --max-num-seqs 32 --max-num-batched-tokens 512 --kv-cache-gb 0.5 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800", "startup_s": 3.0}
+{"event": "point", "file": "smollm2-135m/dli/rep4/closed-fixed@1", "wall_s": 42.65222182800062}
+{"event": "point", "file": "smollm2-135m/dli/rep4/closed-fixed@16", "wall_s": 90.12784041000123}
+{"event": "point", "file": "smollm2-135m/dli/rep4/open-lognormal@0.5", "wall_s": 43.14552117100175}
+{"event": "point", "file": "smollm2-135m/dli/rep4/open-lognormal@1", "wall_s": 87.0375621029998}
+{"event": "server", "rep": 4, "model": "smollm2-135m", "name": "hf", "cmd": "~/src/distributed-llm-inference/.venv/bin/python -m dli.bench.hf_server --model ~/.cache/huggingface/hub/models--HuggingFaceTB--SmolLM2-135M-Instruct/snapshots/12fd25f77366fa6b3b4b768ec3050bf629380bac --served-model-name smollm2-135m --port 8300 --device cpu --dtype float32 --max-batch 16 --max-wait-ms 20", "startup_s": 6.1}
+{"event": "point", "file": "smollm2-135m/hf/rep4/closed-fixed@1", "wall_s": 44.2733660490012}
+{"event": "point", "file": "smollm2-135m/hf/rep4/closed-fixed@16", "wall_s": 60.32189572199786}
+{"event": "point", "file": "smollm2-135m/hf/rep4/open-lognormal@0.5", "wall_s": 69.13538809400052}
+{"event": "end", "unix": 1794361514.51512}
