@@ -39,8 +39,13 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/CompletionOrStream" }
         "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/ModelNotFound" }
+        "413": { $ref: "#/components/responses/TooLarge" }
         "429": { $ref: "#/components/responses/Overloaded" }
+        "500": { $ref: "#/components/responses/ServerError" }
         "503": { $ref: "#/components/responses/Unavailable" }
+        "504": { $ref: "#/components/responses/Timeout" }
   /v1/chat/completions:
     post:
       operationId: createChatCompletion
@@ -57,8 +62,13 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/CompletionOrStream" }
         "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/ModelNotFound" }
+        "413": { $ref: "#/components/responses/TooLarge" }
         "429": { $ref: "#/components/responses/Overloaded" }
+        "500": { $ref: "#/components/responses/ServerError" }
         "503": { $ref: "#/components/responses/Unavailable" }
+        "504": { $ref: "#/components/responses/Timeout" }
 components:
   parameters:
     Priority:
@@ -114,6 +124,10 @@ components:
             - { type: array, items: { type: string }, maxItems: 4 }
         presence_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
         frequency_penalty: { type: number, minimum: -2, maximum: 2, default: 0 }
+        ignore_eos:
+          type: boolean
+          default: false
+          description: "Extension (vLLM-compatible): ignore EOS and generate exactly max_tokens."
         stream: { type: boolean, default: false }
         stream_options:
           type: object
@@ -180,6 +194,33 @@ components:
         choices: { type: array, items: { $ref: "#/components/schemas/Choice" } }
         usage: { $ref: "#/components/schemas/Usage" }
         x_timing: { $ref: "#/components/schemas/Timing" }
+    ChunkChoice:
+      type: object
+      required: [index, finish_reason]
+      properties:
+        index: { type: integer }
+        text: { type: string, description: "Completions endpoint: the new text (may be empty)" }
+        delta:
+          type: object
+          description: "Chat endpoint: role on the first chunk, then content fragments"
+          properties:
+            role: { const: assistant }
+            content: { type: string }
+        finish_reason: { type: [string, "null"], enum: [stop, length, cancelled, null] }
+    CompletionChunk:
+      type: object
+      description: |
+        One SSE event body. The final event before [DONE] may carry `usage` (and `x_timing`)
+        with an empty `choices` list when `stream_options.include_usage` is true.
+      required: [id, object, created, model, choices]
+      properties:
+        id: { type: string }
+        object: { type: string, enum: [text_completion, chat.completion.chunk] }
+        created: { type: integer }
+        model: { type: string }
+        choices: { type: array, items: { $ref: "#/components/schemas/ChunkChoice" } }
+        usage: { $ref: "#/components/schemas/Usage" }
+        x_timing: { $ref: "#/components/schemas/Timing" }
     Error:
       type: object
       required: [error]
@@ -194,8 +235,9 @@ components:
   responses:
     CompletionOrStream:
       description: |
-        Non-streaming JSON response, or (when `stream: true`) a `text/event-stream` of `data: <chunk JSON>`
-        lines terminated by `data: [DONE]`.
+        Non-streaming JSON response, or (when `stream: true`) a `text/event-stream` of
+        `data: <CompletionChunk JSON>` lines terminated by `data: [DONE]`. A failure after the
+        stream has started is reported in-band as one `data: <Error JSON>` line, then `[DONE]`.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/CompletionResponse" }
@@ -215,6 +257,33 @@ components:
           schema: { $ref: "#/components/schemas/Error" }
     Unavailable:
       description: No model ready, or the server is draining.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Unauthorized:
+      description: Missing or invalid API key (checked before the body is parsed).
+      headers:
+        WWW-Authenticate: { schema: { type: string } }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ModelNotFound:
+      description: The requested model is not served by this server.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    TooLarge:
+      description: Request body exceeds the server limit.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ServerError:
+      description: Internal failure (for example the engine stopped); no partial output is returned.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Timeout:
+      description: Non-streaming request exceeded the server request timeout.
       content:
         application/json:
           schema: { $ref: "#/components/schemas/Error" }

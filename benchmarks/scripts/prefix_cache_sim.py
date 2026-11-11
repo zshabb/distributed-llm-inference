@@ -82,8 +82,9 @@ def make_trace(workload: str, seed: int) -> list[Request]:
 
 
 def replay(trace: list[Request], policy: str, num_blocks: int) -> dict[str, float]:
-    bm = BlockManager(num_blocks, BLOCK_SIZE, eviction_policy=policy, watermark=0.0,
-                      debug_checks=False)  # fmt: skip
+    bm = BlockManager(
+        num_blocks, BLOCK_SIZE, eviction_policy=policy, watermark=0.0, debug_checks=False
+    )
     computed = skipped = 0
     t0 = time.perf_counter()
     for i, req in enumerate(trace):
@@ -127,18 +128,31 @@ def main() -> int:
             for blocks in POOL_SIZES:
                 for policy in ("lru", "cost"):
                     r = replay(trace, policy, blocks)
-                    rows.append({"workload": workload, "seed": seed, "pool_blocks": blocks,
-                                 "policy": policy, **r})  # fmt: skip
-                    print(f"{workload:14s} seed={seed} blocks={blocks:5d} {policy:4s} "
-                          f"hit={r['hit_rate']:.4f}", file=sys.stderr)  # fmt: skip
+                    rows.append(
+                        {
+                            "workload": workload,
+                            "seed": seed,
+                            "pool_blocks": blocks,
+                            "policy": policy,
+                            **r,
+                        }
+                    )
+                    print(
+                        f"{workload:14s} seed={seed} blocks={blocks:5d} {policy:4s} "
+                        f"hit={r['hit_rate']:.4f}",
+                        file=sys.stderr,
+                    )
 
     summary = []
     for workload in ("shared-system", "multi-turn", "scan-polluted"):
         for blocks in POOL_SIZES:
             per_policy = {}
             for policy in ("lru", "cost"):
-                hits = [r["hit_rate"] for r in rows if (r["workload"], r["pool_blocks"],
-                        r["policy"]) == (workload, blocks, policy)]  # fmt: skip
+                hits = [
+                    r["hit_rate"]
+                    for r in rows
+                    if (r["workload"], r["pool_blocks"], r["policy"]) == (workload, blocks, policy)
+                ]
                 per_policy[policy] = (statistics.mean(hits), statistics.stdev(hits))
             deltas = [
                 c["hit_rate"] - lr["hit_rate"]
@@ -151,19 +165,22 @@ def main() -> int:
                 and c["workload"] == workload
                 and c["pool_blocks"] == blocks
             ]
-            summary.append({
-                "workload": workload, "pool_blocks": blocks,
-                "pool_tokens": blocks * BLOCK_SIZE,
-                "lru_hit_mean": round(per_policy["lru"][0], 4),
-                "lru_hit_std": round(per_policy["lru"][1], 4),
-                "cost_hit_mean": round(per_policy["cost"][0], 4),
-                "cost_hit_std": round(per_policy["cost"][1], 4),
-                "paired_delta_mean": round(statistics.mean(deltas), 4),
-                "paired_delta_min": round(min(deltas), 4),
-                "paired_delta_max": round(max(deltas), 4),
-                "seeds_cost_better": sum(d > 0 for d in deltas),
-                "seeds": len(deltas),
-            })  # fmt: skip
+            summary.append(
+                {
+                    "workload": workload,
+                    "pool_blocks": blocks,
+                    "pool_tokens": blocks * BLOCK_SIZE,
+                    "lru_hit_mean": round(per_policy["lru"][0], 4),
+                    "lru_hit_std": round(per_policy["lru"][1], 4),
+                    "cost_hit_mean": round(per_policy["cost"][0], 4),
+                    "cost_hit_std": round(per_policy["cost"][1], 4),
+                    "paired_delta_mean": round(statistics.mean(deltas), 4),
+                    "paired_delta_min": round(min(deltas), 4),
+                    "paired_delta_max": round(max(deltas), 4),
+                    "seeds_cost_better": sum(d > 0 for d in deltas),
+                    "seeds": len(deltas),
+                }
+            )
 
     meta = {
         "evidence_label": "SIM",

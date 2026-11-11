@@ -10,11 +10,22 @@ from dli.model.config import ModelConfig, RopeConfig
 
 def _cfg() -> ModelConfig:
     return ModelConfig(
-        model_type="llama", vocab_size=10, hidden_size=16, intermediate_size=32, num_layers=2,
-        num_heads=4, num_kv_heads=2, head_dim=4, rms_norm_eps=1e-6, max_position_embeddings=64,
-        rope=RopeConfig(theta=10000.0), tie_word_embeddings=False, qkv_bias=False, o_bias=False,
+        model_type="llama",
+        vocab_size=10,
+        hidden_size=16,
+        intermediate_size=32,
+        num_layers=2,
+        num_heads=4,
+        num_kv_heads=2,
+        head_dim=4,
+        rms_norm_eps=1e-6,
+        max_position_embeddings=64,
+        rope=RopeConfig(theta=10000.0),
+        tie_word_embeddings=False,
+        qkv_bias=False,
+        o_bias=False,
         mlp_bias=False,
-    )  # fmt: skip
+    )
 
 
 def test_write_then_gather_round_trips_through_scattered_blocks() -> None:

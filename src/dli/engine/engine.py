@@ -106,9 +106,13 @@ class LLMEngine:
             model.config, num_blocks, block_size, dtype=dtype, device=device
         )
         return cls(
-            ModelRunner(model, bm, store), bm, config, eos_token_ids=eos_token_ids, seed=seed,
+            ModelRunner(model, bm, store),
+            bm,
+            config,
+            eos_token_ids=eos_token_ids,
+            seed=seed,
             device=device,
-        )  # fmt: skip
+        )
 
     # ------------------------------------------------------------------ API
 

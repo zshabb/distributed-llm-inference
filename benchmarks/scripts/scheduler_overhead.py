@@ -53,9 +53,10 @@ def overhead_sweep() -> list[dict[str, float]]:
     for concurrency in (8, 32, 128, 256):
         bm = BlockManager(16384, 16, watermark=0.0, debug_checks=False)
         eng = LLMEngine(
-            NullRunner(bm), bm,
+            NullRunner(bm),
+            bm,
             SchedulerConfig(max_num_seqs=concurrency, max_num_batched_tokens=8192),
-        )  # fmt: skip
+        )
         for i in range(concurrency * 4):
             eng.add_request(
                 f"r{i}", list(range(i % 97, i % 97 + 64)), SamplingParams(max_tokens=64)
@@ -66,21 +67,24 @@ def overhead_sweep() -> list[dict[str, float]]:
         sched_us = [s.schedule_s * 1e6 for s in decode_steps]
         post_us = [s.postprocess_s * 1e6 for s in decode_steps]
         per_seq = [(s.schedule_s + s.postprocess_s) * 1e6 / s.num_seqs for s in decode_steps]
-        results.append({
-            "concurrency": concurrency,
-            "decode_steps": len(decode_steps),
-            "schedule_us_median": round(statistics.median(sched_us), 1),
-            "postprocess_us_median": round(statistics.median(post_us), 1),
-            "overhead_us_per_seq_median": round(statistics.median(per_seq), 2),
-            "overhead_us_per_seq_p95": round(statistics.quantiles(per_seq, n=20)[18], 2),
-        })  # fmt: skip
+        results.append(
+            {
+                "concurrency": concurrency,
+                "decode_steps": len(decode_steps),
+                "schedule_us_median": round(statistics.median(sched_us), 1),
+                "postprocess_us_median": round(statistics.median(post_us), 1),
+                "overhead_us_per_seq_median": round(statistics.median(per_seq), 2),
+                "overhead_us_per_seq_p95": round(statistics.quantiles(per_seq, n=20)[18], 2),
+            }
+        )
     return results
 
 
 def profile_largest(out: Path) -> str:
     bm = BlockManager(16384, 16, watermark=0.0, debug_checks=False)
-    eng = LLMEngine(NullRunner(bm), bm, SchedulerConfig(max_num_seqs=256,
-                                                        max_num_batched_tokens=8192))  # fmt: skip
+    eng = LLMEngine(
+        NullRunner(bm), bm, SchedulerConfig(max_num_seqs=256, max_num_batched_tokens=8192)
+    )
     for i in range(512):
         eng.add_request(f"r{i}", list(range(64)), SamplingParams(max_tokens=64))
     prof = cProfile.Profile()
@@ -117,16 +121,19 @@ def model_observation(
     texts = [json.loads(line) for line in prompts_file.read_text().splitlines()]
     prompts = [
         tok(t["text"], add_special_tokens=False)["input_ids"]
-        for t in texts if t["kind"] == "completion"
-    ][:n_prompts]  # fmt: skip
+        for t in texts
+        if t["kind"] == "completion"
+    ][:n_prompts]
     params = SamplingParams(max_tokens=new_tokens, ignore_eos=True)
     total_out = n_prompts * new_tokens
 
     def run_batched() -> tuple[float, float]:
         eng = LLMEngine.for_model(
-            model, num_blocks=2048, block_size=16,
+            model,
+            num_blocks=2048,
+            block_size=16,
             config=SchedulerConfig(max_num_seqs=n_prompts, max_num_batched_tokens=1024),
-        )  # fmt: skip
+        )
         t0 = time.perf_counter()
         outs = eng.generate(prompts, params)
         dt = time.perf_counter() - t0

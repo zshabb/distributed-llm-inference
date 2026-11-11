@@ -174,6 +174,14 @@ class BlockManager:
         self._seqs: dict[SeqId, _Seq] = {}
         self._stats = BlockManagerStats(num_blocks=num_blocks)
 
+    def bind_to_current_thread(self) -> None:
+        """Hand thread ownership to the calling thread.
+
+        For an explicit hand-off: the manager is built on one thread (e.g. server start-up) and then
+        used exclusively by another (the engine loop). Confinement still holds, to the new owner.
+        """
+        self._owner = threading.get_ident()
+
     # ------------------------------------------------------------------ queries
 
     @property

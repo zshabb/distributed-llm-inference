@@ -9,7 +9,7 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 | M1 | Native Llama-family model + HF weight loading; greedy parity with `transformers` | T0 (fp32 exact) · T2 (bf16 tolerance) | **done** |
 | M2 | Paged KV-cache block manager + prefix sharing | T0 (+ [SIM] policy study) | **done** (branch `feat/m2-paged-kv`) |
 | M3 | Continuous batching, chunked prefill, preemption, cancellation | T0 · T2 | **done** (branch `feat/m3-continuous-batching`) |
-| M4 | OpenAI API server, SSE, admission control, backpressure, metrics | T0 · T2 | not started |
+| M4 | OpenAI API server, SSE, admission control, backpressure, metrics | T0 · T2 | **done** (branch `feat/m4-openai-api`) |
 | M5 | Benchmark harness + baselines (HF static batching; vLLM on A16) | T0 · T2 (Gate B) | not started |
 | M6 | Triton paged-attention decode kernel | T0 interpreter · T2 | not started |
 | M7 | Tensor parallelism | T0 gloo · T3 rental | not started |
@@ -66,5 +66,25 @@ Validation tiers: T0 CPU · T1 simulated · T2 single GPU (Vultr A16) · T3 mult
 - [x] Real-checkpoint engine parity: 100/100 × 2 models in fp32 on CPU and A16 (with preemption + chunking)
 - [x] bf16 engine parity: **pre-set criterion failed**, analyzed (bf16 near-ties only; fp32 exact). Exact-match
       criteria now apply to fp32 only; bf16 quality moves to M5 evaluation
-- [ ] Moved to M4: async ingress, deadline-aware admission, stop strings (needs detokenization)
-- [ ] Moved to M5: TTFT/ITL percentiles under open-loop load; bf16 task-quality comparison
+- [x] Moved to M4: async ingress, deadline-aware admission, stop strings (needs detokenization): done in M4
+- [ ] Moved to M5: TTFT/ITL percentiles under open-loop load; bf16 fidelity and task-quality evaluation per
+      `docs/evaluation-plan-m5.md` (the M3 bf16 exact-match criterion remains recorded as FAILED)
+
+## M4 acceptance (spec 01, M4 scope)
+
+- [x] `/v1/completions` and `/v1/chat/completions` (+ `/v1/models`), JSON and SSE streaming (`include_usage`), OpenAI
+      error shape; unsupported OpenAI features rejected with 400, never ignored
+- [x] Stop strings across token boundaries (never leaked), EOS / stop-token / length termination, UTF-8-safe streaming
+- [x] Cancellation on client disconnect for streaming, non-streaming, and queued requests: engine abort, KV freed
+- [x] Admission: in-flight and queue caps, deadline feasibility (`X-Deadline-Ms`), deadline miss while queued, drain;
+      429 + `Retry-After` / 503
+- [x] Request validation, body limit (413), `max_tokens` / context / stop limits, request timeout (504 / in-band)
+- [x] Security: API keys (Argon2id), auth before parsing, tenant from key, loopback defaults, refusal of unauthenticated
+      public binds, sandboxed chat templates, admin listener with optional token
+- [x] Prometheus metrics: requests, errors, rejections, queue depth, tokens, TTFT/ITL/latency, KV, process/GPU memory
+- [x] Real-HTTP tests (63): streaming interruption, cancellation cleanup, overload, malformed requests, contract C1
+      conformance of every response, official `openai` SDK compatibility, real-process SIGTERM drain
+- [x] Real checkpoints over HTTP: fp32 24/24 + 24/24 identical to the reference, stream == non-stream, on CPU and A16;
+      bf16 stream-equality criterion **failed** (batch-composition effect, analyzed; fp32 control exact)
+- [ ] Moved to M5: latency/throughput of the server under open-loop load (TTFT/ITL percentiles), HTTP overhead,
+      admission-predictor calibration (known issue #26)
