@@ -71,6 +71,7 @@ class EngineSpec:
     eos_token_ids: tuple[int, ...]
     enable_prefix_caching: bool = True
     cuda_graphs: tuple[Shape, ...] | None = None
+    decode_attention: str = "auto"
 
 
 def _build(spec: EngineSpec) -> tuple[LLMEngine, dict[str, Any]]:
@@ -85,6 +86,7 @@ def _build(spec: EngineSpec) -> tuple[LLMEngine, dict[str, Any]]:
         eos_token_ids=spec.eos_token_ids,
         enable_prefix_caching=spec.enable_prefix_caching,
         cuda_graphs=spec.cuda_graphs,
+        decode_attention=spec.decode_attention,
     )
     with torch.inference_mode():  # warm kernels, surface load failures before reporting ready
         ids = torch.tensor([1, 2, 3], device=model.inv_freq.device)
@@ -92,7 +94,10 @@ def _build(spec: EngineSpec) -> tuple[LLMEngine, dict[str, Any]]:
         graphs = getattr(eng.runner, "decode_graphs", None)
         if graphs is not None:
             graphs.capture()
-    info: dict[str, Any] = {"cuda_graphs": graphs.summary() if graphs is not None else None}
+    info: dict[str, Any] = {
+        "cuda_graphs": graphs.summary() if graphs is not None else None,
+        "decode_attention": getattr(eng.runner, "decode_attention", None),
+    }
     return eng, info
 
 

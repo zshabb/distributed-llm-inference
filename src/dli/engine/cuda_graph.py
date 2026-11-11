@@ -52,6 +52,16 @@ Shape = tuple[int, int]  # (batch rows, block-table width in blocks)
 # extra key blocks only adds masked gather work, which is cheap next to the launch cost saved.
 BENCHMARK_SHAPES: tuple[Shape, ...] = ((16, 24), (64, 24))
 
+# With the Triton paged kernel a graph's width no longer costs attention work (it reads each
+# sequence's live keys only, nothing is gathered or padded), so wide buckets are cheap: 160 blocks
+# (2,560 tokens at block 16) covers the long-context workloads (prompts up to 2,048 + outputs).
+LONG_CONTEXT_SHAPES: tuple[Shape, ...] = (*BENCHMARK_SHAPES, (16, 160), (64, 160))
+
+
+def default_shapes(decode_attention: str) -> tuple[Shape, ...]:
+    """The graph buckets ``--cuda-graphs`` captures for a resolved decode-attention kernel."""
+    return LONG_CONTEXT_SHAPES if decode_attention == "triton" else BENCHMARK_SHAPES
+
 
 def choose_shape(shapes: Sequence[Shape], num_seqs: int, width: int) -> Shape | None:
     """The smallest shape (fewest padded rows, then narrowest) that holds the step, if any."""
@@ -84,6 +94,7 @@ class DecodeGraph:
         memory_factor: float = 2.0,
         memory_margin: int = 256 << 20,
         pool: Any = None,  # torch.cuda.graph_pool_handle() (a private torch type)
+        decode_attention: str = "sdpa",
     ) -> None:
         if scratch_block >= store.k.shape[1]:
             raise ValueError("scratch block must exist in the store")
@@ -91,6 +102,7 @@ class DecodeGraph:
         self.batch, self.width, self.scratch_block = batch, width, scratch_block
         self.memory_factor, self.memory_margin = memory_factor, memory_margin
         self.pool = pool  # private memory pool shared with other graphs (None: its own)
+        self.decode_attention = decode_attention
         self.stats = GraphStats(batch=batch, width=width)
         self._graph: torch.cuda.CUDAGraph | None = None
         self._buffers: dict[str, torch.Tensor] = {}
@@ -112,10 +124,12 @@ class DecodeGraph:
             v_pool=self.store.v,
             slots=b["slots"],
             block_tables=b["block_tables"],
-            key_mask=BatchedDecodeKV.key_mask_for(
-                b["seq_lens"], self.width * self.store.block_size
-            ),
+            key_mask=None
+            if self.decode_attention == "triton"
+            else BatchedDecodeKV.key_mask_for(b["seq_lens"], self.width * self.store.block_size),
             on_advance=lambda: None,  # bookkeeping happens outside the graph
+            seq_lens=b["seq_lens"],
+            kernel=self.decode_attention,
         )
         logits: torch.Tensor = self.model(b["input_ids"], b["positions"], dec)
         return logits
@@ -202,16 +216,22 @@ class DecodeGraph:
         bs, pad = self.store.block_size, self.batch - n
         scratch_slot = self.scratch_block * bs
         # Build the full padded step on the host, then one copy per buffer (no stale rows).
+        scratch = self.scratch_block
+        flat_tables: list[int] = []
+        for t in tables:  # one flat list: cheap even for wide (long-context) buckets
+            flat_tables.extend(t)
+            flat_tables.extend([scratch] * (self.width - len(t)))
+        flat_tables.extend([scratch] * (self.width * pad))
         host = {
             "input_ids": list(input_ids) + [0] * pad,
             "positions": list(positions) + [0] * pad,
             "slots": list(slots) + [scratch_slot] * pad,
-            "block_tables": [list(t) + [self.scratch_block] * (self.width - len(t)) for t in tables]
-            + [[self.scratch_block] * self.width] * pad,
+            "block_tables": flat_tables,
             "seq_lens": list(seq_lens) + [1] * pad,
         }
         for name, values in host.items():
-            self._buffers[name].copy_(torch.tensor(values, dtype=torch.long), non_blocking=False)
+            buf = self._buffers[name]
+            buf.copy_(torch.tensor(values, dtype=torch.long).view(buf.shape), non_blocking=False)
         self._graph.replay()
         self.stats.replays += 1
         return self._logits[:n].clone()  # the buffer is overwritten by the next replay
@@ -238,6 +258,7 @@ class DecodeGraphs:
         scratch_block: int,
         memory_factor: float = 2.0,
         memory_margin: int = 256 << 20,
+        decode_attention: str = "sdpa",
     ) -> None:
         uniq = sorted(set(shapes))
         if not uniq or any(b < 1 or w < 1 for b, w in uniq):
@@ -255,6 +276,7 @@ class DecodeGraphs:
                 memory_factor=memory_factor,
                 memory_margin=memory_margin,
                 pool=pool,
+                decode_attention=decode_attention,
             )
             for b, w in uniq
         ]

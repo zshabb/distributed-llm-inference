@@ -23,9 +23,9 @@ import torch
 import uvicorn
 
 from dli.engine import SchedulerConfig
-from dli.engine.cuda_graph import BENCHMARK_SHAPES
+from dli.engine.cuda_graph import default_shapes
 from dli.kv.paged_store import PagedKVStore
-from dli.model import hub, load_config
+from dli.model import hub, load_config, paged_attention
 from dli.server.admission import AdmissionConfig
 from dli.server.auth import ApiKeyAuth
 from dli.server.factory import BuildOptions, ServerBundle, build_server
@@ -96,6 +96,13 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "the HTTP event loop's GIL, and the API process does not load the weights) or a thread "
         "of the API process (the original design)",
     )
+    p.add_argument(
+        "--decode-attention",
+        choices=["auto", "triton", "sdpa"],
+        default="auto",
+        help="batched decode attention: the Triton paged GQA kernel (auto picks it on CUDA when "
+        "Triton is available) or the SDPA reference path",
+    )
     p.add_argument("--max-num-seqs", type=int, default=64)
     p.add_argument("--max-num-batched-tokens", type=int, default=512)
     p.add_argument("--max-queued-requests", type=int, default=256)
@@ -127,6 +134,10 @@ def build(args: argparse.Namespace) -> ServerBundle:
         )
     if args.cuda_graphs and not args.device.startswith("cuda"):
         raise SystemExit("--cuda-graphs needs a CUDA --device")
+    try:
+        kernel = paged_attention.resolve(args.decode_attention, args.device)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     model_dir = Path(args.model)
     if not model_dir.is_dir():
         model_dir = hub.download(args.model)  # pinned revisions only (KeyError if unknown)
@@ -160,7 +171,8 @@ def build(args: argparse.Namespace) -> ServerBundle:
         auth=None if args.no_auth else ApiKeyAuth.from_file(args.api_keys_file),
         admin_token=os.environ.get(args.admin_token_env) or None,
         enable_prefix_caching=not args.no_prefix_caching,
-        cuda_graphs=BENCHMARK_SHAPES if args.cuda_graphs else None,
+        cuda_graphs=default_shapes(kernel) if args.cuda_graphs else None,
+        decode_attention=kernel,
         engine_process=args.engine == "process",
     )
     return build_server(model_dir, opts)
