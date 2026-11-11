@@ -252,9 +252,10 @@ def run(
                         **plan["backends"][bname],
                         **model.get("overrides", {}).get(bname, {}),
                     }
-                    stream = bname != "hf"
+                    kind = str(settings.get("kind", bname))  # variants, e.g. dli-noprefix
+                    stream = kind != "hf"
                     srv = backends.start(
-                        bname,
+                        kind,
                         model_dir=model_dir,
                         model_name=model["name"],
                         port=int(plan.get("port", 8300)),
@@ -265,6 +266,7 @@ def run(
                         log_dir=out / "server-logs",
                         settings=settings,
                     )
+                    srv.name = bname  # results and reports use the plan's backend name
                     log.write(
                         json.dumps(
                             {

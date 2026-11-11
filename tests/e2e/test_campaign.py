@@ -23,14 +23,20 @@ def test_campaign_runs_backends_and_reports(tiny_dir: Path, tmp_path: Path) -> N
         "max_num_batched_tokens": 64,
         "saturation_ttft_s": 5.0,
         "backends": {
-            "dli": {"kv_cache_gb": 0.01, "block_size": 4},
+            # a variant of the native backend: "kind" selects the launcher, the key names results
+            "dli-np": {
+                "kind": "dli",
+                "kv_cache_gb": 0.01,
+                "block_size": 4,
+                "extra_args": ["--no-prefix-caching"],
+            },
             "hf": {"max_batch": 4, "max_wait_ms": 5},
         },
         "models": [
             {
                 "name": "tiny",
                 "path": str(tiny_dir),
-                "backends": ["dli", "hf"],
+                "backends": ["dli-np", "hf"],
                 "experiments": ["closed", "open", "overload"],
             }
         ],
@@ -53,7 +59,7 @@ def test_campaign_runs_backends_and_reports(tiny_dir: Path, tmp_path: Path) -> N
                 "mode": "overload",
                 "base": "open",
                 "factors": [2],
-                "backends": ["dli"],
+                "backends": ["dli-np"],
                 "variants": [{"name": "deadline", "headers": {"X-Deadline-Ms": "5000"}}],
             },
         },
@@ -65,18 +71,18 @@ def test_campaign_runs_backends_and_reports(tiny_dir: Path, tmp_path: Path) -> N
     text = campaign.report(out)
 
     runs = out / "runs" / "tiny"
-    assert (runs / "dli" / "rep0" / "closed@2.json").exists()
+    assert (runs / "dli-np" / "rep0" / "closed@2.json").exists()
     assert (runs / "hf" / "rep0" / "closed@2.json").exists()
-    m = json.loads((runs / "dli" / "rep0" / "closed@2.json").read_text())
+    m = json.loads((runs / "dli-np" / "rep0" / "closed@2.json").read_text())
     assert m["ok"] == 6
     assert m["output_tokens"] == 24
-    with gzip.open(runs / "dli" / "rep0" / "closed@2.records.jsonl.gz", "rt") as f:
+    with gzip.open(runs / "dli-np" / "rep0" / "closed@2.records.jsonl.gz", "rt") as f:
         recs = [json.loads(line) for line in f]
     assert len(recs) == 6
     assert all("chunk_times" not in r and r["chunks"] >= 1 for r in recs)
     hf = json.loads((runs / "hf" / "rep0" / "closed@2.json").read_text())
     assert hf["ok"] == 6  # the baseline served the same requests
-    overload = list((runs / "dli" / "rep0").glob("overload@*-x2-deadline.json"))
+    overload = list((runs / "dli-np" / "rep0").glob("overload@*-x2-deadline.json"))
     assert len(overload) == 1  # offered 2x the highest unsaturated open-loop rate
     assert not list((runs / "hf" / "rep0").glob("overload*"))  # dli-only experiment
     assert (out / "env.json").exists()
@@ -88,5 +94,7 @@ def test_campaign_runs_backends_and_reports(tiny_dir: Path, tmp_path: Path) -> N
         for line in (out / "campaign_log.jsonl").read_text().splitlines()
         if '"server"' in line
     ]
-    assert {s["name"] for s in servers} == {"dli", "hf"}
-    assert all("--no-auth" in s["cmd"] or s["name"] == "hf" for s in servers)
+    assert {s["name"] for s in servers} == {"dli-np", "hf"}
+    native = next(s for s in servers if s["name"] == "dli-np")
+    assert "--no-auth" in native["cmd"]
+    assert "--no-prefix-caching" in native["cmd"]
