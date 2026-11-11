@@ -9,6 +9,7 @@ manager in ``dli.kv`` solves in M2) and cannot be shared between sequences.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -128,3 +129,43 @@ class BatchedKV:
         for seg in self.segments:
             if seg.cache is not None:
                 seg.cache.advance(seg.length)
+
+
+@dataclass(frozen=True, slots=True)
+class BatchedDecodeKV:
+    """Steady-state decode for many sequences at once: one new token each, attention batched (M6).
+
+    Built once per engine step by the runner; every layer then does a fixed number of operations
+    regardless of how many sequences are active: one K and one V write for all new tokens, one page
+    gather per K and V, and one attention call with native grouped-query attention. The
+    per-sequence path (:class:`BatchedKV`) stays the reference and handles prefill and mixed steps.
+
+    Attributes:
+        k_pool, v_pool: The paged pools ``[layers, num_blocks, block_size, kv_heads, head_dim]``.
+        slots: Flat slot of each sequence's new token, ``[B]`` (int64).
+        block_tables: Each sequence's blocks, padded to the longest, ``[B, max_blocks]`` (int64).
+            Padding entries point at any valid block; the mask hides them.
+        key_mask: ``[B, 1, 1, max_blocks * block_size]``, True where a key position exists
+            (``position < sequence length including the new token``).
+        on_advance: Called once after all layers wrote their K/V (marks the tokens computed).
+    """
+
+    k_pool: torch.Tensor
+    v_pool: torch.Tensor
+    slots: torch.Tensor
+    block_tables: torch.Tensor
+    key_mask: torch.Tensor
+    on_advance: Callable[[], None]
+
+    @property
+    def batch_size(self) -> int:
+        return int(self.slots.shape[0])
+
+    def advance(self) -> None:
+        self.on_advance()
+
+    @staticmethod
+    def key_mask_for(seq_lens: torch.Tensor, max_keys: int) -> torch.Tensor:
+        """``[B, 1, 1, max_keys]`` boolean mask of valid key positions."""
+        keys = torch.arange(max_keys, device=seq_lens.device)
+        return (keys[None, :] < seq_lens[:, None])[:, None, None, :]
