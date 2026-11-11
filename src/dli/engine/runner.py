@@ -6,7 +6,7 @@ from typing import Protocol
 
 import torch
 
-from dli.engine.cuda_graph import DecodeGraph
+from dli.engine.cuda_graph import DecodeGraphs
 from dli.engine.scheduler import SchedulerOutput
 from dli.kv.block_manager import BlockManager
 from dli.kv.paged_store import PagedKVStore, PagedSequenceView
@@ -34,7 +34,7 @@ class ModelRunner:
         store: PagedKVStore,
         *,
         batched_decode: bool = True,
-        decode_graph: DecodeGraph | None = None,
+        decode_graphs: DecodeGraphs | None = None,
     ) -> None:
         self.model = model
         self.bm = block_manager
@@ -43,8 +43,8 @@ class ModelRunner:
         # Steady-state decode steps (every chunk is one new token) use batched attention; prefill
         # and mixed steps, and batched_decode=False, use the per-sequence reference path.
         self.batched_decode = batched_decode
-        # Optional CUDA graph of the batched decode forward (M6 proof of concept, off by default).
-        self.decode_graph = decode_graph
+        # Optional CUDA graphs of the batched decode forward, one per bucket shape (off by default).
+        self.decode_graphs = decode_graphs
 
     @torch.inference_mode()
     def execute(self, sched: SchedulerOutput) -> torch.Tensor:
@@ -79,8 +79,8 @@ class ModelRunner:
     def _execute_decode(self, sched: SchedulerOutput) -> torch.Tensor:
         """All chunks are single decode tokens: build batched metadata once, attend in one call.
 
-        If a decode CUDA graph is configured and the step fits its shape, the graph is replayed;
-        otherwise (or if it could not be captured) the eager batched path runs.
+        If decode CUDA graphs are configured, the smallest captured bucket the step fits into is
+        replayed; otherwise (no bucket fits, or none could be captured) the eager batched path runs.
         """
         bs = self.store.block_size
         ids, positions, slots, tables, lens = [], [], [], [], []
@@ -98,21 +98,15 @@ class ModelRunner:
             for rid, n in zip(requests, lens, strict=True):
                 self.bm.mark_computed(rid, n)
 
-        graph = self.decode_graph
-        if graph is not None:
-            if graph.stats.status == "not captured":
-                graph.capture()  # first eligible step, on the thread that drives the engine
-            if graph.fits(len(ids), width):
+        graphs = self.decode_graphs
+        if graphs is not None:
+            if graphs.stats.status == "not captured":
+                graphs.capture()  # first decode step, on the thread that drives the engine
+            graph = graphs.select(len(ids), width)  # counts the fallback reason if None
+            if graph is not None:
                 logits = graph.run(ids, positions, slots, tables, lens)
                 advance()
                 return logits
-            graph.note_fallback(
-                graph.stats.status
-                if not graph.ready
-                else "batch"
-                if len(ids) > graph.batch
-                else "width"
-            )
 
         padded = [list(t) + [t[0]] * (width - len(t)) for t in tables]  # padding is masked out
         dev = self.device

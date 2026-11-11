@@ -1,34 +1,40 @@
-"""CUDA graph for the batched decode forward pass (M6 proof of concept: one fixed shape).
+"""CUDA graphs for the batched decode forward pass (M6): a small set of fixed shapes.
 
 After M6 step 1 a steady-state decode step is ~1,200 small kernels whose launch cost (~22 ms on the
-A5000) dwarfs their GPU time (~8 ms). A CUDA graph records those launches once and replays them
-with one call. This module captures exactly one shape, ``batch x width`` (sequences x block-table
-blocks); any step that does not fit runs the eager batched path.
+A5000) dwarfs their GPU time. A CUDA graph records those launches once and replays them with one
+call. A graph has one fixed shape, ``batch x width`` (sequences x block-table blocks), so
+:class:`DecodeGraphs` keeps a few *buckets* and replays the smallest one a step fits into, padding
+the rest; any step that fits none runs the eager batched path.
 
-What is in the graph: the model forward for :class:`~dli.model.kv_cache.BatchedDecodeKV`
-(embedding, RoPE, every layer including the batched KV write, page gather and attention, the LM
-head) and the key mask, computed from ``seq_lens`` inside the graph. What is not: metadata
-construction, copy-on-write copies, sampling, scheduler and block-manager bookkeeping.
+What is in a graph: the model forward for :class:`~dli.model.kv_cache.BatchedDecodeKV` (embedding,
+RoPE, every layer including the batched KV write, page gather and attention, the LM head) and the
+key mask, computed from ``seq_lens`` inside the graph. What is not: metadata construction,
+copy-on-write copies, sampling, scheduler and block-manager bookkeeping.
 
 Graph rules this follows:
-* **Static buffers.** Inputs live in tensors allocated once; each step copies new values into them
-  before ``replay()``. The logits come back in a static output buffer (copied out by the caller).
+* **Static buffers.** Inputs live in tensors allocated once per graph; each step copies new values
+  into them before ``replay()``. The logits come back in a static output buffer (copied out).
 * **Stable addresses.** The KV pools are allocated once (``PagedKVStore``) and only modified in
   place, so the captured kernels keep reading and writing the right memory.
 * **Padding is harmless.** Rows beyond the real batch write their K/V to a *scratch block* that the
   block manager never allocates (the store has one block more than the manager) and attend to that
   one written slot, so they can neither corrupt real KV nor produce NaN from an all-masked row.
-* **Memory is checked first.** Capture is attempted only if free device memory exceeds the measured
-  activation peak of one eager forward at this shape (times a safety factor); otherwise, or if
-  capture fails, the graph is disabled and every step runs eagerly.
+* **One shared memory pool.** Graphs are captured largest first into one private pool, so the
+  smaller ones reuse the largest one's activation memory. That is safe because graphs replay one at
+  a time on one stream and every output is copied out before the next replay.
+* **Memory is checked first.** Each capture is attempted only if free device memory exceeds the
+  measured activation peak of one eager forward at its shape (times a safety factor); otherwise, or
+  if capture fails, that graph is skipped and its steps go to a larger bucket or run eagerly.
 """
 
 from __future__ import annotations
 
+import gc
 import logging
 import time
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 import torch
 
@@ -38,6 +44,20 @@ from dli.model.llama import LlamaForCausalLM
 
 log = logging.getLogger(__name__)
 
+Shape = tuple[int, int]  # (batch rows, block-table width in blocks)
+
+# Covers the closed-fixed benchmark workload at block size 16: prompts of exactly 256 tokens plus
+# 128 output tokens keep every decode context under 384 tokens = 24 blocks, at concurrency 1/16/64.
+# Two batch buckets keep padding at most 4x for small batches; one width bucket because padding
+# extra key blocks only adds masked gather work, which is cheap next to the launch cost saved.
+BENCHMARK_SHAPES: tuple[Shape, ...] = ((16, 24), (64, 24))
+
+
+def choose_shape(shapes: Sequence[Shape], num_seqs: int, width: int) -> Shape | None:
+    """The smallest shape (fewest padded rows, then narrowest) that holds the step, if any."""
+    fitting = [s for s in shapes if s[0] >= num_seqs and s[1] >= width]
+    return min(fitting, default=None)
+
 
 @dataclass
 class GraphStats:
@@ -45,11 +65,9 @@ class GraphStats:
     batch: int = 0
     width: int = 0
     capture_s: float = 0.0
-    free_before: int = 0  # device bytes free before capture
+    free_before: int = 0  # device bytes free before this capture
     eager_peak: int = 0  # extra bytes one eager forward at this shape needed
-    graph_pool: int = 0  # reserved-memory growth caused by capture (graph private pool)
     replays: int = 0
-    fallbacks: dict[str, int] = field(default_factory=dict)
 
 
 class DecodeGraph:
@@ -65,28 +83,25 @@ class DecodeGraph:
         scratch_block: int,
         memory_factor: float = 2.0,
         memory_margin: int = 256 << 20,
+        pool: Any = None,  # torch.cuda.graph_pool_handle() (a private torch type)
     ) -> None:
         if scratch_block >= store.k.shape[1]:
             raise ValueError("scratch block must exist in the store")
         self.model, self.store = model, store
         self.batch, self.width, self.scratch_block = batch, width, scratch_block
         self.memory_factor, self.memory_margin = memory_factor, memory_margin
+        self.pool = pool  # private memory pool shared with other graphs (None: its own)
         self.stats = GraphStats(batch=batch, width=width)
         self._graph: torch.cuda.CUDAGraph | None = None
         self._buffers: dict[str, torch.Tensor] = {}
         self._logits: torch.Tensor | None = None
 
-    # ---------------------------------------------------------------- shape gate
-
-    def fits(self, num_seqs: int, width: int) -> bool:
-        return self.ready and num_seqs <= self.batch and width <= self.width
-
     @property
     def ready(self) -> bool:
         return self._graph is not None
 
-    def note_fallback(self, reason: str) -> None:
-        self.stats.fallbacks[reason] = self.stats.fallbacks.get(reason, 0) + 1
+    def fits(self, num_seqs: int, width: int) -> bool:
+        return self.ready and num_seqs <= self.batch and width <= self.width
 
     # ---------------------------------------------------------------- capture
 
@@ -141,9 +156,9 @@ class DecodeGraph:
         needed = int(self.stats.eager_peak * self.memory_factor) + self.memory_margin
         if free < needed:
             self.stats.status = f"disabled: {free >> 20} MiB free < {needed >> 20} MiB needed"
-            log.warning("CUDA graph %s", self.stats.status)
+            log.warning("CUDA graph %dx%d %s", b, w, self.stats.status)
+            self._buffers = {}
             return False
-        reserved_before = torch.cuda.memory_reserved(dev)
         t0 = time.perf_counter()
         try:
             side = torch.cuda.Stream(dev)  # type: ignore[no-untyped-call]
@@ -153,26 +168,19 @@ class DecodeGraph:
                     self._forward()
             torch.cuda.current_stream(dev).wait_stream(side)
             graph = torch.cuda.CUDAGraph()
-            with torch.cuda.graph(graph):
+            with torch.cuda.graph(graph, pool=self.pool):
                 self._logits = self._forward()
             torch.cuda.synchronize(dev)
         except RuntimeError as exc:  # e.g. OOM or an op that cannot be captured
             self._logits = None
+            self._buffers = {}
             self.stats.status = f"disabled: capture failed ({type(exc).__name__}: {str(exc)[:120]})"
-            log.warning("CUDA graph %s", self.stats.status)
+            log.warning("CUDA graph %dx%d %s", b, w, self.stats.status)
             torch.cuda.empty_cache()
             return False
         self._graph = graph
         self.stats.capture_s = time.perf_counter() - t0
-        self.stats.graph_pool = torch.cuda.memory_reserved(dev) - reserved_before
         self.stats.status = "captured"
-        log.info(
-            "CUDA graph captured: batch %d x width %d in %.2fs, pool +%d MiB",
-            self.batch,
-            self.width,
-            self.stats.capture_s,
-            self.stats.graph_pool >> 20,
-        )
         return True
 
     # ---------------------------------------------------------------- replay
@@ -207,3 +215,134 @@ class DecodeGraph:
         self._graph.replay()
         self.stats.replays += 1
         return self._logits[:n].clone()  # the buffer is overwritten by the next replay
+
+
+@dataclass
+class GraphSetStats:
+    status: str = "not captured"  # not captured | captured | disabled: <reason>
+    capture_s: float = 0.0  # all captures together
+    memory_overhead: int = 0  # reserved bytes added by capture: static buffers + shared pool
+    device_free_drop: int = 0  # the same seen by the driver (includes non-PyTorch allocations)
+    fallbacks: dict[str, int] = field(default_factory=dict)  # eager steps, by reason
+
+
+class DecodeGraphs:
+    """Decode CUDA graphs for a few bucket shapes, captured together, replayed by best fit."""
+
+    def __init__(
+        self,
+        model: LlamaForCausalLM,
+        store: PagedKVStore,
+        *,
+        shapes: Sequence[Shape],
+        scratch_block: int,
+        memory_factor: float = 2.0,
+        memory_margin: int = 256 << 20,
+    ) -> None:
+        uniq = sorted(set(shapes))
+        if not uniq or any(b < 1 or w < 1 for b, w in uniq):
+            raise ValueError(f"cuda graph shapes must be positive (batch, width) pairs: {shapes}")
+        self.store = store
+        self.scratch_block = scratch_block
+        pool = torch.cuda.graph_pool_handle() if store.k.device.type == "cuda" else None
+        self.graphs = [
+            DecodeGraph(
+                model,
+                store,
+                batch=b,
+                width=w,
+                scratch_block=scratch_block,
+                memory_factor=memory_factor,
+                memory_margin=memory_margin,
+                pool=pool,
+            )
+            for b, w in uniq
+        ]
+        self.stats = GraphSetStats()
+
+    @property
+    def shapes(self) -> list[Shape]:
+        return [(g.batch, g.width) for g in self.graphs]
+
+    @property
+    def ready(self) -> bool:
+        return any(g.ready for g in self.graphs)
+
+    def capture(self) -> bool:
+        """Capture every bucket, largest first (the others reuse its pool memory)."""
+        dev = self.store.k.device
+        if dev.type != "cuda":
+            self.stats.status = "disabled: not a CUDA device"
+            for g in self.graphs:
+                g.stats.status = self.stats.status
+            return False
+        # torch.cuda.graph() empties the allocator cache on entry; do it first so the reserved
+        # delta measures only what the graphs keep (static buffers + the shared private pool).
+        torch.cuda.synchronize(dev)
+        gc.collect()
+        torch.cuda.empty_cache()
+        reserved0 = torch.cuda.memory_reserved(dev)
+        free0, _ = torch.cuda.mem_get_info(dev)
+        t0 = time.perf_counter()
+        for g in sorted(self.graphs, key=lambda g: (g.batch * g.width, g.batch), reverse=True):
+            g.capture()
+        torch.cuda.synchronize(dev)
+        self.stats.capture_s = time.perf_counter() - t0
+        torch.cuda.empty_cache()  # drop eager scratch freed during capture; graph pools stay
+        self.stats.memory_overhead = torch.cuda.memory_reserved(dev) - reserved0
+        self.stats.device_free_drop = free0 - torch.cuda.mem_get_info(dev)[0]
+        captured = [g for g in self.graphs if g.ready]
+        if captured:
+            self.stats.status = "captured"
+        else:
+            reasons = {g.stats.status for g in self.graphs}
+            self.stats.status = (
+                reasons.pop() if len(reasons) == 1 else "disabled: no shape captured"
+            )
+        log.info(
+            "CUDA graphs: %s of %s captured in %.2fs, +%d MiB reserved",
+            [(g.batch, g.width) for g in captured],
+            self.shapes,
+            self.stats.capture_s,
+            self.stats.memory_overhead >> 20,
+        )
+        return bool(captured)
+
+    def select(self, num_seqs: int, width: int) -> DecodeGraph | None:
+        """The smallest captured graph that holds the step, or None (and the reason is counted)."""
+        ready = [g for g in self.graphs if g.ready]
+        shape = choose_shape([(g.batch, g.width) for g in ready], num_seqs, width)
+        if shape is not None:
+            return next(g for g in ready if (g.batch, g.width) == shape)
+        if not ready:
+            reason = self.stats.status
+        elif num_seqs > max(g.batch for g in ready):
+            reason = "batch"
+        else:
+            reason = "width"
+        self.stats.fallbacks[reason] = self.stats.fallbacks.get(reason, 0) + 1
+        return None
+
+    def summary(self) -> dict[str, object]:
+        """JSON-ready usage and memory figures (benchmarks, logs)."""
+        s = self.stats
+        return {
+            "status": s.status,
+            "capture_s": round(s.capture_s, 3),
+            "memory_overhead_mib": round(s.memory_overhead / 2**20, 1),
+            "device_free_drop_mib": round(s.device_free_drop / 2**20, 1),
+            "replays": sum(g.stats.replays for g in self.graphs),
+            "fallbacks": dict(s.fallbacks),
+            "graphs": [
+                {
+                    "batch": g.batch,
+                    "width_blocks": g.width,
+                    "status": g.stats.status,
+                    "free_before_capture_mib": g.stats.free_before >> 20,
+                    "eager_peak_mib": round(g.stats.eager_peak / 2**20, 1),
+                    "capture_s": round(g.stats.capture_s, 3),
+                    "replays": g.stats.replays,
+                }
+                for g in self.graphs
+            ],
+        }
