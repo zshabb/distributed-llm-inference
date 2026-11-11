@@ -91,6 +91,26 @@ Rules that keep this correct:
   another (QnA.md, question 45).
 - **Nothing is sent before the first token,** so pre-token failures are real HTTP statuses (QnA.md, question 44).
 
+## 1d. Benchmark campaign (M5)
+
+```
+plan.json ──► campaign.run: for rep, for model, for backend (order rotated per rep)
+                 backends.start(dli | vllm (Docker, pinned digest) | hf)  ── one server on the GPU at a time
+                 warm-up (8 unrecorded requests)
+                 for experiment, for point:
+                    workload (seeded: identical requests for every backend)
+                    loadgen: open loop (Poisson, latency from scheduled arrival) | closed loop | sessions
+                    Monitor thread: NVML memory/util, RSS, server /metrics (KV, queues, prefix hits)
+                    -> runs/<model>/<backend>/rep<k>/<exp>@<point>.json + .records.jsonl.gz
+                    stop sweep one point after saturation
+                 backends.stop (container logs saved)
+report: median [min-max] across repetitions -> SUMMARY.md, summary.json
+```
+
+The precision study (`dli.bench.precision`) needs no HTTP: it wraps the engine's `ModelRunner` in a
+`TeacherForcingRunner` that records every sampling row's logits and then forces the next token, so the real scheduler
+(chunked prefill, batching, preemption) runs unchanged while every configuration sees the same tokens.
+
 ## 2. Components
 
 | Component | File | Responsibility | Key invariants |
@@ -119,6 +139,10 @@ Rules that keep this correct:
 | Auth / limits | `src/dli/server/auth.py`, `limits.py` | API keys (Argon2id), body-size limit | Both run before the body is parsed |
 | Metrics / admin | `src/dli/server/metrics.py`, `admin.py` | Prometheus registry, admin listener (state, drain) | Bounded label cardinality; separate port |
 | Entry point | `src/dli/server/__main__.py`, `factory.py` | CLI (`dli-serve`), safe defaults, graceful drain on SIGTERM | Refuses unauthenticated public binds |
+| Load generator | `src/dli/bench/loadgen.py` | Open/closed/session load against any OpenAI-compatible server; per-request timing | Latency from the scheduled arrival; never fabricates latency for failed requests |
+| Campaign | `src/dli/bench/campaign.py`, `backends.py`, `monitor.py` | Plan execution, server lifecycle, resource sampling, reports | One server at a time; identical seeded requests per backend |
+| HF baseline | `src/dli/bench/hf_server.py` | Static-batching `transformers` server | Batched output equals unbatched greedy (tested) |
+| Precision study | `src/dli/bench/precision.py` | Teacher-forced fidelity, perplexity, ARC accuracy for fp32/bf16 x unbatched/engine | fp32 engine path reproduces the reference exactly (tested) |
 
 ## 3. Data structures and memory
 
