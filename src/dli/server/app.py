@@ -420,8 +420,9 @@ def create_app(
         produced = 0
         last_token_at = timing.start
         events = engine.generate(rid, prompt_ids, params, priority=priority, tenant=tenant)
-        async with asyncio.timeout(config.request_timeout_s), aclosing(events) as evs:
-            async for ev in _guard_dead(evs):
+        deadline = asyncio.get_running_loop().time() + config.request_timeout_s
+        async with aclosing(events) as evs:
+            async for ev in _guard_dead(_before(evs, deadline)):
                 if ev.error is not None:
                     raise APIError(500, ev.error, "server_error", "engine_failure")
                 if ev.finish_reason is FinishReason.CAPACITY:
@@ -577,6 +578,26 @@ def _deadline(header: str | None) -> int | None:
             "invalid_header",
         )
     return value
+
+
+async def _before(events: AsyncIterator[Any], deadline: float) -> AsyncGenerator[Any, None]:
+    """Yield events until the loop-time deadline, then raise TimeoutError.
+
+    Each wait is bounded separately, in whichever task is iterating. asyncio.timeout() around
+    the whole iteration would be wrong here: it binds to the task that *entered* it, and these
+    generators are started in one task (first-token wait) and iterated in another (the streaming
+    response), so its cancellation would hit a task that has already moved on.
+    """
+    loop = asyncio.get_running_loop()
+    while True:
+        remaining = deadline - loop.time()
+        if remaining <= 0:
+            raise TimeoutError
+        try:
+            ev = await asyncio.wait_for(anext(events), remaining)
+        except StopAsyncIteration:
+            return
+        yield ev
 
 
 async def _guard_dead(events: AsyncIterator[Any]) -> AsyncGenerator[Any, None]:

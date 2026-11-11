@@ -270,3 +270,20 @@ def test_client_disconnect_while_queued_aborts_before_running(make_server: Serve
     wait_for(lambda: engine.snapshot.num_running == 0 and engine.snapshot.num_waiting == 0)
     wait_for(lambda: engine.snapshot.kv_used_blocks == 0)
     assert engine.snapshot.total_generated_tokens < 1500, "abandoned requests kept generating"
+
+
+def test_request_timeout_applies_to_streams_too(make_server: ServerFactory) -> None:
+    """Streams are iterated by a different task than the one that started them."""
+    live = make_server(request_timeout_s=0.5, num_blocks=1024)
+    engine = live.bundle.engine
+    payload = {"model": MODEL, "prompt": "t", "max_tokens": 3000, "ignore_eos": True}
+    with live.client() as c:
+        r = c.post("/v1/completions", json=payload)
+        assert r.status_code == 504, r.text
+        with c.stream("POST", "/v1/completions", json={**payload, "stream": True}) as r:
+            data = [ln.removeprefix("data: ") for ln in r.iter_lines() if ln.startswith("data: ")]
+    assert r.status_code == 200
+    assert data[-1] == "[DONE]"
+    assert json.loads(data[-2])["error"]["code"] == "timeout"
+    wait_for(lambda: engine.snapshot.num_running == 0 and engine.snapshot.kv_used_blocks == 0)
+    assert engine.snapshot.total_generated_tokens < 2 * 3000
