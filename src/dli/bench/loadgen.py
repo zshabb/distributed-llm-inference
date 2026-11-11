@@ -314,6 +314,11 @@ async def sessions_open_loop(
 # ----------------------------------------------------------------------------------- metrics
 
 
+def ttft_by_arrival(ok: Sequence[RequestRecord]) -> list[tuple[float, float]]:
+    """(scheduled arrival, TTFT) of completed requests."""
+    return [(r.scheduled, r.first_token - r.scheduled) for r in ok if r.first_token is not None]
+
+
 def run_metrics(result: RunResult) -> dict[str, Any]:
     """Per-run metrics. Latencies run from the scheduled arrival (open) or the send (closed)."""
     from dli.bench.stats import summarize
@@ -340,6 +345,12 @@ def run_metrics(result: RunResult) -> dict[str, Any]:
         r.end - r.sent for r in recs if r.status == "rejected" and r.end is not None
     ]
     lag = [r.sent - r.scheduled for r in recs if r.sent]
+    # Queue growth: median TTFT of the last third of arrivals vs the first third. Stable load keeps
+    # it flat; past saturation the queue, and so TTFT, grows through the run.
+    by_arrival = sorted(ttft_by_arrival(ok), key=lambda x: x[0])
+    third = len(by_arrival) // 3
+    ttft_first = float(np.median([t for _, t in by_arrival[:third]])) if third >= 3 else None
+    ttft_last = float(np.median([t for _, t in by_arrival[-third:]])) if third >= 3 else None
 
     def s(v: list[float]) -> dict[str, float] | None:
         x = summarize(v)
@@ -361,4 +372,6 @@ def run_metrics(result: RunResult) -> dict[str, Any]:
         "itl_s": s(itl),
         "rejection_latency_s": s(rejected_latency),
         "client_lag_s": s(lag),
+        "ttft_first_third_p50_s": ttft_first,
+        "ttft_last_third_p50_s": ttft_last,
     }

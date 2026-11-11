@@ -9,10 +9,17 @@ Each backend server is started fresh, warmed up with a few unrecorded requests, 
 experiment point for that model, then is stopped. For one (repetition, point) every backend
 receives the identical request list (same seed).
 
-Open-loop sweeps stop after the first *saturated* point (completion rate < 99%, achieved rate below
-90% of offered, or median TTFT above ``saturation_ttft_s``): further points would only measure an
-ever-growing queue and cost GPU time. The overload experiment then offers ``factor x`` the highest
-unsaturated rate that backend reached in the same repetition (spec AC5).
+Open-loop sweeps stop after the first *saturated* point: completion rate < 99%, median TTFT above
+``saturation_ttft_s``, or a growing queue (median TTFT of the last third of arrivals > 2x the first
+third's + 0.5 s). Further points would only measure an ever-growing queue and cost GPU time.
+
+The first version (used for the 2026-11-11 campaign) also called a point saturated when the
+completed request rate was below 90% of the offered rate. That rate divides by a span that includes
+the drain tail after the last arrival, so it under-states throughput and stopped sweeps early for
+backends with long end-to-end tails; it was replaced by the queue-growth test.
+
+The overload experiment offers ``factor x`` the highest unsaturated rate that backend reached in the
+same repetition (spec AC5), or the explicit ``rates`` an overload experiment lists.
 
 Raw per-request records are stored gzip-compressed (latencies already derived; per-chunk times are
 reduced to inter-token statistics to keep the repository small).
@@ -103,12 +110,14 @@ def _point_n(exp: dict[str, Any], point: float) -> int:
 
 
 def saturated(m: dict[str, Any], offered: float | None, ttft_limit: float) -> bool:
+    """Incomplete, too slow, or a queue that grows through the run (``offered`` kept for logs)."""
     if m["completion_rate"] < 0.99:
         return True
-    if offered is not None and m["completed_req_per_s"] < 0.9 * offered:
-        return True
     ttft = m.get("ttft_s") or {}
-    return bool(ttft) and ttft["p50"] > ttft_limit
+    if ttft and ttft["p50"] > ttft_limit:
+        return True
+    first, last = m.get("ttft_first_third_p50_s"), m.get("ttft_last_third_p50_s")
+    return first is not None and last is not None and last > 2 * first + 0.5
 
 
 def slim(rec: loadgen.RequestRecord) -> dict[str, Any]:
@@ -289,26 +298,33 @@ def run(
                             if bname not in exp.get("backends", [bname]):
                                 continue
                             if exp["mode"] == "overload":
-                                base = sat.get(exp["base"])
-                                if base is None:
-                                    print(
-                                        f"skip {exp_id}: no unsaturated rate for {bname}",
-                                        flush=True,
-                                    )
-                                    continue
-                                bexp = plan["experiments"][exp["base"]]
-                                for factor in exp["factors"]:
+                                bexp = {**plan["experiments"][exp["base"]], "mode": "open"}
+                                bexp.update(exp.get("overrides", {}))
+                                if "rates" in exp:  # explicit, e.g. 2x a measured saturation
+                                    points = [(float(r), f"r{float(r):g}") for r in exp["rates"]]
+                                else:
+                                    base = sat.get(exp["base"])
+                                    if base is None:
+                                        print(
+                                            f"skip {exp_id}: no unsaturated rate for {bname}",
+                                            flush=True,
+                                        )
+                                        continue
+                                    points = [
+                                        (round(base * f, 3), f"x{f:g}") for f in exp["factors"]
+                                    ]
+                                for rate, label in points:
                                     for var in exp["variants"]:
                                         _run_point(
                                             ctx,
                                             srv,
                                             exp_id,
-                                            {**bexp, "mode": "open"},
-                                            round(base * factor, 3),
+                                            bexp,
+                                            rate,
                                             vocab=vocab,
                                             rep=rep,
                                             headers=var.get("headers", {}),
-                                            tag=f"x{factor:g}-{var['name']}",
+                                            tag=f"{label}-{var['name']}",
                                             stream=stream,
                                         )
                                 continue
