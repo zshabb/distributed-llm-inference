@@ -20,6 +20,20 @@ if [[ "$(uv --version 2>/dev/null | awk '{print $2}')" != "$UV_VERSION" ]]; then
 fi
 uv --version
 
+# Persistent storage (profiles that set DLI_PERSIST_DIR, e.g. a RunPod network volume): results,
+# logs and the Hugging Face cache live there and survive a pod restart; the repo and the Python
+# environment stay on fast local disk (a network filesystem is slow for thousands of small files),
+# and are rebuilt by this script after a restart.
+if [[ -n "${DLI_PERSIST_DIR:-}" ]]; then
+  mkdir -p "$DLI_PERSIST_DIR/results" "$DLI_PERSIST_DIR/logs" "$DLI_PERSIST_DIR/hf"
+  if [[ -d benchmarks/results && ! -L benchmarks/results ]]; then
+    # keep anything produced locally before persistence was configured, never overwrite
+    rsync -a --ignore-existing benchmarks/results/ "$DLI_PERSIST_DIR/results/" && rm -rf benchmarks/results
+  fi
+  ln -sfn "$DLI_PERSIST_DIR/results" benchmarks/results
+  echo "persistent results: benchmarks/results -> $DLI_PERSIST_DIR/results; HF cache: ${HF_HOME:-unset}"
+fi
+
 # --frozen: fail instead of re-resolving, so the host runs exactly what was locked and reviewed.
 uv sync --frozen --extra cu130
 uv run --frozen python -c "import sys, torch; print('python', sys.version.split()[0], '| torch', torch.__version__, '| cuda', torch.version.cuda, '| available', torch.cuda.is_available())"

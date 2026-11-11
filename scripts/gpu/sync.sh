@@ -26,6 +26,7 @@ esac
 
 gpu_ssh "mkdir -p '$GPU_REMOTE_DIR'"
 # --delete keeps the remote tree identical to the local one; .venv and results produced on the host
-# are excluded so a sync never destroys the environment or unsaved measurements.
-gpu_rsync -az --delete --exclude '.venv/' --exclude 'benchmarks/results/' "$stage/" "$GPU_HOST:$GPU_REMOTE_DIR/"
+# (a directory, or a symlink to persistent storage) are excluded, so a sync never destroys the
+# environment or unsaved measurements.
+gpu_rsync -az --delete --exclude '.venv/' --exclude 'benchmarks/results' "$stage/" "$GPU_HOST:$GPU_REMOTE_DIR/"
 echo "synced $(cat "$stage/REVISION") (${SYNC_FROM:-worktree}) -> $GPU_HOST:$GPU_REMOTE_DIR"
