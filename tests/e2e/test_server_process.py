@@ -74,9 +74,10 @@ def test_requires_keys_by_default(tiny_dir: Path) -> None:
 
 
 def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path) -> None:
-    proc, port, _ = _launch(tiny_dir, "--no-auth")
+    proc, port, admin_port = _launch(tiny_dir, "--no-auth")
     try:
         _wait_ready(port, proc)
+        assert httpx.get(f"http://127.0.0.1:{admin_port}/metrics", timeout=10).status_code == 200
         with (
             httpx.Client(base_url=f"http://127.0.0.1:{port}", timeout=60) as c,
             c.stream(
@@ -104,6 +105,12 @@ def test_sigterm_drains_inflight_stream_then_exits_cleanly(tiny_dir: Path) -> No
         assert busy.status_code == 503, busy.text  # drain refuses new work
         assert rest[-1] == "data: [DONE]", "in-flight stream was cut off instead of drained"
         assert proc.wait(timeout=60) == 0
+        out = proc.stdout.read() if proc.stdout else ""
+        # The admin config must not silence the API logs (uvicorn loggers are process-wide).
+        assert "Uvicorn running on" in out, out
+        assert '"POST /v1/completions HTTP/1.1" 200' in out, out
+        assert "GET /readyz" in out, out
+        assert "GET /metrics" not in out, "Prometheus scrapes should not flood the access log"
     finally:
         if proc.poll() is None:
             proc.kill()

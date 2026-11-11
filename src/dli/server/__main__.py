@@ -44,6 +44,14 @@ class _ManagedServer(uvicorn.Server):
         yield
 
 
+class _DropScrapes(logging.Filter):
+    """Keep periodic `GET /metrics` scrapes out of the access log; log everything else."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args if isinstance(record.args, tuple) else ()
+        return not (len(args) >= 3 and args[1] == "GET" and args[2] == "/metrics")
+
+
 def _is_loopback(host: str) -> bool:
     if host == "localhost":
         return True
@@ -143,15 +151,19 @@ async def serve(bundle: ServerBundle, args: argparse.Namespace) -> None:
     api = _ManagedServer(
         uvicorn.Config(bundle.app, host=args.host, port=args.port, log_level="info", lifespan="off")
     )
+    # uvicorn's loggers are process-wide and every Config reconfigures them (level, and access_log
+    # =False removes the access handler for BOTH servers). So both use the same settings, and
+    # Prometheus scrapes are filtered out of the access log instead.
     admin = _ManagedServer(
         uvicorn.Config(
             bundle.admin_app,
             host=args.admin_host,
             port=args.admin_port,
-            log_level="warning",
+            log_level="info",
             lifespan="off",
         )
     )
+    logging.getLogger("uvicorn.access").addFilter(_DropScrapes())
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
 
