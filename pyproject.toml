@@ -42,8 +42,17 @@ dev = [
     "types-pyyaml>=6.0.12.20261103",
 ]
 
+# Benchmarking and evaluation (dli.bench): statistics, dataset files, GPU sampling. Installed by default
+# so benchmarks and their tests run everywhere; the server itself does not import these.
+bench = [
+    "numpy>=2.0",
+    "nvidia-ml-py>=12.0",
+    "pyarrow>=17",
+    "scipy>=1.13",
+]
+
 [tool.uv]
-# Security floor for transitive dependencies (pip-audit findings); see CHANGELOG.
+default-groups = ["dev", "bench"]
 # Security floors (pip-audit findings) and supply-chain ceilings: new dependencies are pinned to releases at least
 # two weeks old at the time they were added (ENGINEERING_STANDARDS supply-chain policy). Lift deliberately.
 constraint-dependencies = [
@@ -51,6 +60,10 @@ constraint-dependencies = [
     "fastapi<=0.162.0",
     "openai<=3.40.0",
     "pydantic<=2.14.1",
+    "numpy<=2.5.4",
+    "nvidia-ml-py<=13.615.71",
+    "pyarrow<=26.0.0",
+    "scipy<=1.18.1",
 ]
 conflicts = [[{ extra = "cpu" }, { extra = "cu130" }]]
 
