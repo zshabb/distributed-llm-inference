@@ -102,5 +102,7 @@ class Monitor:
             if vals:
                 out[f"{k}_max"] = max(vals)
                 out[f"{k}_mean"] = sum(vals) / len(vals)
+            if vals and k.endswith("_total"):  # counters: growth during this run
+                out[f"{k}_delta"] = vals[-1] - vals[0]
         out["samples"] = len(self.samples)
         return out

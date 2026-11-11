@@ -64,6 +64,30 @@ class _EngineCollector(Collector):
         yield CounterMetricFamily(
             "dli_engine_preemptions", "Requests preempted (recompute)", value=s.total_preemptions
         )
+        if s.cuda_graph_status != "off":
+            yield GaugeMetricFamily(
+                "dli_cuda_graph_captured",
+                "1 if at least one decode CUDA graph bucket is captured",
+                value=1.0 if s.cuda_graph_status == "captured" else 0.0,
+            )
+            yield CounterMetricFamily(
+                "dli_cuda_graph_replays",
+                "Decode steps served by a CUDA graph replay",
+                value=s.cuda_graph_replays,
+            )
+            fallbacks = CounterMetricFamily(
+                "dli_cuda_graph_fallbacks",
+                "Decode steps run eagerly although graphs are enabled, by reason",
+                labels=["reason"],
+            )
+            for reason, count in s.cuda_graph_fallbacks:
+                fallbacks.add_metric([reason], count)
+            yield fallbacks
+            yield GaugeMetricFamily(
+                "dli_cuda_graph_memory_bytes",
+                "GPU memory reserved by decode CUDA graph capture (buffers + pool)",
+                value=float(s.cuda_graph_memory_bytes),
+            )
         if torch.cuda.is_available():
             yield GaugeMetricFamily(
                 "dli_gpu_memory_allocated_bytes",

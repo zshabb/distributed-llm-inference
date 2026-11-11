@@ -27,8 +27,10 @@ import queue
 import threading
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
+from typing import Any
 
 from dli.engine import FinishReason, LLMEngine, Priority, RequestOutput
+from dli.engine.cuda_graph import DecodeGraphs
 from dli.sampling import SamplingParams
 
 
@@ -67,6 +69,11 @@ class EngineSnapshot:
     total_generated_tokens: int = 0
     prefix_hit_tokens: int = 0
     prefix_query_tokens: int = 0
+    # Decode CUDA graphs: "off" when not configured, else the capture status of the bucket set.
+    cuda_graph_status: str = "off"
+    cuda_graph_replays: int = 0  # decode steps served by a graph replay
+    cuda_graph_fallbacks: tuple[tuple[str, int], ...] = ()  # eager decode steps, by reason
+    cuda_graph_memory_bytes: int = 0  # reserved by capture (static buffers + shared pool)
     healthy: bool = True
     error: str | None = None
 
@@ -119,6 +126,8 @@ class AsyncEngine:
 
     def __init__(self, engine: LLMEngine, *, idle_poll_s: float = 0.02) -> None:
         self._engine = engine
+        # Decode CUDA graphs of the wrapped engine, if configured (captured before start()).
+        self.decode_graphs: DecodeGraphs | None = getattr(engine.runner, "decode_graphs", None)
         self._cmds: queue.Queue[_Command] = queue.Queue()
         self._pending: dict[str, _Pending] = {}
         self._idle_poll_s = idle_poll_s
@@ -278,6 +287,15 @@ class AsyncEngine:
             max(0, len(r.prompt_ids) - r.num_computed_tokens) for r in sched.running
         )
         st = eng.bm.stats()
+        graphs = self.decode_graphs
+        graph_fields: dict[str, Any] = {}
+        if graphs is not None:
+            graph_fields = {
+                "cuda_graph_status": graphs.stats.status,
+                "cuda_graph_replays": sum(g.stats.replays for g in graphs.graphs),
+                "cuda_graph_fallbacks": tuple(sorted(graphs.stats.fallbacks.items())),
+                "cuda_graph_memory_bytes": graphs.stats.memory_overhead,
+            }
         self._snapshot = EngineSnapshot(
             num_waiting=len(sched.waiting),
             num_running=len(sched.running),
@@ -299,4 +317,5 @@ class AsyncEngine:
             prefix_hit_tokens=st.prompt_tokens_hit,
             prefix_query_tokens=st.prompt_tokens_queried,
             healthy=True,
+            **graph_fields,
         )
