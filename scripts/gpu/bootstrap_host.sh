@@ -7,6 +7,9 @@ set -euo pipefail
 UV_VERSION="0.13.5"   # keep in sync with docs/operations.md
 UV_ASSET="uv-x86_64-unknown-linux-gnu.tar.gz"
 export PATH="$HOME/.local/bin:$PATH"
+# Same interpreter build on every host: uv-managed CPython at the exact version in .python-version,
+# never whatever the image ships (the RunPod image's system 3.12.3 would otherwise be picked).
+export UV_PYTHON_PREFERENCE=only-managed
 
 if [[ "$(uv --version 2>/dev/null | awk '{print $2}')" != "$UV_VERSION" ]]; then
   tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
