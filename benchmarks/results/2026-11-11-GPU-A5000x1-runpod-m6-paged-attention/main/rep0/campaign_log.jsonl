@@ -1,0 +1,9 @@
+{"event": "start", "unix": 1794441006.8074708, "revision": "dbb8be0e416d"}
+{"event": "server", "rep": 0, "model": "qwen2.5-0.5b", "name": "dli-graphs", "cmd": "~/work/dli-main/.venv/bin/python -m dli.server --model /workspace/dli/hf/hub/models--Qwen--Qwen2.5-0.5B-Instruct/snapshots/7ae557604adf67be50417f59c2c2f167def9a775 --served-model-name qwen2.5-0.5b --port 8300 --admin-port 8301 --no-auth --device cuda --dtype bfloat16 --max-num-seqs 128 --max-num-batched-tokens 2048 --num-blocks 100416 --block-size 16 --max-queued-requests 4096 --max-inflight-requests 8192 --request-timeout 1800 --cuda-graphs", "startup_s": 13.3}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-fixed@16", "wall_s": 3.727713346015662}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-fixed@64", "wall_s": 6.750276491045952}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-1k@16", "wall_s": 8.92549616494216}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-1k@64", "wall_s": 12.867993760155514}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-2k@16", "wall_s": 5.8511932687833905}
+{"event": "point", "file": "qwen2.5-0.5b/dli-graphs/rep0/closed-2k@64", "wall_s": 12.663380994927138}
+{"event": "end", "unix": 1794441073.4622228}

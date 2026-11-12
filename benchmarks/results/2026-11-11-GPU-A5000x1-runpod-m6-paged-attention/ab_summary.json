@@ -1,0 +1,218 @@
+[
+ {
+  "experiment": "closed-1k",
+  "concurrency": 16,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 917.9,
+   "tok_per_s_range": [
+    914.7,
+    933.9
+   ],
+   "ttft_p50_ms": 178,
+   "ttft_p99_ms": 331,
+   "tpot_p50_ms": 16.7,
+   "e2e_p99_ms": 4567,
+   "graph_replays_per_step": 0.0,
+   "graph_fallbacks": 1462.0,
+   "gpu_mem_max_gib": 20.43
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 2323.1,
+   "tok_per_s_range": [
+    2100.3,
+    2450.4
+   ],
+   "ttft_p50_ms": 242,
+   "ttft_p99_ms": 377,
+   "tpot_p50_ms": 5.8,
+   "e2e_p99_ms": 1803,
+   "graph_replays_per_step": 0.966,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.47
+  },
+  "speedup": 2.53,
+  "ranges_disjoint": true
+ },
+ {
+  "experiment": "closed-1k",
+  "concurrency": 64,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 2546.6,
+   "tok_per_s_range": [
+    2536.1,
+    2553.0
+   ],
+   "ttft_p50_ms": 481,
+   "ttft_p99_ms": 1425,
+   "tpot_p50_ms": 22.8,
+   "e2e_p99_ms": 7208,
+   "graph_replays_per_step": 0.0,
+   "graph_fallbacks": 1396.0,
+   "gpu_mem_max_gib": 20.43
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 5052.7,
+   "tok_per_s_range": [
+    4330.3,
+    5098.4
+   ],
+   "ttft_p50_ms": 490,
+   "ttft_p99_ms": 1328,
+   "tpot_p50_ms": 10.5,
+   "e2e_p99_ms": 3968,
+   "graph_replays_per_step": 0.888,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.47
+  },
+  "speedup": 1.98,
+  "ranges_disjoint": true
+ },
+ {
+  "experiment": "closed-2k",
+  "concurrency": 16,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 700.1,
+   "tok_per_s_range": [
+    584.9,
+    752.7
+   ],
+   "ttft_p50_ms": 350,
+   "ttft_p99_ms": 560,
+   "tpot_p50_ms": 20.7,
+   "e2e_p99_ms": 3259,
+   "graph_replays_per_step": 0.0,
+   "graph_fallbacks": 691.0,
+   "gpu_mem_max_gib": 20.43
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 1402.0,
+   "tok_per_s_range": [
+    1287.6,
+    1437.4
+   ],
+   "ttft_p50_ms": 474,
+   "ttft_p99_ms": 983,
+   "tpot_p50_ms": 7.4,
+   "e2e_p99_ms": 1706,
+   "graph_replays_per_step": 0.89,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.47
+  },
+  "speedup": 2.0,
+  "ranges_disjoint": true
+ },
+ {
+  "experiment": "closed-2k",
+  "concurrency": 64,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 1276.6,
+   "tok_per_s_range": [
+    1257.2,
+    1293.9
+   ],
+   "ttft_p50_ms": 1200,
+   "ttft_p99_ms": 2326,
+   "tpot_p50_ms": 39.4,
+   "e2e_p99_ms": 7149,
+   "graph_replays_per_step": 0.0,
+   "graph_fallbacks": 636.0,
+   "gpu_mem_max_gib": 20.43
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 2293.5,
+   "tok_per_s_range": [
+    2027.2,
+    2321.3
+   ],
+   "ttft_p50_ms": 1043,
+   "ttft_p99_ms": 1977,
+   "tpot_p50_ms": 18.9,
+   "e2e_p99_ms": 4222,
+   "graph_replays_per_step": 0.639,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.47
+  },
+  "speedup": 1.8,
+  "ranges_disjoint": true
+ },
+ {
+  "experiment": "closed-fixed",
+  "concurrency": 16,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 2235.3,
+   "tok_per_s_range": [
+    2198.0,
+    2261.3
+   ],
+   "ttft_p50_ms": 126,
+   "ttft_p99_ms": 210,
+   "tpot_p50_ms": 6.2,
+   "e2e_p99_ms": 975,
+   "graph_replays_per_step": 0.972,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.28
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 2672.5,
+   "tok_per_s_range": [
+    2551.4,
+    2698.8
+   ],
+   "ttft_p50_ms": 116,
+   "ttft_p99_ms": 292,
+   "tpot_p50_ms": 4.9,
+   "e2e_p99_ms": 819,
+   "graph_replays_per_step": 0.971,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.35
+  },
+  "speedup": 1.2,
+  "ranges_disjoint": true
+ },
+ {
+  "experiment": "closed-fixed",
+  "concurrency": 64,
+  "main": {
+   "reps": 3,
+   "tok_per_s_median": 4955.3,
+   "tok_per_s_range": [
+    4854.7,
+    4980.5
+   ],
+   "ttft_p50_ms": 249,
+   "ttft_p99_ms": 613,
+   "tpot_p50_ms": 10.8,
+   "e2e_p99_ms": 1868,
+   "graph_replays_per_step": 0.927,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.43
+  },
+  "branch": {
+   "reps": 3,
+   "tok_per_s_median": 6244.9,
+   "tok_per_s_range": [
+    5944.3,
+    6626.6
+   ],
+   "ttft_p50_ms": 263,
+   "ttft_p99_ms": 663,
+   "tpot_p50_ms": 7.4,
+   "e2e_p99_ms": 1514,
+   "graph_replays_per_step": 0.919,
+   "graph_fallbacks": 0.0,
+   "gpu_mem_max_gib": 20.47
+  },
+  "speedup": 1.26,
+  "ranges_disjoint": true
+ }
+]
