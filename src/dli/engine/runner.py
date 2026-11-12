@@ -36,6 +36,7 @@ class ModelRunner:
         *,
         batched_decode: bool = True,
         decode_graphs: DecodeGraphs | None = None,
+        decode_attention: str = "sdpa",
     ) -> None:
         self.model = model
         self.bm = block_manager
@@ -46,6 +47,8 @@ class ModelRunner:
         self.batched_decode = batched_decode
         # Optional CUDA graphs of the batched decode forward, one per bucket shape (off by default).
         self.decode_graphs = decode_graphs
+        # Batched decode attention kernel: "sdpa" (reference, any device) or "triton" (CUDA).
+        self.decode_attention = decode_attention
 
     @torch.inference_mode()
     def execute(self, sched: SchedulerOutput) -> torch.Tensor:
@@ -109,13 +112,18 @@ class ModelRunner:
         padded = [t + [t[0]] * (width - len(t)) for t in tables]
         dev = self.device
         seq_lens = torch.tensor(lens, dtype=torch.long, device=dev)
+        triton = self.decode_attention == "triton"
         return BatchedDecodeKV(
             k_pool=self.store.k,
             v_pool=self.store.v,
             slots=torch.tensor(slots, dtype=torch.long, device=dev),
             block_tables=torch.tensor(padded, dtype=torch.long, device=dev),
-            key_mask=BatchedDecodeKV.key_mask_for(seq_lens, width * self.store.block_size),
+            key_mask=None
+            if triton
+            else BatchedDecodeKV.key_mask_for(seq_lens, width * self.store.block_size),
             on_advance=advance,
+            seq_lens=seq_lens,
+            kernel=self.decode_attention,
         )
 
     def _execute_decode(self, sched: SchedulerOutput) -> torch.Tensor:

@@ -1,0 +1,97 @@
+{
+ "name": "m6-a5000-paged-attention",
+ "description": "Triton paged decode attention vs main (owner-approved 2026-11-11): the native server as shipped (engine process, --cuda-graphs; decode attention auto = Triton on the branch, SDPA on main), closed-loop at concurrency 16 and 64 on three context regimes. Run once per revision per repetition, alternating main and branch in one session. M6 baseline settings otherwise.",
+ "label": "GPU-A5000x1-runpod",
+ "device": "cuda",
+ "dtype": "bfloat16",
+ "reps": 1,
+ "port": 8300,
+ "max_num_seqs": 128,
+ "max_num_batched_tokens": 2048,
+ "saturation_ttft_s": 10.0,
+ "request_timeout_s": 900,
+ "backends": {
+  "dli-graphs": {
+   "kind": "dli",
+   "block_size": 16,
+   "extra_args": [
+    "--cuda-graphs"
+   ]
+  }
+ },
+ "models": [
+  {
+   "name": "qwen2.5-0.5b",
+   "repo": "Qwen/Qwen2.5-0.5B-Instruct",
+   "backends": [
+    "dli-graphs"
+   ],
+   "experiments": [
+    "closed-fixed",
+    "closed-1k",
+    "closed-2k"
+   ],
+   "overrides": {
+    "dli-graphs": {
+     "num_blocks": 100416
+    }
+   }
+  }
+ ],
+ "experiments": {
+  "closed-fixed": {
+   "description": "input 256, output 128",
+   "workload": {
+    "type": "synthetic",
+    "input": {
+     "fixed": 256
+    },
+    "output": {
+     "fixed": 128
+    }
+   },
+   "mode": "closed",
+   "points": [
+    16,
+    64
+   ],
+   "n_per_concurrency": 4
+  },
+  "closed-1k": {
+   "description": "input 1,024, output 256 (contexts up to 1,280 = 80 blocks)",
+   "workload": {
+    "type": "synthetic",
+    "input": {
+     "fixed": 1024
+    },
+    "output": {
+     "fixed": 256
+    }
+   },
+   "mode": "closed",
+   "points": [
+    16,
+    64
+   ],
+   "n_per_concurrency": 2
+  },
+  "closed-2k": {
+   "description": "input 2,048, output 128 (contexts up to 2,176 = 136 blocks)",
+   "workload": {
+    "type": "synthetic",
+    "input": {
+     "fixed": 2048
+    },
+    "output": {
+     "fixed": 128
+    }
+   },
+   "mode": "closed",
+   "points": [
+    16,
+    64
+   ],
+   "n_per_concurrency": 2
+  }
+ }
+}

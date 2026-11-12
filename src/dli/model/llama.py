@@ -20,6 +20,7 @@ from torch import nn
 
 from dli.model.config import ModelConfig
 from dli.model.kv_cache import BatchedDecodeKV, BatchedKV, KVCacheView, MixedKV, Segment
+from dli.model.paged_attention import paged_decode_attention
 from dli.model.rope import apply_rope, inverse_frequencies, rope_cos_sin
 
 
@@ -124,6 +125,13 @@ class Attention(nn.Module):
         # Write all new K/V rows at once (keys post-RoPE, as in the reference path).
         k_pool.view(-1, kv_heads, dim).index_copy_(0, dec.slots, k.transpose(0, 1))
         v_pool.view(-1, kv_heads, dim).index_copy_(0, dec.slots, v.transpose(0, 1))
+        if dec.kernel == "triton":
+            # Read each sequence's live keys in place, a whole query group per KV head (M6).
+            assert dec.seq_lens is not None
+            out_t = paged_decode_attention(
+                q.transpose(0, 1), k_pool, v_pool, dec.block_tables, dec.seq_lens
+            )
+            return out_t.transpose(0, 1)
         # Gather every sequence's blocks, padded: [B, max_blocks * block, kv_heads, d].
         keys = k_pool[dec.block_tables].view(bsz, -1, kv_heads, dim).transpose(1, 2)
         values = v_pool[dec.block_tables].view(bsz, -1, kv_heads, dim).transpose(1, 2)

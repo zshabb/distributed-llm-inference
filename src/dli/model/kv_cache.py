@@ -146,16 +146,22 @@ class BatchedDecodeKV:
         block_tables: Each sequence's blocks, padded to the longest, ``[B, max_blocks]`` (int64).
             Padding entries point at any valid block; the mask hides them.
         key_mask: ``[B, 1, 1, max_blocks * block_size]``, True where a key position exists
-            (``position < sequence length including the new token``).
+            (``position < sequence length including the new token``). Needed by the SDPA kernel
+            only (``None`` with ``kernel="triton"``, which reads exactly ``seq_lens`` keys).
         on_advance: Called once after all layers wrote their K/V (marks the tokens computed).
+        seq_lens: ``[B]`` int64 keys per sequence including the new token (Triton kernel).
+        kernel: ``"sdpa"`` (gather + masked SDPA, the reference) or ``"triton"``
+            (:func:`dli.model.paged_attention.paged_decode_attention`, reads the pool in place).
     """
 
     k_pool: torch.Tensor
     v_pool: torch.Tensor
     slots: torch.Tensor
     block_tables: torch.Tensor
-    key_mask: torch.Tensor
+    key_mask: torch.Tensor | None
     on_advance: Callable[[], None]
+    seq_lens: torch.Tensor | None = None
+    kernel: str = "sdpa"
 
     @property
     def batch_size(self) -> int:

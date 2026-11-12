@@ -23,6 +23,7 @@ from dli.engine.runner import ModelRunner, Runner
 from dli.engine.scheduler import Scheduler, SchedulerConfig
 from dli.kv.block_manager import BlockManager
 from dli.kv.paged_store import PagedKVStore
+from dli.model import paged_attention
 from dli.model.llama import LlamaForCausalLM
 from dli.sampling import SamplingParams, make_generator, sample
 
@@ -100,11 +101,14 @@ class LLMEngine:
         enable_prefix_caching: bool = True,
         batched_decode: bool = True,
         cuda_graphs: Sequence[Shape] | None = None,
+        decode_attention: str = "auto",
         eos_token_ids: Collection[int] = (),
         seed: int = 0,
     ) -> LLMEngine:
         device = model.inv_freq.device
         dtype = model.model.embed_tokens.weight.dtype
+        # Batched decode attention: Triton paged kernel on CUDA when available, else SDPA.
+        kernel = paged_attention.resolve(decode_attention, device)
         bm = BlockManager(
             num_blocks,
             block_size,
@@ -121,9 +125,18 @@ class LLMEngine:
         if cuda_graphs:
             if not batched_decode:
                 raise ValueError("cuda_graphs require batched_decode")
-            graphs = DecodeGraphs(model, store, shapes=cuda_graphs, scratch_block=num_blocks)
+            graphs = DecodeGraphs(
+                model, store, shapes=cuda_graphs, scratch_block=num_blocks, decode_attention=kernel
+            )
         return cls(
-            ModelRunner(model, bm, store, batched_decode=batched_decode, decode_graphs=graphs),
+            ModelRunner(
+                model,
+                bm,
+                store,
+                batched_decode=batched_decode,
+                decode_graphs=graphs,
+                decode_attention=kernel,
+            ),
             bm,
             config,
             eos_token_ids=eos_token_ids,

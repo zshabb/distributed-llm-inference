@@ -1,0 +1,254 @@
+{
+ "device": "NVIDIA RTX A5000",
+ "torch": "2.14.1+cu130",
+ "triton": "3.8.0",
+ "layers": 24,
+ "rows": [
+  {
+   "batch": 64,
+   "max_context": 383,
+   "width_blocks": 24,
+   "mean_len": 353.5,
+   "kv_bytes_per_layer_live": 11584000,
+   "kv_bytes_per_layer_padded": 12582912,
+   "current": {
+    "ms_per_step": 4.3789,
+    "max_abs_err": 0.001357333784733239,
+    "effective_gbs_live_kv": 63.5
+   },
+   "reshape": {
+    "ms_per_step": 1.9846,
+    "max_abs_err": 0.001357333784733239,
+    "effective_gbs_live_kv": 140.1
+   },
+   "triton-s1": {
+    "ms_per_step": 0.5197,
+    "max_abs_err": 0.001357333784733239,
+    "effective_gbs_live_kv": 535.0
+   },
+   "triton-s4": {
+    "ms_per_step": 0.6058,
+    "max_abs_err": 0.0012484025280538047,
+    "effective_gbs_live_kv": 458.9
+   },
+   "triton-s8": {
+    "ms_per_step": 0.7286,
+    "max_abs_err": 0.0012484025280538047,
+    "effective_gbs_live_kv": 381.6
+   },
+   "triton-s16": {
+    "ms_per_step": 1.0333,
+    "max_abs_err": 0.0012484025280538047,
+    "effective_gbs_live_kv": 269.1
+   },
+   "gather_only": {
+    "ms_per_step": 0.9672
+   }
+  },
+  {
+   "batch": 16,
+   "max_context": 383,
+   "width_blocks": 24,
+   "mean_len": 351.1,
+   "kv_bytes_per_layer_live": 2876416,
+   "kv_bytes_per_layer_padded": 3145728,
+   "current": {
+    "ms_per_step": 1.2341,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 55.9
+   },
+   "reshape": {
+    "ms_per_step": 0.9357,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 73.8
+   },
+   "triton-s1": {
+    "ms_per_step": 0.2452,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 281.5
+   },
+   "triton-s4": {
+    "ms_per_step": 0.2228,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 309.8
+   },
+   "triton-s8": {
+    "ms_per_step": 0.2364,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 292.0
+   },
+   "triton-s16": {
+    "ms_per_step": 0.2881,
+    "max_abs_err": 0.0012304814532054231,
+    "effective_gbs_live_kv": 239.6
+   },
+   "gather_only": {
+    "ms_per_step": 0.2239
+   }
+  },
+  {
+   "batch": 64,
+   "max_context": 1150,
+   "width_blocks": 72,
+   "mean_len": 1056.9,
+   "kv_bytes_per_layer_live": 34633216,
+   "kv_bytes_per_layer_padded": 37748736,
+   "current": {
+    "ms_per_step": 12.4084,
+    "max_abs_err": 0.0007089822292470904,
+    "effective_gbs_live_kv": 67.0
+   },
+   "reshape": {
+    "ms_per_step": 5.1248,
+    "max_abs_err": 0.0007089822292470904,
+    "effective_gbs_live_kv": 162.2
+   },
+   "triton-s1": {
+    "ms_per_step": 1.3612,
+    "max_abs_err": 0.0007089822292470904,
+    "effective_gbs_live_kv": 610.6
+   },
+   "triton-s4": {
+    "ms_per_step": 1.454,
+    "max_abs_err": 0.0006359986497652126,
+    "effective_gbs_live_kv": 571.7
+   },
+   "triton-s8": {
+    "ms_per_step": 1.5796,
+    "max_abs_err": 0.0006347037613631534,
+    "effective_gbs_live_kv": 526.2
+   },
+   "triton-s16": {
+    "ms_per_step": 1.8427,
+    "max_abs_err": 0.0005959996846283122,
+    "effective_gbs_live_kv": 451.1
+   },
+   "gather_only": {
+    "ms_per_step": 2.7567
+   }
+  },
+  {
+   "batch": 16,
+   "max_context": 1150,
+   "width_blocks": 72,
+   "mean_len": 1068.5,
+   "kv_bytes_per_layer_live": 8753152,
+   "kv_bytes_per_layer_padded": 9437184,
+   "current": {
+    "ms_per_step": 3.5628,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 59.0
+   },
+   "reshape": {
+    "ms_per_step": 2.5006,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 84.0
+   },
+   "triton-s1": {
+    "ms_per_step": 0.6979,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 301.0
+   },
+   "triton-s4": {
+    "ms_per_step": 0.4594,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 457.3
+   },
+   "triton-s8": {
+    "ms_per_step": 0.4758,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 441.5
+   },
+   "triton-s16": {
+    "ms_per_step": 0.5642,
+    "max_abs_err": 0.0009632841904128608,
+    "effective_gbs_live_kv": 372.3
+   },
+   "gather_only": {
+    "ms_per_step": 0.7355
+   }
+  },
+  {
+   "batch": 16,
+   "max_context": 2175,
+   "width_blocks": 136,
+   "mean_len": 2004.0,
+   "kv_bytes_per_layer_live": 16416768,
+   "kv_bytes_per_layer_padded": 17825792,
+   "current": {
+    "ms_per_step": 6.5979,
+    "max_abs_err": 0.0004524553819598154,
+    "effective_gbs_live_kv": 59.7
+   },
+   "reshape": {
+    "ms_per_step": 4.4622,
+    "max_abs_err": 0.0004524553819598154,
+    "effective_gbs_live_kv": 88.3
+   },
+   "triton-s1": {
+    "ms_per_step": 1.2496,
+    "max_abs_err": 0.0004524553819598154,
+    "effective_gbs_live_kv": 315.3
+   },
+   "triton-s4": {
+    "ms_per_step": 0.738,
+    "max_abs_err": 0.0005826793896723248,
+    "effective_gbs_live_kv": 533.9
+   },
+   "triton-s8": {
+    "ms_per_step": 0.7559,
+    "max_abs_err": 0.0005241071180401846,
+    "effective_gbs_live_kv": 521.2
+   },
+   "triton-s16": {
+    "ms_per_step": 0.8464,
+    "max_abs_err": 0.0005826793896723248,
+    "effective_gbs_live_kv": 465.5
+   },
+   "gather_only": {
+    "ms_per_step": 1.3434
+   }
+  },
+  {
+   "batch": 64,
+   "max_context": 2175,
+   "width_blocks": 136,
+   "mean_len": 2011.8,
+   "kv_bytes_per_layer_live": 65923584,
+   "kv_bytes_per_layer_padded": 71303168,
+   "current": {
+    "ms_per_step": 23.2946,
+    "max_abs_err": 0.0005793580343884941,
+    "effective_gbs_live_kv": 67.9
+   },
+   "reshape": {
+    "ms_per_step": 9.2314,
+    "max_abs_err": 0.0005793580343884941,
+    "effective_gbs_live_kv": 171.4
+   },
+   "triton-s1": {
+    "ms_per_step": 2.4706,
+    "max_abs_err": 0.0005793580343884941,
+    "effective_gbs_live_kv": 640.4
+   },
+   "triton-s4": {
+    "ms_per_step": 2.5283,
+    "max_abs_err": 0.0005352905157789967,
+    "effective_gbs_live_kv": 625.8
+   },
+   "triton-s8": {
+    "ms_per_step": 2.6993,
+    "max_abs_err": 0.000523852404318681,
+    "effective_gbs_live_kv": 586.1
+   },
+   "triton-s16": {
+    "ms_per_step": 2.9776,
+    "max_abs_err": 0.0005425873076286558,
+    "effective_gbs_live_kv": 531.4
+   },
+   "gather_only": {
+    "ms_per_step": 5.1224
+   }
+  }
+ ]
+}

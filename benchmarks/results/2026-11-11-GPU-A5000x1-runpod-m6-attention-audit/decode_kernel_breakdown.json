@@ -1,0 +1,442 @@
+{
+ "runs": [
+  {
+   "batch": 64,
+   "input_len": 256,
+   "graphs": true,
+   "mean_context": 305.4,
+   "unprofiled_step_ms": 9.02,
+   "gpu_ms_per_step": 8.379,
+   "gpu_ms_by_category": {
+    "attention": 3.055,
+    "gemm": 2.504,
+    "norm_rope_elementwise": 1.732,
+    "kv_gather": 0.846,
+    "kv_write": 0.116,
+    "sampling": 0.066,
+    "other": 0.061
+   },
+   "top_kernels": [
+    {
+     "kernel": "fmha_cutlassF_bf16_aligned_64x64_rf_sm80(PyTorchMemEffAttention::AttentionKernel<cutlass::bfloat16_t, cutlass:",
+     "ms_per_step": 3.055,
+     "calls_per_step": 24.0,
+     "category": "attention"
+    },
+    {
+     "kernel": "ampere_bf16_s16816gemm_bf16_128x64_ldg8_f2f_stages_64x3_tn",
+     "ms_per_step": 1.286,
+     "calls_per_step": 72.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "ms_per_step": 0.846,
+     "calls_per_step": 49.0,
+     "category": "kv_gather"
+    },
+    {
+     "kernel": "ampere_bf16_s16816gemm_bf16_128x64_ldg8_f2f_stages_32x6_tn",
+     "ms_per_step": 0.427,
+     "calls_per_step": 1.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::",
+     "ms_per_step": 0.323,
+     "calls_per_step": 145.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x128_32x6_tn_align8>(cutlass_80_tensorop",
+     "ms_per_step": 0.239,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{la",
+     "ms_per_step": 0.226,
+     "calls_per_step": 51.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, fl",
+     "ms_per_step": 0.166,
+     "calls_per_step": 49.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_te",
+     "ms_per_step": 0.16,
+     "calls_per_step": 48.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __n",
+     "ms_per_step": 0.15,
+     "calls_per_step": 72.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_",
+     "ms_per_step": 0.136,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>,",
+     "ms_per_step": 0.116,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2>",
+     "ms_per_step": 0.116,
+     "calls_per_step": 48.0,
+     "category": "kv_write"
+    },
+    {
+     "kernel": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __n",
+     "ms_per_step": 0.106,
+     "calls_per_step": 48.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::CUDAFunctor_add<c10",
+     "ms_per_step": 0.104,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at:",
+     "ms_per_step": 0.096,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float",
+     "ms_per_step": 0.086,
+     "calls_per_step": 50.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespac",
+     "ms_per_step": 0.072,
+     "calls_per_step": 24.0,
+     "category": "norm_rope_elementwise"
+    }
+   ],
+   "graph": {
+    "status": "captured",
+    "capture_s": 0.189,
+    "memory_overhead_mib": 84.0,
+    "device_free_drop_mib": 122.0,
+    "replays": 45,
+    "fallbacks": {},
+    "graphs": [
+     {
+      "batch": 16,
+      "width_blocks": 24,
+      "status": "captured",
+      "free_before_capture_mib": 22441,
+      "eager_peak_mib": 4.7,
+      "capture_s": 0.048,
+      "replays": 0
+     },
+     {
+      "batch": 64,
+      "width_blocks": 24,
+      "status": "captured",
+      "free_before_capture_mib": 22513,
+      "eager_peak_mib": 18.7,
+      "capture_s": 0.107,
+      "replays": 45
+     }
+    ]
+   }
+  },
+  {
+   "batch": 16,
+   "input_len": 256,
+   "graphs": true,
+   "mean_context": 302.4,
+   "unprofiled_step_ms": 5.552,
+   "gpu_ms_per_step": 5.228,
+   "gpu_ms_by_category": {
+    "gemm": 2.444,
+    "norm_rope_elementwise": 1.552,
+    "attention": 0.884,
+    "kv_gather": 0.168,
+    "kv_write": 0.113,
+    "other": 0.047,
+    "sampling": 0.02
+   },
+   "top_kernels": [
+    {
+     "kernel": "fmha_cutlassF_bf16_aligned_64x64_rf_sm80(PyTorchMemEffAttention::AttentionKernel<cutlass::bfloat16_t, cutlass:",
+     "ms_per_step": 0.884,
+     "calls_per_step": 24.0,
+     "category": "attention"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_te",
+     "ms_per_step": 0.85,
+     "calls_per_step": 48.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_te",
+     "ms_per_step": 0.556,
+     "calls_per_step": 72.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "ampere_bf16_s16816gemm_bf16_64x64_ldg8_f2f_stages_64x6_tn",
+     "ms_per_step": 0.47,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x10_tn_align8>(cutlass_80_tensorop",
+     "ms_per_step": 0.402,
+     "calls_per_step": 1.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::",
+     "ms_per_step": 0.302,
+     "calls_per_step": 145.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "ms_per_step": 0.168,
+     "calls_per_step": 48.0,
+     "category": "kv_gather"
+    },
+    {
+     "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, fl",
+     "ms_per_step": 0.16,
+     "calls_per_step": 49.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{la",
+     "ms_per_step": 0.149,
+     "calls_per_step": 51.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_",
+     "ms_per_step": 0.13,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>,",
+     "ms_per_step": 0.113,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2>",
+     "ms_per_step": 0.113,
+     "calls_per_step": 48.0,
+     "category": "kv_write"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::CUDAFunctor_add<c10",
+     "ms_per_step": 0.098,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at:",
+     "ms_per_step": 0.093,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float",
+     "ms_per_step": 0.076,
+     "calls_per_step": 50.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::BFloat16>, std::array<char*",
+     "ms_per_step": 0.069,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespac",
+     "ms_per_step": 0.067,
+     "calls_per_step": 24.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::rsqrt_kernel_cuda(at::TensorIteratorBase&)::{lam",
+     "ms_per_step": 0.06,
+     "calls_per_step": 49.0,
+     "category": "norm_rope_elementwise"
+    }
+   ],
+   "graph": {
+    "status": "captured",
+    "capture_s": 0.273,
+    "memory_overhead_mib": 84.0,
+    "device_free_drop_mib": 84.0,
+    "replays": 45,
+    "fallbacks": {},
+    "graphs": [
+     {
+      "batch": 16,
+      "width_blocks": 24,
+      "status": "captured",
+      "free_before_capture_mib": 22533,
+      "eager_peak_mib": 4.7,
+      "capture_s": 0.08,
+      "replays": 45
+     },
+     {
+      "batch": 64,
+      "width_blocks": 24,
+      "status": "captured",
+      "free_before_capture_mib": 22595,
+      "eager_peak_mib": 18.7,
+      "capture_s": 0.141,
+      "replays": 0
+     }
+    ]
+   }
+  },
+  {
+   "batch": 64,
+   "input_len": 1024,
+   "graphs": false,
+   "mean_context": 1085.0,
+   "unprofiled_step_ms": 22.469,
+   "gpu_ms_per_step": 15.983,
+   "gpu_ms_by_category": {
+    "attention": 8.615,
+    "kv_gather": 2.59,
+    "gemm": 2.58,
+    "norm_rope_elementwise": 1.994,
+    "kv_write": 0.131,
+    "sampling": 0.066,
+    "other": 0.008
+   },
+   "top_kernels": [
+    {
+     "kernel": "fmha_cutlassF_bf16_aligned_64x64_rf_sm80(PyTorchMemEffAttention::AttentionKernel<cutlass::bfloat16_t, cutlass:",
+     "ms_per_step": 8.615,
+     "calls_per_step": 24.0,
+     "category": "attention"
+    },
+    {
+     "kernel": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+     "ms_per_step": 2.59,
+     "calls_per_step": 49.0,
+     "category": "kv_gather"
+    },
+    {
+     "kernel": "ampere_bf16_s16816gemm_bf16_128x64_ldg8_f2f_stages_64x3_tn",
+     "ms_per_step": 1.292,
+     "calls_per_step": 72.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "ampere_bf16_s16816gemm_bf16_128x64_ldg8_f2f_stages_32x6_tn",
+     "ms_per_step": 0.427,
+     "calls_per_step": 1.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::",
+     "ms_per_step": 0.369,
+     "calls_per_step": 145.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x128_32x6_tn_align8>(cutlass_80_tensorop",
+     "ms_per_step": 0.257,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{la",
+     "ms_per_step": 0.238,
+     "calls_per_step": 51.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::MeanOps<float, float, float, fl",
+     "ms_per_step": 0.207,
+     "calls_per_step": 49.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_128x2_tn_align8>(cutlass_80_wmma_te",
+     "ms_per_step": 0.178,
+     "calls_per_step": 48.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __n",
+     "ms_per_step": 0.158,
+     "calls_per_step": 72.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::(anonymous namespace)::CatArrayBatchedCopy<at::native::(anonymous namespace)::OpaqueType<2u>,",
+     "ms_per_step": 0.148,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_",
+     "ms_per_step": 0.146,
+     "calls_per_step": 24.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::index_elementwise_kernel<128, 4, at::native::index_copy_kernel_impl<at::native::OpaqueType<2>",
+     "ms_per_step": 0.131,
+     "calls_per_step": 48.0,
+     "category": "kv_write"
+    },
+    {
+     "kernel": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __n",
+     "ms_per_step": 0.122,
+     "calls_per_step": 48.0,
+     "category": "gemm"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::CUDAFunctor_add<c10",
+     "ms_per_step": 0.118,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::neg_kernel_cuda(at:",
+     "ms_per_step": 0.11,
+     "calls_per_step": 48.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 2, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<float",
+     "ms_per_step": 0.105,
+     "calls_per_step": 50.0,
+     "category": "norm_rope_elementwise"
+    },
+    {
+     "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::(anonymous namespac",
+     "ms_per_step": 0.092,
+     "calls_per_step": 24.0,
+     "category": "norm_rope_elementwise"
+    }
+   ],
+   "graph": null
+  }
+ ]
+}

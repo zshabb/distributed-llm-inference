@@ -48,6 +48,7 @@ class BuildOptions:
     enable_prefix_caching: bool = True
     cuda_graphs: tuple[Shape, ...] | None = None  # decode CUDA graph buckets (None: eager only)
     engine_process: bool = False  # run the engine in a child process (no GIL shared with HTTP)
+    decode_attention: str = "auto"  # batched decode kernel: auto (Triton on CUDA), triton, sdpa
 
 
 def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
@@ -73,6 +74,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
                 eos_token_ids=tuple(codec.eos_token_ids),
                 enable_prefix_caching=opts.enable_prefix_caching,
                 cuda_graphs=opts.cuda_graphs,
+                decode_attention=opts.decode_attention,
             ),
             kv_total_blocks=opts.num_blocks,
         )
@@ -87,6 +89,7 @@ def build_server(model_dir: str | Path, opts: BuildOptions) -> ServerBundle:
             eos_token_ids=codec.eos_token_ids,
             enable_prefix_caching=opts.enable_prefix_caching,
             cuda_graphs=opts.cuda_graphs,
+            decode_attention=opts.decode_attention,
         )
         aengine = AsyncEngine(engine)
     config = ServerConfig(
